@@ -15,7 +15,7 @@ import (
 	"github.com/FactomProject/factoid/wallet"
 )
 
-func CommitChain(name string, data []byte) (error) {
+func CommitChain(name string, data []byte) error {
 	type walletcommit struct {
 		Message string
 	}
@@ -53,7 +53,7 @@ func CommitChain(name string, data []byte) (error) {
 	return nil
 }
 
-func CommitEntry(name string, data []byte) (error) {
+func CommitEntry(name string, data []byte) error {
 	type walletcommit struct {
 		Message string
 	}

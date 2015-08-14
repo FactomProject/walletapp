@@ -5,11 +5,11 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/hoisie/web"
 	"io/ioutil"
-	"fmt"
 
-    "github.com/FactomProject/fctwallet/Wallet"
+	"github.com/FactomProject/fctwallet/Wallet"
 )
 
 func HandleCommitChain(ctx *web.Context, name string) {
@@ -20,7 +20,7 @@ func HandleCommitChain(ctx *web.Context, name string) {
 		return
 	}
 
-	err=Wallet.CommitChain(name, data)
+	err = Wallet.CommitChain(name, data)
 	if err != nil {
 		fmt.Println(err)
 		ctx.WriteHeader(httpBad)
@@ -36,7 +36,7 @@ func HandleCommitEntry(ctx *web.Context, name string) {
 		return
 	}
 
-	err=Wallet.CommitEntry(name, data)
+	err = Wallet.CommitEntry(name, data)
 	if err != nil {
 		fmt.Println(err)
 		ctx.WriteHeader(httpBad)

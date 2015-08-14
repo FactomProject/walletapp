@@ -5,29 +5,27 @@
 package handlers
 
 import (
-    "github.com/FactomProject/factoid/state/stateinit"
-	"github.com/FactomProject/FactomCode/util"    
-   
+	"github.com/FactomProject/FactomCode/util"
+	"github.com/FactomProject/factoid/state/stateinit"
 )
 
 const (
-    httpOK  = 200
-    httpBad = 400
+	httpOK  = 200
+	httpBad = 400
 )
 
-
 var (
-    cfg = util.ReadConfig().Wallet
-    IpAddress        = cfg.Address
-    PortNumber       = cfg.Port
-    applicationName  = "Factom/fctwallet"
-    dataStorePath    = cfg.DataFile
-    refreshInSeconds = cfg.RefreshInSeconds
-    
-    ipaddressFD      = "localhost:"
-    portNumberFD     = "8088"
-    
-    databasefile     = "factoid_wallet_bolt.db"
+	cfg              = util.ReadConfig().Wallet
+	IpAddress        = cfg.Address
+	PortNumber       = cfg.Port
+	applicationName  = "Factom/fctwallet"
+	dataStorePath    = cfg.DataFile
+	refreshInSeconds = cfg.RefreshInSeconds
+
+	ipaddressFD  = "localhost:"
+	portNumberFD = "8088"
+
+	databasefile = "factoid_wallet_bolt.db"
 )
 
 var factoidState = stateinit.NewFactoidState(cfg.BoltDBPath + databasefile)

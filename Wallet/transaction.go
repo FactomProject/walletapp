@@ -105,11 +105,11 @@ func FactoidNewTransaction(key string) error {
 func FactoidDeleteTransaction(key string) error {
 	// Make sure we have a key
 	if len(key) == 0 {
-        return fmt.Errorf("Missing transaction key")
+		return fmt.Errorf("Missing transaction key")
 	}
 	// Wipe out the key
 	factoidState.GetDB().DeleteKey([]byte(fct.DB_BUILD_TRANS), []byte(key))
-    return nil
+	return nil
 }
 
 func FactoidAddFee(trans fct.ITransaction, key string, address fct.IAddress, name string) (uint64, error) {
@@ -120,43 +120,43 @@ func FactoidAddFee(trans fct.ITransaction, key string, address fct.IAddress, nam
 		}
 		outs, err := trans.TotalOutputs()
 		if err != nil {
-            return 0, err
+			return 0, err
 		}
 		ecs, err := trans.TotalECs()
 		if err != nil {
-            return 0, err
+			return 0, err
 		}
 
-		if ins != outs + ecs {
-            return 0, fmt.Errorf("Inputs and outputs don't add up")
+		if ins != outs+ecs {
+			return 0, fmt.Errorf("Inputs and outputs don't add up")
 		}
 	}
 
 	err := ValidateKey(key)
 	if err != nil {
-        return 0, err
+		return 0, err
 	}
 
 	fee, err := GetFee()
 	if err != nil {
-        return 0, err
+		return 0, err
 	}
 
 	transfee, err := trans.CalculateFee(uint64(fee))
 	if err != nil {
-        return 0, err
+		return 0, err
 	}
 
 	adr, err := factoidState.GetWallet().GetAddressHash(address)
 	if err != nil {
-        return 0, err
+		return 0, err
 	}
 
 	for _, input := range trans.GetInputs() {
 		if input.GetAddress().IsSameAs(adr) {
 			amt, err := fct.ValidateAmounts(input.GetAmount(), transfee)
 			if err != nil {
-                return 0, err
+				return 0, err
 			}
 			input.SetAmount(amt)
 			return transfee, nil
@@ -164,6 +164,7 @@ func FactoidAddFee(trans fct.ITransaction, key string, address fct.IAddress, nam
 	}
 	return 0, fmt.Errorf("%s is not an input to the transaction.", key)
 }
+
 /*
 func HandleFactoidAddInput(ctx *web.Context, parms string) {
 	trans, key, _, address, amount, ok := getParams_(ctx, parms, false)
@@ -408,17 +409,17 @@ func GetFee() (int64, error) {
 
 func GetAddresses() ([]string, []wallet.IWalletEntry) {
 	keys, values := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
-    answerWE:=[]wallet.IWalletEntry{}
-    answerKeys:=[]string{}
+	answerWE := []wallet.IWalletEntry{}
+	answerKeys := []string{}
 	for i, k := range keys {
 		we, ok := values[i].(wallet.IWalletEntry)
 		if !ok {
 			panic("Get Addresses finds the database corrupt. Shouldn't happen")
 		}
-        answerWE=append(answerWE, we)
-        answerKeys = append(answerKeys, string(k))
+		answerWE = append(answerWE, we)
+		answerKeys = append(answerKeys, string(k))
 	}
-    return answerKeys, answerWE
+	return answerKeys, answerWE
 }
 
 func GetTransactions() ([]byte, error) {
