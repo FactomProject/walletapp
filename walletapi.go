@@ -9,7 +9,7 @@ import (
     "time"
     "github.com/hoisie/web"
     fct "github.com/FactomProject/factoid"
-    "github.com/FactomProject/factoid/fctwallet/handlers"   
+    "github.com/FactomProject/fctwallet/handlers"   
 )
 
 var _ = fct.Address{}
