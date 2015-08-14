@@ -19,6 +19,8 @@ import (
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
 	"github.com/hoisie/web"
+
+    "github.com/FactomProject/fctwallet/Wallet"
 )
 
 /******************************************
@@ -229,18 +231,11 @@ func HandleFactoidNewTransaction(ctx *web.Context, key string) {
         reportResults(ctx, msg, false)
         return
     }
-    
-	// Make sure we don't already have a transaction in process with this key
-	t := factoidState.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
-	if t != nil {
-		str := fmt.Sprintln("Duplicate key: '", key, "'")
-        reportResults(ctx, str, false)
-		return
-	}
-	// Create a transaction
-	t = factoidState.GetWallet().CreateTransaction(factoidState.GetTimeMilli())
-	// Save it with the key
-	factoidState.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), t)
+
+    err:=Wallet.FactoidNewTransaction(key)
+    if err!=nil {
+        reportResults(ctx, err.Error(), false)
+    }
 
 	reportResults(ctx,"Success building a transaction", true)
 }
@@ -255,8 +250,10 @@ func HandleFactoidDeleteTransaction(ctx *web.Context, key string) {
         reportResults(ctx,"Missing transaction key",false)  
         return
     }
-    // Wipe out the key
-    factoidState.GetDB().DeleteKey([]byte(fct.DB_BUILD_TRANS), []byte(key))
+    err:=Wallet.FactoidDeleteTransaction(key)
+    if err!=nil {
+        reportResults(ctx, err.Error(), false)
+    }
     reportResults(ctx, "Success deleting transaction",true)
 }
 
@@ -267,7 +264,7 @@ func HandleFactoidAddFee(ctx *web.Context, parms string) {
     }
     
     name := ctx.Params["name"]   // This is the name the user used.
-    
+
     {
         ins,err  := trans.TotalInputs();  if err!=nil { reportResults(ctx,err.Error(), false) } 
         outs,err := trans.TotalOutputs(); if err!=nil { reportResults(ctx,err.Error(), false) } 
@@ -284,45 +281,13 @@ func HandleFactoidAddFee(ctx *web.Context, parms string) {
             return
         }
     }
-        
-    msg, ok := ValidateKey(key) 
-    if !ok {
-        reportResults(ctx, msg, false)
-        return
+
+    transfee, err:=Wallet.FactoidAddFee(trans, key, address, name)
+    if err!=nil {
+        reportResults(ctx, err.Error(), false)
     }
     
-    fee,err := GetFee(ctx)
-    if err != nil {
-        reportResults(ctx,err.Error(),false)
-        return
-    }
-    
-    transfee,err := trans.CalculateFee(uint64(fee))
-    if err != nil {
-        reportResults(ctx,err.Error(),false)
-        return
-    }
-    
-    adr, err := factoidState.GetWallet().GetAddressHash(address)
-    if err != nil {
-        reportResults(ctx, err.Error(),false)
-        return
-    }
-    
-    for _,input := range trans.GetInputs() {
-        
-        if input.GetAddress().IsSameAs(adr) {
-            amt,err := fct.ValidateAmounts(input.GetAmount(), transfee)  
-            if err != nil {
-                reportResults(ctx,err.Error(),false)
-                return
-            }
-            input.SetAmount(amt)
-            reportResults(ctx, fmt.Sprintf("Added %s to %s",fct.ConvertDecimal(uint64(transfee)),name), true)
-            return
-        }
-    }
-    reportResults(ctx, fmt.Sprintf("%s is not an input to the transaction.",key), false)
+    reportResults(ctx, fmt.Sprintf("Added %s to %s",fct.ConvertDecimal(uint64(transfee)),name), true)
     return
 }
  
@@ -595,7 +560,7 @@ func HandleGetFee(ctx *web.Context) {
 
 
 func GetAddresses() ([]byte) {
-    keys, values := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
+    keys, values := Wallet.GetAddresses()
     
     ecKeys := make([]string,0,len(keys))
     fctKeys := make([]string,0,len(keys))
@@ -603,21 +568,18 @@ func GetAddresses() ([]byte) {
     fctBalances := make([]string,0,len(keys))
     fctAddresses := make([]string,0,len(keys))
     ecAddresses := make([]string,0,len(keys))
-    
+
     var maxlen int
-    for i,k := range keys {
+    for i, k := range keys {
         if len(k) > maxlen {maxlen = len(k)}
-        we,ok := values[i].(wallet.IWalletEntry)
-        if !ok { 
-            panic("Get Addresses finds the database corrupt.  Shouldn't happen")
-        }
+        we := values[i]
         var adr string
         if we.GetType() == "ec" {
             address, err := we.GetAddress()
             if err != nil { continue }
             adr = fct.ConvertECAddressToUserStr(address)
             ecAddresses = append(ecAddresses,adr)
-            ecKeys = append(ecKeys, string(k))
+            ecKeys = append(ecKeys, k)
             bal,_ := ECBalance(adr)
             ecBalances = append(ecBalances,strconv.FormatInt(bal,10))
         }else{
@@ -625,7 +587,7 @@ func GetAddresses() ([]byte) {
             if err != nil { continue }
             adr = fct.ConvertFctAddressToUserStr(address)
             fctAddresses = append(fctAddresses,adr)
-            fctKeys = append(fctKeys, string(k))
+            fctKeys = append(fctKeys, k)
             bal,_ := FctBalance(adr)
             sbal := fct.ConvertDecimal(uint64(bal))
             fctBalances = append(fctBalances,sbal)
