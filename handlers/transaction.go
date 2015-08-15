@@ -9,8 +9,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -64,23 +62,8 @@ func reportResults(ctx *web.Context, response string, success bool) {
 	}
 }
 
-func getTransaction(ctx *web.Context, key string) (trans fct.ITransaction, err error) {
-
-	msg, valid := ValidateKey(key)
-	if !valid {
-		return nil, fmt.Errorf(msg)
-	}
-
-	// Now get the transaction.  If we don't have a transaction by the given
-	// keys there is nothing we can do.  Now we *could* create the transaaction
-	// and tie it to the key.  Something to think about.
-	ib := factoidState.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
-
-	trans, ok := ib.(fct.ITransaction)
-	if ib == nil || !ok {
-		return nil, fmt.Errorf("Unknown Transaction: %s", key)
-	}
-	return
+func getTransaction(ctx *web.Context, key string) (fct.ITransaction, error) {
+	return Wallet.GetTransaction(key)
 }
 
 // &key=<key>&name=<name or address>&amount=<amount>
@@ -307,35 +290,12 @@ func HandleFactoidAddInput(ctx *web.Context, parms string) {
 	if !ok {
 		return
 	}
-	msg, ok := ValidateKey(key)
-	if !ok {
-		reportResults(ctx, msg, false)
-		return
-	}
 
-	// First look if this is really an update
-	for _, input := range trans.GetInputs() {
-		if input.GetAddress().IsSameAs(address) {
-			oldamt := input.GetAmount()
-			input.SetAmount(uint64(amount))
-			reportResults(ctx, fmt.Sprintf("Input was %s\n"+
-				"Now is    %s",
-				fct.ConvertDecimal(oldamt),
-				fct.ConvertDecimal(uint64(amount))), true)
-			return
-		}
-	}
-
-	// Add our new input
-	err := factoidState.GetWallet().AddInput(trans, address, uint64(amount))
+	err := Wallet.FactoidAddInput(trans, key, address, uint64(amount))
 	if err != nil {
-		reportResults(ctx, "Failed to add input", false)
+		reportResults(ctx, err.Error(), false)
 		return
 	}
-
-	// Update our map with our new transaction to the same key. Otherwise, all
-	// of our work will go away!
-	factoidState.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
 
 	reportResults(ctx, "Success adding Input", true)
 }
@@ -346,34 +306,11 @@ func HandleFactoidAddOutput(ctx *web.Context, parms string) {
 		return
 	}
 
-	msg, ok := ValidateKey(key)
-	if !ok {
-		reportResults(ctx, msg, false)
-		return
-	}
-
-	// First look if this is really an update
-	for _, output := range trans.GetOutputs() {
-		if output.GetAddress().IsSameAs(address) {
-			oldamt := output.GetAmount()
-			output.SetAmount(uint64(amount))
-			reportResults(ctx, fmt.Sprintf("Input was %s\n"+
-				"Now is    %s",
-				fct.ConvertDecimal(oldamt),
-				fct.ConvertDecimal(uint64(amount))), true)
-			return
-		}
-	}
-	// Add our new Output
-	err := factoidState.GetWallet().AddOutput(trans, address, uint64(amount))
+	err := Wallet.FactoidAddOutput(trans, key, address, uint64(amount))
 	if err != nil {
-		reportResults(ctx, "Failed to add output", false)
+		reportResults(ctx, err.Error(), false)
 		return
 	}
-
-	// Update our map with our new transaction to the same key.  Otherwise, all
-	// of our work will go away!
-	factoidState.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
 
 	reportResults(ctx, "Success adding output", true)
 }
@@ -384,186 +321,47 @@ func HandleFactoidAddECOutput(ctx *web.Context, parms string) {
 		return
 	}
 
-	msg, ok := ValidateKey(key)
-	if !ok {
-		reportResults(ctx, msg, false)
-		return
-	}
-	// First look if this is really an update
-	for _, ecoutput := range trans.GetECOutputs() {
-		if ecoutput.GetAddress().IsSameAs(address) {
-			oldamt := ecoutput.GetAmount()
-			ecoutput.SetAmount(uint64(amount))
-			reportResults(ctx, fmt.Sprintf("Input was %s\n"+
-				"Now is    %s",
-				fct.ConvertDecimal(oldamt),
-				fct.ConvertDecimal(uint64(amount))), true)
-			return
-		}
-	}
-	// Add our new Entry Credit Output
-	err := factoidState.GetWallet().AddECOutput(trans, address, uint64(amount))
+	err := Wallet.FactoidAddECOutput(trans, key, address, uint64(amount))
 	if err != nil {
-		reportResults(ctx, "Failed to add input", false)
+		reportResults(ctx, err.Error(), false)
 		return
 	}
-
-	// Update our map with our new transaction to the same key.  Otherwise, all
-	// of our work will go away!
-	factoidState.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
 
 	reportResults(ctx, "Success adding Entry Credit Output", true)
 }
 
 func HandleFactoidSignTransaction(ctx *web.Context, key string) {
-
-	msg, ok := ValidateKey(key)
-	if !ok {
-		reportResults(ctx, msg, false)
-		return
-	}
-
-	// Get the transaction
-	trans, err := getTransaction(ctx, key)
-	if err != nil {
-		reportResults(ctx, "Failed to get the transaction", false)
-		return
-	}
-
-	err = factoidState.GetWallet().Validate(1, trans)
+	err := Wallet.FactoidSignTransaction(key)
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
 		return
 	}
-
-	valid, err := factoidState.GetWallet().SignInputs(trans)
-	if err != nil {
-		reportResults(ctx, err.Error(), false)
-	}
-	if !valid {
-		reportResults(ctx, "Not all inputs are signed", false)
-	}
-	// Update our map with our new transaction to the same key.  Otherwise, all
-	// of our work will go away!
-	factoidState.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
 
 	reportResults(ctx, "Success signing transaction", true)
 }
 
 func HandleFactoidSubmit(ctx *web.Context, jsonkey string) {
-	type submitReq struct {
-		Transaction string
-	}
-
-	in := new(submitReq)
-	json.Unmarshal([]byte(jsonkey), in)
-
-	key := in.Transaction
-	// Get the transaction
-	trans, err := getTransaction(ctx, key)
+	resp, err := Wallet.FactoidSubmit(jsonkey)
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
 		return
 	}
 
-	err = factoidState.GetWallet().ValidateSignatures(trans)
-	if err != nil {
-		reportResults(ctx, err.Error(), false)
-		return
-	}
-
-	// Okay, transaction is good, so marshal and send to factomd!
-	data, err := trans.MarshalBinary()
-	if err != nil {
-		reportResults(ctx, "Failed to marshal the transaction for factomd", false)
-		return
-	}
-
-	transdata := string(hex.EncodeToString(data))
-
-	s := struct{ Transaction string }{transdata}
-
-	j, err := json.Marshal(s)
-	if err != nil {
-		reportResults(ctx, "Failed to marshal the transaction for factomd", false)
-		return
-	}
-
-	resp, err := http.Post(
-		fmt.Sprintf("http://%s/v1/factoid-submit/", ipaddressFD+portNumberFD),
-		"application/json",
-		bytes.NewBuffer(j))
-
-	if err != nil {
-		reportResults(ctx, err.Error(), false)
-		return
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		reportResults(ctx, err.Error(), false)
-	}
-
-	resp.Body.Close()
-
-	r := new(Response)
-	if err := json.Unmarshal(body, r); err != nil {
-		reportResults(ctx, err.Error(), false)
-	}
-
-	if r.Success {
-		factoidState.GetDB().DeleteKey([]byte(fct.DB_BUILD_TRANS), []byte(key))
-		reportResults(ctx, r.Response, true)
-	} else {
-		reportResults(ctx, r.Response, false)
-	}
-
+	reportResults(ctx, resp, true)
 }
 
 func GetFee(ctx *web.Context) (int64, error) {
-	str := fmt.Sprintf("http://%s/v1/factoid-get-fee/", ipaddressFD+portNumberFD)
-	resp, err := http.Get(str)
-	if err != nil {
-		return 0, err
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		resp.Body.Close()
-		return 0, err
-	}
-	resp.Body.Close()
-
-	type x struct{ Fee int64 }
-	b := new(x)
-	if err := json.Unmarshal(body, b); err != nil {
-		return 0, err
-	}
-
-	return b.Fee, nil
+	return Wallet.GetFee()
 }
 
 func HandleGetFee(ctx *web.Context) {
-	str := fmt.Sprintf("http://%s/v1/factoid-get-fee/", ipaddressFD+portNumberFD)
-	resp, err := http.Get(str)
+	fee, err := Wallet.GetFee()
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
 		return
 	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		reportResults(ctx, err.Error(), false)
-		return
-	}
-	resp.Body.Close()
 
-	type x struct{ Fee int64 }
-	b := new(x)
-	if err := json.Unmarshal(body, b); err != nil {
-		reportResults(ctx, err.Error(), false)
-		return
-	}
-
-	ctx.Write(body)
+	ctx.Write([]byte(fmt.Sprintf("{Fee: %d}", fee)))
 }
 
 func GetAddresses() []byte {
