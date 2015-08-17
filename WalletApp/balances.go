@@ -183,7 +183,7 @@ func GetBalances(state State) []byte {
 			fctAddresses = append(fctAddresses, adr)
 			fctKeys = append(fctKeys, string(k))
 			bal, _ := FctBalance(state, adr)
-			sbal := fct.ConvertDecimal(uint64(bal))
+			sbal := fct.ConvertDecimalToPaddedString(uint64(bal))
 			fctBalances = append(fctBalances, sbal)
 		}
 	}
@@ -232,7 +232,7 @@ func (Balance) Execute(state State, args []string) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println(args[2], "=", fct.ConvertDecimal(uint64(bal)))
+	fmt.Println(args[2], "=", fct.ConvertDecimalToPaddedString(uint64(bal)))
 	return nil
 }
 
