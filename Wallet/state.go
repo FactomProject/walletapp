@@ -16,7 +16,7 @@ var (
 	ipaddressFD  = "localhost:"
 	portNumberFD = "8088"
 
-	databasefile = "factoid_wallet_bolt2.db"
+	databasefile = "factoid_wallet_bolt.db"
 )
 
 var factoidState = stateinit.NewFactoidState(cfg.BoltDBPath + databasefile)

@@ -11,59 +11,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
 )
-
-/*************************************************************************
- * Handler Functions
- *************************************************************************/
-
-// Setup:  seed --
-// Setup creates the 10 fountain Factoid Addresses, then sets address
-// generation to be unique for this wallet.  You CAN call setup multiple
-// times, but once the Fountain addresses are created, Setup only changes
-// the seed.
-//
-// Setup must be called once before you do anything else with the wallet.
-//
-/*
-func HandleFactoidSetup(ctx *web.Context, seed string) {
-	// Make sure we have a seed.
-	if len(seed) == 0 {
-		msg := "You must supply some random seed. For example (don't use this!)\n" +
-			"factom-cli setup 'woe!#in31!%234ng)%^&$%oeg%^&*^jp45694a;gmr@#t4 q34y'\n" +
-			"would make a nice seed.  The more random the better.\n\n" +
-			"Note that if you create an address before you call Setup, you must\n" +
-			"use those address(s) as you access the fountians."
-
-		reportResults(ctx, msg, false)
-	}
-	setFountian := false
-	keys, _ := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
-	if len(keys) == 0 {
-		setFountian = true
-		for i := 1; i <= 10; i++ {
-			name := fmt.Sprintf("%02d-Fountain", i)
-			_, err := factoidState.GetWallet().GenerateFctAddress([]byte(name), 1, 1)
-			if err != nil {
-				reportResults(ctx, err.Error(), false)
-				return
-			}
-		}
-	}
-
-	seedprime := fct.Sha([]byte(fmt.Sprintf("%s%v", seed, time.Now().UnixNano()))).Bytes()
-	factoidState.GetWallet().NewSeed(seedprime)
-
-	if setFountian {
-		reportResults(ctx, "New seed set, fountain addresses defined", true)
-	} else {
-		reportResults(ctx, "New seed set, no fountain addresses defined", true)
-	}
-}*/
 
 // New Transaction:  key --
 // We create a new transaction, and track it with the user supplied key.  The
@@ -376,12 +327,7 @@ func GetAddresses() ([]string, []wallet.IWalletEntry) {
 	return answerKeys, answerWE
 }
 
-func GetTransactions() ([]byte, error) {
-	exch, err := GetFee()
-	if err != nil {
-		return nil, err
-	}
-
+func GetTransactions() ([][]byte, []fct.ITransaction, error) {
 	// Get the transactions in flight.
 	keys, values := factoidState.GetDB().GetKeysValues([]byte(fct.DB_BUILD_TRANS))
 
@@ -397,71 +343,30 @@ func GetTransactions() ([]byte, error) {
 			}
 		}
 	}
+	answer := []fct.ITransaction{}
 
-	var out bytes.Buffer
-	for i, key := range keys {
+	for i, _ := range values {
 		if values[i] == nil {
 			continue
 		}
-		trans := values[i].(fct.ITransaction)
-
-		fee, _ := trans.CalculateFee(uint64(exch))
-		cprt := ""
-		cin, err := trans.TotalInputs()
-		if err != nil {
-			cprt = cprt + err.Error()
-		}
-		cout, err := trans.TotalOutputs()
-		if err != nil {
-			cprt = cprt + err.Error()
-		}
-		cecout, err := trans.TotalECs()
-		if err != nil {
-			cprt = cprt + err.Error()
-		}
-
-		if len(cprt) == 0 {
-			v := int64(cin) - int64(cout) - int64(cecout)
-			sign := ""
-			if v < 0 {
-				sign = "-"
-				v = -v
-			}
-			cprt = fmt.Sprintf(" Currently will pay: %s%s",
-				sign,
-				strings.TrimSpace(fct.ConvertDecimal(uint64(v))))
-			if sign == "-" || fee > uint64(v) {
-				cprt = cprt + "\n\nWARNING: Currently your transaction fee may be too low"
-			}
-		}
-
-		out.WriteString(fmt.Sprintf("\n%25s:  Fee Due: %s  %s\n\n%s\n",
-			key,
-			strings.TrimSpace(fct.ConvertDecimal(fee)),
-			cprt,
-			values[i].String()))
+		answer = append(answer, values[i].(fct.ITransaction))
 	}
 
-	output := out.Bytes()
-	// now look for the addresses, and replace them with our names. (the transactions
-	// in flight also have a Factom address... We leave those alone.
+	return keys, answer, nil
+}
 
-	names, vs := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
+func GetWalletNames() (keys [][]byte, values []fct.IBlock) {
+	return factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
+}
 
-	for i, name := range names {
-		we, ok := vs[i].(wallet.IWalletEntry)
-		if !ok {
-			return nil, fmt.Errorf("Database is corrupt")
-		}
+func GetRaw(bucket, key []byte) fct.IBlock {
+	return factoidState.GetDB().GetRaw(bucket, key)
+}
 
-		address, err := we.GetAddress()
-		if err != nil {
-			continue
-		} // We shouldn't get any of these, but ignore them if we do.
-		adrstr := []byte(hex.EncodeToString(address.Bytes()))
+func GenerateFctAddress(name []byte, m int, n int) (hash fct.IAddress, err error) {
+	return factoidState.GetWallet().GenerateFctAddress(name, m, n)
+}
 
-		output = bytes.Replace(output, adrstr, name, -1)
-	}
-
-	return output, nil
+func NewSeed(data []byte) {
+	factoidState.GetWallet().NewSeed(data)
 }

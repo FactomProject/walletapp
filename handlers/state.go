@@ -6,7 +6,7 @@ package handlers
 
 import (
 	"github.com/FactomProject/FactomCode/util"
-	"github.com/FactomProject/factoid/state/stateinit"
+	//"github.com/FactomProject/factoid/state/stateinit"
 )
 
 const (
@@ -25,7 +25,9 @@ var (
 	ipaddressFD  = "localhost:"
 	portNumberFD = "8088"
 
-	databasefile = "factoid_wallet_bolt.db"
+	//databasefile = "factoid_wallet_bolt.db"
 )
 
+/*
 var factoidState = stateinit.NewFactoidState(cfg.BoltDBPath + databasefile)
+*/
