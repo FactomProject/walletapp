@@ -312,19 +312,17 @@ func GetFee() (int64, error) {
 	return b.Fee, nil
 }
 
-func GetAddresses() ([]string, []wallet.IWalletEntry) {
-	keys, values := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
+func GetAddresses() []wallet.IWalletEntry {
+	_, values := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
 	answerWE := []wallet.IWalletEntry{}
-	answerKeys := []string{}
-	for i, k := range keys {
-		we, ok := values[i].(wallet.IWalletEntry)
+	for _, v := range values {
+		we, ok := v.(wallet.IWalletEntry)
 		if !ok {
 			panic("Get Addresses finds the database corrupt. Shouldn't happen")
 		}
 		answerWE = append(answerWE, we)
-		answerKeys = append(answerKeys, string(k))
 	}
-	return answerKeys, answerWE
+	return answerWE
 }
 
 func GetTransactions() ([][]byte, []fct.ITransaction, error) {

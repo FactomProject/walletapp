@@ -365,21 +365,20 @@ func HandleGetFee(ctx *web.Context) {
 }
 
 func GetAddresses() []byte {
-	keys, values := Wallet.GetAddresses()
+	values := Wallet.GetAddresses()
 
-	ecKeys := make([]string, 0, len(keys))
-	fctKeys := make([]string, 0, len(keys))
-	ecBalances := make([]string, 0, len(keys))
-	fctBalances := make([]string, 0, len(keys))
-	fctAddresses := make([]string, 0, len(keys))
-	ecAddresses := make([]string, 0, len(keys))
+	ecKeys := make([]string, 0, len(values))
+	fctKeys := make([]string, 0, len(values))
+	ecBalances := make([]string, 0, len(values))
+	fctBalances := make([]string, 0, len(values))
+	fctAddresses := make([]string, 0, len(values))
+	ecAddresses := make([]string, 0, len(values))
 
 	var maxlen int
-	for i, k := range keys {
-		if len(k) > maxlen {
-			maxlen = len(k)
+	for _, we := range values {
+		if len(we.GetName()) > maxlen {
+			maxlen = len(we.GetName())
 		}
-		we := values[i]
 		var adr string
 		if we.GetType() == "ec" {
 			address, err := we.GetAddress()
@@ -388,7 +387,7 @@ func GetAddresses() []byte {
 			}
 			adr = fct.ConvertECAddressToUserStr(address)
 			ecAddresses = append(ecAddresses, adr)
-			ecKeys = append(ecKeys, k)
+			ecKeys = append(ecKeys, string(we.GetName()))
 			bal, _ := ECBalance(adr)
 			ecBalances = append(ecBalances, strconv.FormatInt(bal, 10))
 		} else {
@@ -398,7 +397,7 @@ func GetAddresses() []byte {
 			}
 			adr = fct.ConvertFctAddressToUserStr(address)
 			fctAddresses = append(fctAddresses, adr)
-			fctKeys = append(fctKeys, k)
+			fctKeys = append(fctKeys, string(we.GetName()))
 			bal, _ := FctBalance(adr)
 			sbal := fct.ConvertDecimal(uint64(bal))
 			fctBalances = append(fctBalances, sbal)
