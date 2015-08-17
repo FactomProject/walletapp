@@ -510,7 +510,7 @@ func (Print) Execute(state State, args []string) error {
 				fmt.Println(err)
 				continue
 			}
-			fmt.Println("Required Fee:       ", strings.TrimSpace(fct.ConvertDecimal(fee)))
+			fmt.Println("Required Fee:       ", fct.ConvertDecimalToString(fee))
 			tin, err1 := trans.TotalInputs()
 			tout, err2 := trans.TotalOutputs()
 			if err1 == nil && err2 == nil {
@@ -521,7 +521,7 @@ func (Print) Execute(state State, args []string) error {
 					cfee = -cfee
 				}
 				fmt.Print("Fee You are paying: ",
-					sign, strings.TrimSpace(fct.ConvertDecimal(uint64(cfee))), "\n")
+					sign, fct.ConvertDecimalToString(uint64(cfee)), "\n")
 			} else {
 				if err1 != nil {
 					fmt.Println("Inputs have an error: ", err1)
@@ -549,7 +549,7 @@ func (Print) Execute(state State, args []string) error {
 				continue
 			}
 			fmt.Println("Factoids to buy one Entry Credit: ",
-				fct.ConvertDecimal(uint64(v)))
+				fct.ConvertDecimalToPaddedString(uint64(v)))
 		case "height":
 			fmt.Println("Directory block height is: ", state.fs.GetDBHeight())
 		default:
