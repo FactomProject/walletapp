@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	fct "github.com/FactomProject/factoid"
