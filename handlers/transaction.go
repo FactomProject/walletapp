@@ -120,7 +120,7 @@ func getParams_(ctx *web.Context, params string, ec bool) (
 	// Could check for that some how, but there are many ways around such checks.
 
 	if len(name) <= fct.ADDRESS_LENGTH {
-		we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(name))
+		we := Wallet.GetRaw([]byte(fct.W_NAME), []byte(name))
 		if we != nil {
 			address, err = we.(wallet.IWalletEntry).GetAddress()
 			if err != nil || address == nil {
@@ -171,12 +171,12 @@ func HandleFactoidSetup(ctx *web.Context, seed string) {
 		reportResults(ctx, msg, false)
 	}
 	setFountian := false
-	keys, _ := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
+	keys, _ := Wallet.GetWalletNames()
 	if len(keys) == 0 {
 		setFountian = true
 		for i := 1; i <= 10; i++ {
 			name := fmt.Sprintf("%02d-Fountain", i)
-			_, err := factoidState.GetWallet().GenerateFctAddress([]byte(name), 1, 1)
+			_, err := Wallet.GenerateFctAddress([]byte(name), 1, 1)
 			if err != nil {
 				reportResults(ctx, err.Error(), false)
 				return
@@ -185,7 +185,7 @@ func HandleFactoidSetup(ctx *web.Context, seed string) {
 	}
 
 	seedprime := fct.Sha([]byte(fmt.Sprintf("%s%v", seed, time.Now().UnixNano()))).Bytes()
-	factoidState.GetWallet().NewSeed(seedprime)
+	Wallet.NewSeed(seedprime)
 
 	if setFountian {
 		reportResults(ctx, "New seed set, fountain addresses defined", true)
@@ -430,29 +430,13 @@ func GetTransactions(ctx *web.Context) ([]byte, error) {
 		return nil, err
 	}
 
-	// Get the transactions in flight.
-	keys, values := factoidState.GetDB().GetKeysValues([]byte(fct.DB_BUILD_TRANS))
-
-	for i := 0; i < len(keys)-1; i++ {
-		for j := 0; j < len(keys)-i-1; j++ {
-			if bytes.Compare(keys[j], keys[j+1]) > 0 {
-				t := keys[j]
-				keys[j] = keys[j+1]
-				keys[j+1] = t
-				t2 := values[j]
-				values[j] = values[j+1]
-				values[j+1] = t2
-			}
-
-		}
+	keys, transactions, err := Wallet.GetTransactions()
+	if err != nil {
+		return nil, err
 	}
-	var out bytes.Buffer
-	for i, key := range keys {
-		if values[i] == nil {
-			continue
-		}
-		trans := values[i].(fct.ITransaction)
 
+	var out bytes.Buffer
+	for i, trans := range transactions {
 		fee, _ := trans.CalculateFee(uint64(exch))
 		cprt := ""
 		cin, err := trans.TotalInputs()
@@ -484,17 +468,17 @@ func GetTransactions(ctx *web.Context) ([]byte, error) {
 		}
 
 		out.WriteString(fmt.Sprintf("\n%25s:  Fee Due: %s  %s\n\n%s\n",
-			key,
+			keys[i],
 			strings.TrimSpace(fct.ConvertDecimal(fee)),
 			cprt,
-			values[i].String()))
+			transactions[i].String()))
 	}
 
 	output := out.Bytes()
 	// now look for the addresses, and replace them with our names. (the transactions
 	// in flight also have a Factom address... We leave those alone.
 
-	names, vs := factoidState.GetDB().GetKeysValues([]byte(fct.W_NAME))
+	names, vs := Wallet.GetWalletNames()
 
 	for i, name := range names {
 		we, ok := vs[i].(wallet.IWalletEntry)
