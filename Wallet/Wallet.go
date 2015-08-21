@@ -2,31 +2,24 @@ package Wallet
 
 import (
 	"fmt"
-	"regexp"
 
 	fct "github.com/FactomProject/factoid"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 )
 
 /******************************************
  * Helper Functions
  ******************************************/
-
-var badChar, _ = regexp.Compile("[^A-Za-z0-9_-]")
-var badHexChar, _ = regexp.Compile("[^A-Fa-f0-9]")
-
 type Response struct {
 	Response string
 	Success  bool
 }
 
 func ValidateKey(key string) error {
-	if len(key) > fct.ADDRESS_LENGTH {
-		return fmt.Errorf("Key is too long.")
+	if Utility.IsValidKey(key) {
+		return nil
 	}
-	if badChar.FindStringIndex(key) != nil {
-		return fmt.Errorf("Key contains invalid characters.")
-	}
-	return nil
+	return fmt.Errorf("Invalid key")
 }
 
 func GetTransaction(key string) (trans fct.ITransaction, err error) {
