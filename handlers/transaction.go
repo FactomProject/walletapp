@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+	"strings"
 
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
@@ -267,7 +268,7 @@ func HandleFactoidAddFee(ctx *web.Context, parms string) {
 				"Addfee requires that all the inputs balance the outputs.\n"+
 					"The total inputs of your transaction are              %s\n"+
 					"The total outputs + ecoutputs of your transaction are %s",
-				fct.ConvertDecimalToPaddedString(ins), fct.ConvertDecimalToPaddedString(outs+ecs))
+				fct.ConvertDecimal(ins), fct.ConvertDecimal(outs+ecs))
 
 			reportResults(ctx, msg, false)
 			return
@@ -279,7 +280,7 @@ func HandleFactoidAddFee(ctx *web.Context, parms string) {
 		reportResults(ctx, err.Error(), false)
 	}
 
-	reportResults(ctx, fmt.Sprintf("Added %s to %s", fct.ConvertDecimalToPaddedString(uint64(transfee)), name), true)
+	reportResults(ctx, fmt.Sprintf("Added %s to %s", fct.ConvertDecimal(uint64(transfee)), name), true)
 	return
 }
 
@@ -398,7 +399,7 @@ func GetAddresses() []byte {
 			fctAddresses = append(fctAddresses, adr)
 			fctKeys = append(fctKeys, string(we.GetName()))
 			bal, _ := FctBalance(adr)
-			sbal := fct.ConvertDecimalToPaddedString(uint64(bal))
+			sbal := fct.ConvertDecimal(uint64(bal))
 			fctBalances = append(fctBalances, sbal)
 		}
 	}
@@ -459,7 +460,7 @@ func GetTransactions(ctx *web.Context) ([]byte, error) {
 			}
 			cprt = fmt.Sprintf(" Currently will pay: %s%s",
 				sign,
-				fct.ConvertDecimalToString(uint64(v)))
+				strings.TrimSpace(fct.ConvertDecimal(uint64(v))))
 			if sign == "-" || fee > uint64(v) {
 				cprt = cprt + "\n\nWARNING: Currently your transaction fee may be too low"
 			}
@@ -467,7 +468,7 @@ func GetTransactions(ctx *web.Context) ([]byte, error) {
 
 		out.WriteString(fmt.Sprintf("\n%25s:  Fee Due: %s  %s\n\n%s\n",
 			keys[i],
-			fct.ConvertDecimalToString(fee),
+			strings.TrimSpace(fct.ConvertDecimal(fee)),
 			cprt,
 			transactions[i].String()))
 	}
