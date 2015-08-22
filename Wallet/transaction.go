@@ -14,6 +14,7 @@ import (
 
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 )
 
 // New Transaction:  key --
@@ -31,9 +32,9 @@ func FactoidNewTransaction(key string) error {
 		return fmt.Errorf("Missing transaction key")
 	}
 
-	err := ValidateKey(key)
-	if err != nil {
-		return err
+	ok := Utility.IsValidKey(key)
+	if !ok {
+		return  fmt.Errorf("Invalid name for transaction")
 	}
 
 	// Make sure we don't already have a transaction in process with this key
@@ -83,10 +84,11 @@ func FactoidAddFee(trans fct.ITransaction, key string, address fct.IAddress, nam
 		}
 	}
 
-	err := ValidateKey(key)
-	if err != nil {
-		return 0, err
+	ok := Utility.IsValidKey(key)
+	if !ok {
+		return 0, fmt.Errorf("Invalid name for transaction")
 	}
+	
 
 	fee, err := GetFee()
 	if err != nil {
@@ -117,10 +119,11 @@ func FactoidAddFee(trans fct.ITransaction, key string, address fct.IAddress, nam
 }
 
 func FactoidAddInput(trans fct.ITransaction, key string, address fct.IAddress, amount uint64) error {
-	err := ValidateKey(key)
-	if err != nil {
-		return err
+	ok := Utility.IsValidKey(key)
+	if !ok {
+		return fmt.Errorf("Invalid name for transaction")
 	}
+	
 
 	// First look if this is really an update
 	for _, input := range trans.GetInputs() {
@@ -131,7 +134,7 @@ func FactoidAddInput(trans fct.ITransaction, key string, address fct.IAddress, a
 	}
 
 	// Add our new input
-	err = factoidState.GetWallet().AddInput(trans, address, amount)
+	err := factoidState.GetWallet().AddInput(trans, address, amount)
 	if err != nil {
 		return fmt.Errorf("Failed to add input")
 	}
@@ -144,9 +147,9 @@ func FactoidAddInput(trans fct.ITransaction, key string, address fct.IAddress, a
 }
 
 func FactoidAddOutput(trans fct.ITransaction, key string, address fct.IAddress, amount uint64) error {
-	err := ValidateKey(key)
-	if err != nil {
-		return err
+	ok := Utility.IsValidKey(key)
+	if !ok {
+		return fmt.Errorf("Invalid name for transaction")
 	}
 
 	// First look if this is really an update
@@ -157,7 +160,7 @@ func FactoidAddOutput(trans fct.ITransaction, key string, address fct.IAddress, 
 		}
 	}
 	// Add our new Output
-	err = factoidState.GetWallet().AddOutput(trans, address, uint64(amount))
+	err := factoidState.GetWallet().AddOutput(trans, address, uint64(amount))
 	if err != nil {
 		return fmt.Errorf("Failed to add output")
 	}
@@ -170,9 +173,9 @@ func FactoidAddOutput(trans fct.ITransaction, key string, address fct.IAddress, 
 }
 
 func FactoidAddECOutput(trans fct.ITransaction, key string, address fct.IAddress, amount uint64) error {
-	err := ValidateKey(key)
-	if err != nil {
-		return err
+	ok := Utility.IsValidKey(key)
+	if !ok {
+		return fmt.Errorf("Invalid name for transaction")
 	}
 	// First look if this is really an update
 	for _, ecoutput := range trans.GetECOutputs() {
@@ -182,7 +185,7 @@ func FactoidAddECOutput(trans fct.ITransaction, key string, address fct.IAddress
 		}
 	}
 	// Add our new Entry Credit Output
-	err = factoidState.GetWallet().AddECOutput(trans, address, uint64(amount))
+	err := factoidState.GetWallet().AddECOutput(trans, address, uint64(amount))
 	if err != nil {
 		return fmt.Errorf("Failed to add input")
 	}
@@ -195,9 +198,9 @@ func FactoidAddECOutput(trans fct.ITransaction, key string, address fct.IAddress
 }
 
 func FactoidSignTransaction(key string) error {
-	err := ValidateKey(key)
-	if err != nil {
-		return err
+	ok := Utility.IsValidKey(key)
+	if !ok {
+		return fmt.Errorf("Invalid name for transaction")
 	}
 
 	// Get the transaction

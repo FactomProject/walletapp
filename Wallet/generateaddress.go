@@ -6,12 +6,14 @@ package Wallet
 
 import (
 	"github.com/FactomProject/factoid"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
+	"fmt"
 )
 
 func GenerateAddress(name string) (factoid.IAddress, error) {
-	err := ValidateKey(name)
-	if err != nil {
-		return nil, err
+	ok := Utility.IsValidKey(name)
+	if !ok {
+		return nil, fmt.Errorf("Invalid name or address")
 	}
 	addr, err := factoidState.GetWallet().GenerateFctAddress([]byte(name), 1, 1)
 	if err != nil {
@@ -29,9 +31,9 @@ func GenerateAddressString(name string) (string, error) {
 }
 
 func GenerateECAddress(name string) (factoid.IAddress, error) {
-	err := ValidateKey(name)
-	if err != nil {
-		return nil, err
+	ok := Utility.IsValidKey(name)
+	if !ok {
+		return nil, fmt.Errorf("Invalid name or address")
 	}
 	addr, err := factoidState.GetWallet().GenerateECAddress([]byte(name))
 	if err != nil {

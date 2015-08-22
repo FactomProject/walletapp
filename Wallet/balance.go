@@ -10,6 +10,7 @@ import (
 	"fmt"
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -18,9 +19,9 @@ import (
 
 func FactoidBalance(adr string) (int64, error) {
 	if !fct.ValidateFUserStr(adr) {
-		err := ValidateKey(adr)
-		if err != nil {
-			return 0, err
+		ok := Utility.IsValidKey(adr)
+		if !ok {
+			return 0, fmt.Errorf("Invalid name or address")
 		}
 
 		we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
@@ -68,9 +69,9 @@ func FactoidBalance(adr string) (int64, error) {
 func ECBalance(adr string) (int64, error) {
 
 	if !fct.ValidateECUserStr(adr) {
-		err := ValidateKey(adr)
-		if err != nil {
-			return 0, err
+		ok := Utility.IsValidKey(adr)
+		if !ok {
+			return 0, fmt.Errorf("Invalid name or address")
 		}
 
 		we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
