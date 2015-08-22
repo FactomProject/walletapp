@@ -118,7 +118,7 @@ func Start() {
 	// Get Fee
 	// localhost:8089/v1/factoid-get-fee/
 	// Get the Transaction fee
-	server.Get("/v1/factoid-get-fee/", handlers.HandleGetFee)
+	server.Get("/v1/factoid-get-fee/(.*)", handlers.HandleGetFee)
 
 	// Get Address List
 	// localhost:8089/v1/factoid-get-addresses/

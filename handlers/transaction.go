@@ -354,14 +354,35 @@ func GetFee(ctx *web.Context) (int64, error) {
 	return Wallet.GetFee()
 }
 
-func HandleGetFee(ctx *web.Context) {
+func HandleGetFee(ctx *web.Context, k string) {
+	
+	var trans fct.ITransaction
+	var err error
+	
+	key := ctx.Params["key"]
+	
+	fmt.Println("getfee", key)
+	 
+	if len(key) > 0 {
+		trans, err = getTransaction(ctx, key)
+		if err != nil {
+			reportResults(ctx, "Failure to locate the transaction", false)
+			return
+		}
+	}
+	
 	fee, err := Wallet.GetFee()
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
 		return
 	}
-
-	ctx.Write([]byte(fmt.Sprintf("{Fee: %d}", fee)))
+	
+	if trans != nil {
+		ufee, _ := trans.CalculateFee(uint64(fee))
+		fee = int64(ufee)
+	}
+	
+	reportResults(ctx, fmt.Sprintf("%s",strings.TrimSpace(fct.ConvertDecimal(uint64(fee)))), true)
 }
 
 func GetAddresses() []byte {
