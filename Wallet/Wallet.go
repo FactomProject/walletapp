@@ -3,7 +3,7 @@ package Wallet
 import (
 	"fmt"
 	"regexp"
-
+	"github/FactomProject/fctwallet/Wallet/Utility"
 	fct "github.com/FactomProject/factoid"
 )
 
@@ -19,20 +19,11 @@ type Response struct {
 	Success  bool
 }
 
-func ValidateKey(key string) error {
-	if len(key) > fct.ADDRESS_LENGTH {
-		return fmt.Errorf("Key is too long.")
-	}
-	if badChar.FindStringIndex(key) != nil {
-		return fmt.Errorf("Key contains invalid characters.")
-	}
-	return nil
-}
 
 func GetTransaction(key string) (trans fct.ITransaction, err error) {
-	err = ValidateKey(key)
-	if err != nil {
-		return nil, err
+	ok = Utility.IsValidKey(key)
+	if !ok {
+		return nil, fmt.Errorf("Invalid name or address")
 	}
 
 	// Now get the transaction.  If we don't have a transaction by the given
