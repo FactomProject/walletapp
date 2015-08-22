@@ -341,13 +341,13 @@ func HandleFactoidSignTransaction(ctx *web.Context, key string) {
 }
 
 func HandleFactoidSubmit(ctx *web.Context, jsonkey string) {
-	resp, err := Wallet.FactoidSubmit(jsonkey)
+	_, err := Wallet.FactoidSubmit(jsonkey)
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
 		return
 	}
 
-	reportResults(ctx, resp, true)
+	reportResults(ctx, "Success Submitting transaction", true)
 }
 
 func GetFee(ctx *web.Context) (int64, error) {

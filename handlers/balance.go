@@ -6,12 +6,51 @@ package handlers
 
 import (
 	"fmt"
+	"encoding/hex"
 	"github.com/hoisie/web"
-
+	"github.com/FactomProject/factom"
 	"github.com/FactomProject/fctwallet/Wallet"
 )
 
+var DBHead    []byte
+var DBHeadStr string
+
+func getAll() error {
+	db, err := factom.GetDBlockHead()
+	if err != nil {
+		return err
+	}
+	
+	DBHeadStr = db.KeyMR
+	
+	return nil
+}
+
+func refresh() error {
+	if DBHead == nil {
+		getAll()
+	}else{
+		db,err := factom.GetDBlockHead()
+		if err != nil {
+			return err
+		}
+		if db.KeyMR != DBHeadStr {
+			DBHeadStr = db.KeyMR
+			DBHead, err = hex.DecodeString(db.KeyMR)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	fmt.Println(string(DBHead))
+	return nil
+}
+
 func FctBalance(adr string) (int64, error) {
+	err := refresh()
+	if err != nil {
+		return 0, err
+	}
 	return Wallet.FactoidBalance(adr)
 }
 
@@ -39,3 +78,4 @@ func HandleFactoidBalance(ctx *web.Context, adr string) {
 	str := fmt.Sprintf("%d", v)
 	reportResults(ctx, str, true)
 }
+
