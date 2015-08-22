@@ -341,16 +341,20 @@ func GetTransactions() ([][]byte, []fct.ITransaction, error) {
 			}
 		}
 	}
-	answer := []fct.ITransaction{}
+	answer  := []fct.ITransaction{}
+	theKeys := [][]byte{}
+	
 
+	
 	for i, _ := range values {
 		if values[i] == nil {
 			continue
 		}
 		answer = append(answer, values[i].(fct.ITransaction))
+		theKeys = append(theKeys,keys[i])
 	}
 
-	return keys, answer, nil
+	return theKeys, answer, nil
 }
 
 func GetWalletNames() (keys [][]byte, values []fct.IBlock) {
