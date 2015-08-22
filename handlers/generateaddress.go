@@ -7,16 +7,16 @@ package handlers
 import (
 	fct "github.com/FactomProject/factoid"
 	"github.com/hoisie/web"
-
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 	"github.com/FactomProject/fctwallet/Wallet"
 )
 
 var _ = fct.Address{}
 
 func HandleFactoidGenerateAddress(ctx *web.Context, name string) {
-	msg, ok := ValidateKey(name)
+	ok := Utility.IsValidKey(name)
 	if !ok {
-		reportResults(ctx, msg, false)
+		reportResults(ctx, "Name provided is not valid", false)
 		return
 	}
 
@@ -30,12 +30,12 @@ func HandleFactoidGenerateAddress(ctx *web.Context, name string) {
 }
 
 func HandleFactoidGenerateECAddress(ctx *web.Context, name string) {
-	msg, ok := ValidateKey(name)
+	ok := Utility.IsValidKey(name)
 	if !ok {
-		reportResults(ctx, msg, false)
+		reportResults(ctx, "Name provided is not valid", false)
 		return
 	}
-
+	
 	adrstr, err := Wallet.GenerateECAddressString(name)
 	if err != nil {
 		reportResults(ctx, err.Error(), false)

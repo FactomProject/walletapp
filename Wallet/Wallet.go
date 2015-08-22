@@ -3,7 +3,7 @@ package Wallet
 import (
 	"fmt"
 	"regexp"
-	"github/FactomProject/fctwallet/Wallet/Utility"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 	fct "github.com/FactomProject/factoid"
 )
 
@@ -21,7 +21,7 @@ type Response struct {
 
 
 func GetTransaction(key string) (trans fct.ITransaction, err error) {
-	ok = Utility.IsValidKey(key)
+	ok := Utility.IsValidKey(key)
 	if !ok {
 		return nil, fmt.Errorf("Invalid name or address")
 	}
@@ -31,7 +31,7 @@ func GetTransaction(key string) (trans fct.ITransaction, err error) {
 	// and tie it to the key.  Something to think about.
 	ib := factoidState.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 
-	trans, ok := ib.(fct.ITransaction)
+	trans, ok = ib.(fct.ITransaction)
 	if ib == nil || !ok {
 		return nil, fmt.Errorf("Unknown Transaction: %s", key)
 	}
