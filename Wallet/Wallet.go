@@ -19,6 +19,12 @@ type Response struct {
 	Success  bool
 }
 
+func ValidateKey(key string) error {
+	if Utility.IsValidKey(key) {
+		return nil
+	}
+	return fmt.Errorf("Invalid key")
+}
 
 func GetTransaction(key string) (trans fct.ITransaction, err error) {
 	ok := Utility.IsValidKey(key)
