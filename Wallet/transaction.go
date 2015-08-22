@@ -187,7 +187,7 @@ func FactoidAddECOutput(trans fct.ITransaction, key string, address fct.IAddress
 	// Add our new Entry Credit Output
 	err := factoidState.GetWallet().AddECOutput(trans, address, uint64(amount))
 	if err != nil {
-		return fmt.Errorf("Failed to add input")
+		return fmt.Errorf("Failed to add Entry Credit Output")
 	}
 
 	// Update our map with our new transaction to the same key.  Otherwise, all
