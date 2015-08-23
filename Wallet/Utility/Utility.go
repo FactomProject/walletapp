@@ -7,6 +7,7 @@ package Utility
 import (
 	"github.com/FactomProject/factoid"
 	"regexp"
+	"strings"
 )
 
 var badChar, _ = regexp.Compile("[^A-Za-z0-9_-]")                                                      //alphanumeric plus _-
@@ -17,13 +18,20 @@ var HUMAN_ADDRESS_LENGTH int = 52
 var NICKNAME_LENGTH int = 64
 
 func IsValidAddress(address string) bool {
+	
 	if len(address) != HUMAN_ADDRESS_LENGTH {
 		return false
 	}
+	
 	if badBase58Char.FindStringIndex(address) != nil {
 		return false
 	}
-	//TODO: validate address further
+	
+	if !strings.HasPrefix(address,"FA") &&
+	   !strings.HasPrefix(address,"EC") {
+	    return false
+	}
+	
 	return true
 }
 
