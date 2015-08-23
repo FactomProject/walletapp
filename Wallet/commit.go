@@ -10,9 +10,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 )
 
 func CommitChain(name string, data []byte) error {
@@ -31,7 +33,24 @@ func CommitChain(name string, data []byte) error {
 		return fmt.Errorf("Could not decode message:", err)
 	}
 
-	we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(name))
+	var we fct.IBlock
+	
+	if Utility.IsValidAddress(name) && strings.HasPrefix(name,"EC") {
+		addr := fct.ConvertUserStrToAddress(name)
+		we = factoidState.GetDB().GetRaw([]byte(fct.W_ADDRESS_PUB_KEY),addr)
+	}else if Utility.IsValidHexAddress(name) {
+		addr, err := hex.DecodeString(name)
+		if err == nil {
+			we = factoidState.GetDB().GetRaw([]byte(fct.W_ADDRESS_PUB_KEY),addr)
+		}
+	}else{
+		we = factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(name))
+	}
+	
+	if we == nil {
+		return fmt.Errorf("Unknown address")
+	}
+	
 	signed := factoidState.GetWallet().SignCommit(we.(wallet.IWalletEntry), msg)
 
 	com := new(commit)
