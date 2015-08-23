@@ -25,9 +25,12 @@ func FactoidBalance(adr string) (int64, error) {
 		}
 
 		we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
-
+		
 		if we != nil {
 			we2 := we.(wallet.IWalletEntry)
+			if we2.GetType() != "fct" {
+				return 0, fmt.Errorf("Cannot get a factoid balance on an Entry Credit Address")
+			}
 			addr, _ := we2.GetAddress()
 			adr = hex.EncodeToString(addr.Bytes())
 		}
@@ -78,6 +81,11 @@ func ECBalance(adr string) (int64, error) {
 
 		if we != nil {
 			we2 := we.(wallet.IWalletEntry)
+			
+			if we2.GetType() != "ec" {
+				return 0, fmt.Errorf("Cannot get a an Entry Credit balance on a Factoid Address")
+			}
+			
 			addr, _ := we2.GetAddress()
 			adr = hex.EncodeToString(addr.Bytes())
 		}
