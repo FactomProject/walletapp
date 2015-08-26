@@ -42,7 +42,6 @@ func refresh() error {
 			}
 		}
 	}
-	fmt.Println(string(DBHead))
 	return nil
 }
 
