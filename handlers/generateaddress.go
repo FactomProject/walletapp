@@ -14,8 +14,7 @@ import (
 var _ = fct.Address{}
 
 func HandleFactoidGenerateAddress(ctx *web.Context, name string) {
-	ok := Utility.IsValidKey(name)
-	if !ok {
+	if Utility.IsValidKey(name) == false {
 		reportResults(ctx, "Name provided is not valid", false)
 		return
 	}
@@ -30,8 +29,7 @@ func HandleFactoidGenerateAddress(ctx *web.Context, name string) {
 }
 
 func HandleFactoidGenerateECAddress(ctx *web.Context, name string) {
-	ok := Utility.IsValidKey(name)
-	if !ok {
+	if Utility.IsValidKey(name) == false {
 		reportResults(ctx, "Name provided is not valid", false)
 		return
 	}
@@ -45,9 +43,10 @@ func HandleFactoidGenerateECAddress(ctx *web.Context, name string) {
 	reportResults(ctx, adrstr, true)
 }
 
-func HandleFactoidGenerateAddressFromPrivateKey(ctx *web.Context, name string, privateKey string) {
-	ok := Utility.IsValidKey(name)
-	if !ok {
+func HandleFactoidGenerateAddressFromPrivateKey(ctx *web.Context, params string) {
+	name := ctx.Params["name"]
+	privateKey := ctx.Params["privateKey"]
+	if Utility.IsValidKey(name) == false {
 		reportResults(ctx, "Name provided is not valid", false)
 		return
 	}
@@ -69,9 +68,10 @@ func HandleFactoidGenerateAddressFromPrivateKey(ctx *web.Context, name string, p
 	reportResults(ctx, adrstr, true)
 }
 
-func HandleFactoidGenerateECAddressFromPrivateKey(ctx *web.Context, name string, privateKey string) {
-	ok := Utility.IsValidKey(name)
-	if !ok {
+func HandleFactoidGenerateECAddressFromPrivateKey(ctx *web.Context, params string) {
+	name := ctx.Params["name"]
+	privateKey := ctx.Params["privateKey"]
+	if Utility.IsValidKey(name) == false {
 		reportResults(ctx, "Name provided is not valid", false)
 		return
 	}

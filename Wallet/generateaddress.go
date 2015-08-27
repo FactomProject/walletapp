@@ -28,7 +28,7 @@ func GenerateAddressString(name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return factoid.ConvertECAddressToUserStr(addr), nil
+	return factoid.ConvertFctAddressToUserStr(addr), nil
 }
 
 func GenerateAddressFromPrivateKey(name string, privateKey string) (factoid.IAddress, error) {
@@ -45,7 +45,7 @@ func GenerateAddressFromPrivateKey(name string, privateKey string) (factoid.IAdd
 	if err != nil {
 		return nil, err
 	}
-	addr, err := factoidState.GetWallet().GenerateFctAddressFromPrivateKey([]byte(name), privateKey, 1, 1)
+	addr, err := factoidState.GetWallet().GenerateFctAddressFromPrivateKey([]byte(name), priv, 1, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func GenerateAddressStringFromPrivateKey(name string, privateKey string) (string
 	if err != nil {
 		return "", err
 	}
-	return factoid.ConvertECAddressToUserStr(addr), nil
+	return factoid.ConvertFctAddressToUserStr(addr), nil
 }
 
 func GenerateECAddress(name string) (factoid.IAddress, error) {

@@ -41,6 +41,10 @@ func Start() {
 	// can use the name for the address in this API
 	server.Get("/v1/factoid-generate-ec-address/([^/]+)", handlers.HandleFactoidGenerateECAddress)
 
+	server.Get("/v1/factoid-generate-address-from-private-key/(.*)", handlers.HandleFactoidGenerateAddressFromPrivateKey)
+
+	server.Get("/v1/factoid-generate-ec-address-from-private-key/(.*)", handlers.HandleFactoidGenerateECAddressFromPrivateKey)
+
 	// New Transaction
 	// localhost:8089/v1/factoid-new-transaction/<key>
 	// Use the key in subsequent calls to add inputs, outputs, ecoutputs, and to
