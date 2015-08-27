@@ -18,20 +18,27 @@ var HUMAN_ADDRESS_LENGTH int = 52
 var NICKNAME_LENGTH int = 64
 
 func IsValidAddress(address string) bool {
-	
+
 	if len(address) != HUMAN_ADDRESS_LENGTH {
 		return false
 	}
-	
+
 	if badBase58Char.FindStringIndex(address) != nil {
 		return false
 	}
-	
-	if !strings.HasPrefix(address,"FA") &&
-	   !strings.HasPrefix(address,"EC") {
-	    return false
+
+	if !strings.HasPrefix(address, "FA") &&
+		!strings.HasPrefix(address, "EC") {
+		return false
 	}
-	
+
+	return true
+}
+
+func IsValidHex(h string) bool {
+	if badHexChar.FindStringIndex(h) != nil {
+		return false
+	}
 	return true
 }
 
