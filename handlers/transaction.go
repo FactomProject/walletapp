@@ -219,6 +219,7 @@ func HandleFactoidNewTransaction(ctx *web.Context, key string) {
 	err := Wallet.FactoidNewTransaction(key)
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
+		return
 	}
 
 	reportResults(ctx, "Success building a transaction", true)
