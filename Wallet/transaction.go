@@ -40,7 +40,7 @@ func FactoidNewTransaction(key string) error {
 	// Make sure we don't already have a transaction in process with this key
 	t := factoidState.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	if t != nil {
-		return fmt.Errorf("Duplicate key: '", key, "'")
+		return fmt.Errorf("Duplicate key: '%s'", key)
 	}
 	// Create a transaction
 	t = factoidState.GetWallet().CreateTransaction(factoidState.GetTimeMilli())
