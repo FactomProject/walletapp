@@ -44,11 +44,10 @@ func Start() {
 	server.Get("/v1/factoid-generate-address-from-private-key/(.*)", handlers.HandleFactoidGenerateAddressFromPrivateKey)
 	server.Get("/v1/factoid-generate-ec-address-from-private-key/(.*)", handlers.HandleFactoidGenerateECAddressFromPrivateKey)
 
-	server.Get("/v1/factoid-generate-address-from-human-readible-private-key/(.*)", handlers.HandleFactoidGenerateAddressFromHumanReadiblePrivateKey)
-	server.Get("/v1/factoid-generate-ec-address-from-human-readible-private-key/(.*)", handlers.HandleFactoidGenerateECAddressFromHumanReadiblePrivateKey)
+	server.Get("/v1/factoid-generate-address-from-human-readable-private-key/(.*)", handlers.HandleFactoidGenerateAddressFromHumanReadablePrivateKey)
+	server.Get("/v1/factoid-generate-ec-address-from-human-readable-private-key/(.*)", handlers.HandleFactoidGenerateECAddressFromHumanReadablePrivateKey)
 
-	server.Get("/v1/factoid-generate-address-from-mnemonic/(.*)", handlers.HandleFactoidGenerateAddressFromMnemonic)
-	server.Get("/v1/factoid-generate-ec-address-from-mnemonic/(.*)", handlers.HandleFactoidGenerateECAddressFromMnemonic)
+	server.Get("/v1/factoid-generate-address-from-token-sale/(.*)", handlers.HandleFactoidGenerateAddressFromMnemonic)
 
 	// New Transaction
 	// localhost:8089/v1/factoid-new-transaction/<key>
