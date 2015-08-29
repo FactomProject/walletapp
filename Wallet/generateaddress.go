@@ -64,19 +64,19 @@ func GenerateAddressStringFromPrivateKey(name string, privateKey string) (string
 	return factoid.ConvertFctAddressToUserStr(addr), nil
 }
 
-func GenerateAddressFromHumanReadiblePrivateKey(name string, privateKey string) (factoid.IAddress, error) {
+func GenerateAddressFromHumanReadablePrivateKey(name string, privateKey string) (factoid.IAddress, error) {
 	if Utility.IsValidKey(name) == false {
 		return nil, fmt.Errorf("Invalid name or address")
 	}
-	addr, err := factoidState.GetWallet().GenerateFctAddressFromHumanReadiblePrivateKey([]byte(name), privateKey, 1, 1)
+	addr, err := factoidState.GetWallet().GenerateFctAddressFromHumanReadablePrivateKey([]byte(name), privateKey, 1, 1)
 	if err != nil {
 		return nil, err
 	}
 	return addr, nil
 }
 
-func GenerateAddressStringFromHumanReadiblePrivateKey(name string, privateKey string) (string, error) {
-	addr, err := GenerateAddressFromHumanReadiblePrivateKey(name, privateKey)
+func GenerateAddressStringFromHumanReadablePrivateKey(name string, privateKey string) (string, error) {
+	addr, err := GenerateAddressFromHumanReadablePrivateKey(name, privateKey)
 	if err != nil {
 		return "", err
 	}
@@ -155,40 +155,22 @@ func GenerateECAddressStringFromPrivateKey(name string, privateKey string) (stri
 	return factoid.ConvertECAddressToUserStr(addr), nil
 }
 
-func GenerateECAddressFromHumanReadiblePrivateKey(name string, privateKey string) (factoid.IAddress, error) {
+func GenerateECAddressFromHumanReadablePrivateKey(name string, privateKey string) (factoid.IAddress, error) {
 	if Utility.IsValidKey(name) == false {
 		return nil, fmt.Errorf("Invalid name or address")
 	}
-	addr, err := factoidState.GetWallet().GenerateECAddressFromHumanReadiblePrivateKey([]byte(name), privateKey)
+	addr, err := factoidState.GetWallet().GenerateECAddressFromHumanReadablePrivateKey([]byte(name), privateKey)
 	if err != nil {
 		return nil, err
 	}
 	return addr, nil
 }
 
-func GenerateECAddressStringFromHumanReadiblePrivateKey(name string, privateKey string) (string, error) {
-	addr, err := GenerateECAddressFromHumanReadiblePrivateKey(name, privateKey)
+func GenerateECAddressStringFromHumanReadablePrivateKey(name string, privateKey string) (string, error) {
+	addr, err := GenerateECAddressFromHumanReadablePrivateKey(name, privateKey)
 	if err != nil {
 		return "", err
 	}
 	return factoid.ConvertECAddressToUserStr(addr), nil
 }
 
-func GenerateECAddressFromMnemonic(name string, privateKey string) (factoid.IAddress, error) {
-	if Utility.IsValidKey(name) == false {
-		return nil, fmt.Errorf("Invalid name or address")
-	}
-	addr, err := factoidState.GetWallet().GenerateECAddressFromMnemonic([]byte(name), privateKey)
-	if err != nil {
-		return nil, err
-	}
-	return addr, nil
-}
-
-func GenerateECAddressStringFromMnemonic(name string, privateKey string) (string, error) {
-	addr, err := GenerateECAddressFromMnemonic(name, privateKey)
-	if err != nil {
-		return "", err
-	}
-	return factoid.ConvertECAddressToUserStr(addr), nil
-}

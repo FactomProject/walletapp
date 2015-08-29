@@ -98,10 +98,10 @@ func HandleFactoidGenerateECAddressFromPrivateKey(ctx *web.Context, params strin
 }
 
 /*********************************************************************************************************/
-/********************************From human readible private key******************************************/
+/********************************From human readable private key******************************************/
 /*********************************************************************************************************/
 
-func HandleFactoidGenerateAddressFromHumanReadiblePrivateKey(ctx *web.Context, params string) {
+func HandleFactoidGenerateAddressFromHumanReadablePrivateKey(ctx *web.Context, params string) {
 	name := ctx.Params["name"]
 	privateKey := ctx.Params["privateKey"]
 	if Utility.IsValidKey(name) == false {
@@ -109,7 +109,7 @@ func HandleFactoidGenerateAddressFromHumanReadiblePrivateKey(ctx *web.Context, p
 		return
 	}
 
-	adrstr, err := Wallet.GenerateAddressStringFromHumanReadiblePrivateKey(name, privateKey)
+	adrstr, err := Wallet.GenerateAddressStringFromHumanReadablePrivateKey(name, privateKey)
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
 		return
@@ -118,7 +118,7 @@ func HandleFactoidGenerateAddressFromHumanReadiblePrivateKey(ctx *web.Context, p
 	reportResults(ctx, adrstr, true)
 }
 
-func HandleFactoidGenerateECAddressFromHumanReadiblePrivateKey(ctx *web.Context, params string) {
+func HandleFactoidGenerateECAddressFromHumanReadablePrivateKey(ctx *web.Context, params string) {
 	name := ctx.Params["name"]
 	privateKey := ctx.Params["privateKey"]
 	if Utility.IsValidKey(name) == false {
@@ -126,7 +126,7 @@ func HandleFactoidGenerateECAddressFromHumanReadiblePrivateKey(ctx *web.Context,
 		return
 	}
 
-	adrstr, err := Wallet.GenerateECAddressStringFromHumanReadiblePrivateKey(name, privateKey)
+	adrstr, err := Wallet.GenerateECAddressStringFromHumanReadablePrivateKey(name, privateKey)
 	if err != nil {
 		reportResults(ctx, err.Error(), false)
 		return
@@ -156,19 +156,3 @@ func HandleFactoidGenerateAddressFromMnemonic(ctx *web.Context, params string) {
 	reportResults(ctx, adrstr, true)
 }
 
-func HandleFactoidGenerateECAddressFromMnemonic(ctx *web.Context, params string) {
-	name := ctx.Params["name"]
-	mnemonic := ctx.Params["mnemonic"]
-	if Utility.IsValidKey(name) == false {
-		reportResults(ctx, "Name provided is not valid", false)
-		return
-	}
-
-	adrstr, err := Wallet.GenerateECAddressStringFromMnemonic(name, mnemonic)
-	if err != nil {
-		reportResults(ctx, err.Error(), false)
-		return
-	}
-
-	reportResults(ctx, adrstr, true)
-}
