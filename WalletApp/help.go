@@ -12,14 +12,14 @@ type Help struct {
 	ICommand
 }
 
-func (h Help) Execute(state State, args []string) error {
+func (h Help) Execute(state IState, args []string) error {
 	if len(args) == 1 || len(args) > 2 {
 		fmt.Println(h.ShortHelp())
 		return nil
 	}
 	if strings.ToLower(args[1]) == "all" {
-		keys := make([]string, 0, len(state.commands))
-		for key, _ := range state.commands {
+		keys := make([]string, 0, len(state.GetCommands()))
+		for key, _ := range state.GetCommands() {
 			keys = append(keys, key)
 		}
 		for i := 0; i < len(keys)-1; i++ {
@@ -32,14 +32,16 @@ func (h Help) Execute(state State, args []string) error {
 			}
 		}
 		for _, key := range keys {
-			fmt.Println(state.commands[key].LongHelp())
+			fmt.Println(state.GetCommands()[key].LongHelp())
 		}
 	}
-	c := state.commands[strings.ToLower(args[1])]
+	c := state.GetCommands()[strings.ToLower(args[1])]
 	if c != nil {
 		fmt.Println(c.LongHelp())
 	} else {
-		return fmt.Errorf("Unknown Command")
+		if strings.ToLower(args[1]) != "all" {
+			return fmt.Errorf("Unknown Command")
+		}
 	}
 	return nil
 }

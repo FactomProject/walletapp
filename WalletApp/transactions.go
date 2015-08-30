@@ -12,7 +12,6 @@ import (
 	"github.com/FactomProject/factoid/wallet"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 /************************************************************
@@ -32,7 +31,7 @@ type NewTransaction struct {
 // Multiple transactions can be under construction at one time, but they need
 // their own keys. Once a transaction is either submitted or deleted, the key
 // can be reused.
-func (NewTransaction) Execute(state State, args []string) error {
+func (NewTransaction) Execute(state IState, args []string) error {
 
 	if len(args) != 2 {
 		return fmt.Errorf("Invalid Parameters")
@@ -40,14 +39,14 @@ func (NewTransaction) Execute(state State, args []string) error {
 	key := args[1]
 
 	// Make sure we don't already have a transaction in process with this key
-	t := state.fs.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
+	t := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	if t != nil {
 		return fmt.Errorf("Duplicate key: '%s'", key)
 	}
 	// Create a transaction
-	t = state.fs.GetWallet().CreateTransaction(state.fs.GetTimeMilli())
+	t = state.GetFS().GetWallet().CreateTransaction(state.GetFS().GetTimeMilli())
 	// Save it with the key
-	state.fs.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), t)
+	state.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), t)
 
 	fmt.Println("Beginning Transaction ", key)
 	return nil
@@ -85,7 +84,7 @@ type AddInput struct {
 //
 //
 
-func (AddInput) Execute(state State, args []string) error {
+func (AddInput) Execute(state IState, args []string) error {
 
 	if len(args) != 4 {
 		return fmt.Errorf("Invalid Parameters")
@@ -94,7 +93,7 @@ func (AddInput) Execute(state State, args []string) error {
 	adr := args[2]
 	amt := args[3]
 
-	ib := state.fs.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
+	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	trans, ok := ib.(fct.ITransaction)
 	if ib == nil || !ok {
 		return fmt.Errorf("Unknown Transaction")
@@ -107,7 +106,7 @@ func (AddInput) Execute(state State, args []string) error {
 				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
 			}
 
-			we := state.fs.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
+			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 
 			if we != nil {
 				we2 := we.(wallet.IWalletEntry)
@@ -126,7 +125,7 @@ func (AddInput) Execute(state State, args []string) error {
 	}
 	amount, _ := fct.ConvertFixedPoint(amt)
 	bamount, _ := strconv.ParseInt(amount, 10, 64)
-	err := state.fs.GetWallet().AddInput(trans, addr, uint64(bamount))
+	err := state.GetFS().GetWallet().AddInput(trans, addr, uint64(bamount))
 
 	if err != nil {
 		return err
@@ -169,7 +168,7 @@ type AddOutput struct {
 //
 //
 
-func (AddOutput) Execute(state State, args []string) error {
+func (AddOutput) Execute(state IState, args []string) error {
 
 	if len(args) != 4 {
 		return fmt.Errorf("Invalid Parameters")
@@ -178,7 +177,7 @@ func (AddOutput) Execute(state State, args []string) error {
 	adr := args[2]
 	amt := args[3]
 
-	ib := state.fs.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
+	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	trans, ok := ib.(fct.ITransaction)
 	if ib == nil || !ok {
 		return fmt.Errorf("Unknown Transaction")
@@ -191,7 +190,7 @@ func (AddOutput) Execute(state State, args []string) error {
 				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
 			}
 
-			we := state.fs.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
+			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 
 			if we != nil {
 				we2 := we.(wallet.IWalletEntry)
@@ -210,7 +209,7 @@ func (AddOutput) Execute(state State, args []string) error {
 	}
 	amount, _ := fct.ConvertFixedPoint(amt)
 	bamount, _ := strconv.ParseInt(amount, 10, 64)
-	err := state.fs.GetWallet().AddOutput(trans, addr, uint64(bamount))
+	err := state.GetFS().GetWallet().AddOutput(trans, addr, uint64(bamount))
 	if err != nil {
 		return err
 	}
@@ -253,7 +252,7 @@ type AddECOutput struct {
 //
 // Buy Entry Credits
 
-func (AddECOutput) Execute(state State, args []string) error {
+func (AddECOutput) Execute(state IState, args []string) error {
 
 	if len(args) != 4 {
 		return fmt.Errorf("Invalid Parameters")
@@ -262,7 +261,7 @@ func (AddECOutput) Execute(state State, args []string) error {
 	adr := args[2]
 	amt := args[3]
 
-	ib := state.fs.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
+	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	trans, ok := ib.(fct.ITransaction)
 	if ib == nil || !ok {
 		return fmt.Errorf("Unknown Transaction")
@@ -275,7 +274,7 @@ func (AddECOutput) Execute(state State, args []string) error {
 				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
 			}
 
-			we := state.fs.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
+			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 
 			if we != nil {
 				we2 := we.(wallet.IWalletEntry)
@@ -294,7 +293,7 @@ func (AddECOutput) Execute(state State, args []string) error {
 	}
 	amount, _ := fct.ConvertFixedPoint(amt)
 	bamount, _ := strconv.ParseInt(amount, 10, 64)
-	err := state.fs.GetWallet().AddECOutput(trans, addr, uint64(bamount))
+	err := state.GetFS().GetWallet().AddECOutput(trans, addr, uint64(bamount))
 	if err != nil {
 		return err
 	}
@@ -337,24 +336,24 @@ type Sign struct {
 // Sign <k>
 //
 // Sign the given transaction identified by the given key
-func (Sign) Execute(state State, args []string) error {
+func (Sign) Execute(state IState, args []string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("Invalid Parameters")
 	}
 	key := args[1]
 	// Get the transaction
-	ib := state.fs.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
+	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	trans, ok := ib.(fct.ITransaction)
 	if !ok {
 		return fmt.Errorf("Invalid Parameters")
 	}
 
-	err := state.fs.GetWallet().Validate(1, trans)
+	err := state.GetFS().GetWallet().Validate(1, trans)
 	if err != nil {
 		return err
 	}
 
-	ok, err = state.fs.GetWallet().SignInputs(trans)
+	ok, err = state.GetFS().GetWallet().SignInputs(trans)
 	if err != nil {
 		return err
 	}
@@ -364,7 +363,7 @@ func (Sign) Execute(state State, args []string) error {
 
 	// Update our map with our new transaction to the same key.  Otherwise, all
 	// of our work will go away!
-	state.fs.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
+	state.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
 
 	return nil
 
@@ -405,25 +404,25 @@ type Submit struct {
 // Submit <k>
 //
 // Submit the given transaction identified by the given key
-func (Submit) Execute(state State, args []string) error {
+func (Submit) Execute(state IState, args []string) error {
 
 	if len(args) != 2 {
 		return fmt.Errorf("Invalid Parameters")
 	}
 	key := args[1]
 	// Get the transaction
-	ib := state.fs.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
+	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	trans, ok := ib.(fct.ITransaction)
 	if !ok {
 		return fmt.Errorf("Invalid Parameters")
 	}
 
-	err := state.fs.GetWallet().Validate(1, trans)
+	err := state.GetFS().GetWallet().Validate(1, trans)
 	if err != nil {
 		return err
 	}
 
-	err = state.fs.GetWallet().ValidateSignatures(trans)
+	err = state.GetFS().GetWallet().ValidateSignatures(trans)
 	if err != nil {
 		return err
 	}
@@ -454,7 +453,7 @@ func (Submit) Execute(state State, args []string) error {
 	resp.Body.Close()
 
 	// Clear out the transaction
-	state.fs.GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), nil)
+	state.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), nil)
 
 	fmt.Println("Transaction", key, "Submitted")
 
@@ -471,108 +470,10 @@ func (Submit) ShortHelp() string {
 
 func (Submit) LongHelp() string {
 	return `
-Submit <key>                          Submits the transaction specified by the given key.
-                                      Each input in the transaction must have  a valid
-                                      signature, or Submit will reject the transaction.
+Submit <key>                        Submits the transaction specified by the given key.
+                                    Each input in the transaction must have  a valid
+                                    signature, or Submit will reject the transaction.
 `
 }
 
-/************************************************************
- * Print <v>
- ************************************************************/
-type Print struct {
-	ICommand
-}
 
-// Print <v1> <v2> ...
-//
-// Print Stuff.  We will add to this over time.  Right now, if <v> = a transaction
-// key, it prints that transaction.
-
-func (Print) Execute(state State, args []string) error {
-	fmt.Println()
-	for i, v := range args {
-		if i == 0 {
-			continue
-		}
-
-		ib := state.fs.GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(v))
-		trans, ok := ib.(fct.ITransaction)
-		if ib != nil && ok {
-			fmt.Println(trans)
-			v, err := GetRate(state)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			fee, err := trans.CalculateFee(uint64(v))
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			fmt.Println("Required Fee:       ", fct.ConvertDecimalToString(fee))
-			tin, err1 := trans.TotalInputs()
-			tout, err2 := trans.TotalOutputs()
-			if err1 == nil && err2 == nil {
-				cfee := int64(tin) - int64(tout)
-				sign := ""
-				if cfee < 0 {
-					sign = "-"
-					cfee = -cfee
-				}
-				fmt.Print("Fee You are paying: ",
-					sign, fct.ConvertDecimalToString(uint64(cfee)), "\n")
-			} else {
-				if err1 != nil {
-					fmt.Println("Inputs have an error: ", err1)
-				}
-				if err2 != nil {
-					fmt.Println("Outputs have an error: ", err2)
-				}
-			}
-			binary, err := trans.MarshalBinary()
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			fmt.Println("Transaction Size:   ", len(binary))
-			continue
-		}
-
-		switch strings.ToLower(v) {
-		case "currentblock":
-			fmt.Println(state.fs.GetCurrentBlock())
-		case "rate":
-			v, err := GetRate(state)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-			fmt.Println("Factoids to buy one Entry Credit: ",
-				fct.ConvertDecimalToPaddedString(uint64(v)))
-		case "height":
-			fmt.Println("Directory block height is: ", state.fs.GetDBHeight())
-		default:
-			fmt.Println("Unknown: ", v)
-		}
-	}
-
-	return nil
-}
-
-func (Print) Name() string {
-	return "Print"
-}
-
-func (Print) ShortHelp() string {
-	return "Print <v1> <v2> ...  Prints the specified transaction(s) or the exchange rate."
-}
-
-func (Print) LongHelp() string {
-	return `
-Print <v1> <v2> ...                  Prints the specified values.  If <v> is a key for 
-                                     a transaction, it will print said transaction.
-      v = rate                       Print the number of factoids required to buy one
-                                     one entry credit
-`
-}
