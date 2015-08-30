@@ -13,7 +13,7 @@ type Exit struct {
 	ICommand
 }
 
-func (Exit) Execute(state State, args []string) error {
+func (Exit) Execute(state IState, args []string) error {
 	if len(args) < 2 {
 		os.Exit(0)
 	}

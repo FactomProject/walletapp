@@ -11,10 +11,12 @@ import (
 )
 
 type IState interface {
-	GetCommand([]string) (ICommand, error)
+	GetCommand([]string) 	(ICommand, error)
 	AddCommand(ICommand)
-	Execute(args []string) error
-	GetServer() string
+	Execute(args []string) 	error
+	GetServer() 			string
+	GetFS() 				state.IFactoidState
+	GetCommands()			map[string]ICommand
 }
 
 type State struct {
@@ -27,6 +29,14 @@ type State struct {
 }
 
 var _ IState = (*State)(nil)
+
+func (s State) GetCommands() map[string]ICommand {
+	return s.commands
+}
+
+func (s State) GetFS() state.IFactoidState {
+	return s.fs
+}
 
 func (s State) GetCommand(args []string) (ICommand, error) {
 	if len(args) == 0 {
@@ -58,27 +68,31 @@ func (s State) AddCommand(cmd ICommand) {
 	s.commands[strings.ToLower(cmd.Name())] = cmd
 }
 
-func NewState() IState {
+func NewState(filename string) IState {
 	s := new(State)
 
-	s.dbfile = "/tmp/wallet_app_bolt.db"
+	s.dbfile = filename
 	s.fs = stateinit.NewFactoidState(s.dbfile)
 	s.commands = make(map[string]ICommand, 10)
 	s.ipaddressFD = "localhost:"
 	s.portNumberFD = "8088"
 
-	s.AddCommand(new(Exit))
-	s.AddCommand(new(Balance))
-	s.AddCommand(new(Help))
-	s.AddCommand(new(NewAddress))
-	s.AddCommand(new(Balances))
-	s.AddCommand(new(NewTransaction))
+	s.AddCommand(new(AddECOutput))
 	s.AddCommand(new(AddInput))
 	s.AddCommand(new(AddOutput))
-	s.AddCommand(new(AddECOutput))
+	s.AddCommand(new(Balance))
+	s.AddCommand(new(Balances))
+	s.AddCommand(new(Export))
+	s.AddCommand(new(Exit))
+	s.AddCommand(new(Help))
+	s.AddCommand(new(Import))
+	s.AddCommand(new(NewAddress))
+	s.AddCommand(new(NewTransaction))
+	s.AddCommand(new(Print))
+	s.AddCommand(new(Run))
+	s.AddCommand(new(Setup))
 	s.AddCommand(new(Sign))
 	s.AddCommand(new(Submit))
-	s.AddCommand(new(Print))
 
 	return s
 }
@@ -88,7 +102,7 @@ func NewState() IState {
  ******************************************/
 
 type ICommand interface {
-	Execute(state State, args []string) error
+	Execute(state IState, args []string) error
 	Name() string
 	ShortHelp() string // Short description
 	LongHelp() string  // Detailed Help

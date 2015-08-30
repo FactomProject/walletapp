@@ -47,7 +47,7 @@ func GetRate(state IState) (int64, error) {
 
 }
 
-func FctBalance(state State, adr string) (int64, error) {
+func FctBalance(state IState, adr string) (int64, error) {
 
 	if !fct.ValidateFUserStr(adr) {
 		if len(adr) != 64 {
@@ -55,7 +55,7 @@ func FctBalance(state State, adr string) (int64, error) {
 				return 0, fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
 			}
 
-			we := state.fs.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
+			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 
 			if we != nil {
 				we2 := we.(wallet.IWalletEntry)
@@ -86,17 +86,27 @@ func FctBalance(state State, adr string) (int64, error) {
 	}
 	resp.Body.Close()
 
-	type Balance struct{ Balance int64 }
+	type Balance struct{ 
+		Response string
+		Success bool
+	}
 	b := new(Balance)
+
 	if err := json.Unmarshal(body, b); err != nil {
 		return 0, fmt.Errorf("Parsing Error on data returned by Factom Client")
 	}
-
-	return b.Balance, nil
+	if !b.Success {
+		return 0, fmt.Errorf(err.Error())
+	}
+	v, err := strconv.ParseInt(b.Response,10,64)	
+	if err != nil {
+		return 0, fmt.Errorf("Invalid balance returned by factomd")
+	}
+	return v, nil
 
 }
 
-func ECBalance(state State, adr string) (int64, error) {
+func ECBalance(state IState, adr string) (int64, error) {
 
 	if !fct.ValidateECUserStr(adr) {
 		if len(adr) != 64 {
@@ -104,7 +114,7 @@ func ECBalance(state State, adr string) (int64, error) {
 				return 0, fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
 			}
 
-			we := state.fs.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
+			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 
 			if we != nil {
 				we2 := we.(wallet.IWalletEntry)
@@ -134,18 +144,27 @@ func ECBalance(state State, adr string) (int64, error) {
 	}
 	resp.Body.Close()
 
-	type Balance struct{ Balance int64 }
+	type Balance struct{ 
+		Response string
+		Success bool
+	}
 	b := new(Balance)
+	
 	if err := json.Unmarshal(body, b); err != nil {
-		fmt.Println("-4::", err)
 		return 0, fmt.Errorf("Parsing Error on data returned by Factom Client")
 	}
-
-	return b.Balance, nil
+	if !b.Success {
+		return 0, fmt.Errorf(err.Error())
+	}
+	v, err := strconv.ParseInt(b.Response,10,64)	
+	if err != nil {
+		return 0, fmt.Errorf("Invalid balance returned by factomd")
+	}
+	return v, nil
 }
 
-func GetBalances(state State) []byte {
-	keys, values := state.fs.GetDB().GetKeysValues([]byte(fct.W_NAME))
+func GetBalances(state IState) []byte {
+	keys, values := state.GetFS().GetDB().GetKeysValues([]byte(fct.W_NAME))
 
 	ecKeys := make([]string, 0, len(keys))
 	fctKeys := make([]string, 0, len(keys))
@@ -172,7 +191,10 @@ func GetBalances(state State) []byte {
 			adr = fct.ConvertECAddressToUserStr(address)
 			ecAddresses = append(ecAddresses, adr)
 			ecKeys = append(ecKeys, string(k))
-			bal, _ := ECBalance(state, adr)
+			bal, err := ECBalance(state, adr)
+			if err != nil {
+				fmt.Println(err)
+			}
 			ecBalances = append(ecBalances, strconv.FormatInt(bal, 10))
 		} else {
 			address, err := we.GetAddress()
@@ -182,8 +204,11 @@ func GetBalances(state State) []byte {
 			adr = fct.ConvertFctAddressToUserStr(address)
 			fctAddresses = append(fctAddresses, adr)
 			fctKeys = append(fctKeys, string(k))
-			bal, _ := FctBalance(state, adr)
-			sbal := fct.ConvertDecimalToPaddedString(uint64(bal))
+			bal, err := FctBalance(state, adr)
+			if err != nil {
+				fmt.Println(err)
+			}
+			sbal := fct.ConvertDecimal(uint64(bal))
 			fctBalances = append(fctBalances, sbal)
 		}
 	}
@@ -215,7 +240,7 @@ type Balance struct {
 	ICommand
 }
 
-func (Balance) Execute(state State, args []string) (err error) {
+func (Balance) Execute(state IState, args []string) (err error) {
 	if len(args) != 3 {
 		return fmt.Errorf("Wrong number of parameters")
 	}
@@ -232,7 +257,11 @@ func (Balance) Execute(state State, args []string) (err error) {
 	if err != nil {
 		return err
 	}
-	fmt.Println(args[2], "=", fct.ConvertDecimalToPaddedString(uint64(bal)))
+	if args[1] == "fct" {
+		fmt.Println(args[2], "=", fct.ConvertDecimal(uint64(bal)))
+	}else{
+		fmt.Println(args[2], "=", bal)
+	}
 	return nil
 }
 
@@ -254,6 +283,26 @@ Balance <ec|fct> <name|address>     ec      -- an Entry Credit address balance
 `
 }
 
+func GenAddress(state IState, adrType string, key string) error {
+	switch strings.ToLower(adrType) {
+		case "ec":
+			adr, err := state.GetFS().GetWallet().GenerateECAddress([]byte(key))
+			if err != nil {
+				return err
+			}
+			fmt.Println(key, "=", fct.ConvertECAddressToUserStr(adr))
+		case "fct":
+			adr, err := state.GetFS().GetWallet().GenerateFctAddress([]byte(key), 1, 1)
+			if err != nil {
+				return err
+			}
+			fmt.Println(key, "=", fct.ConvertFctAddressToUserStr(adr))
+		default:
+			return fmt.Errorf("Invalid Parameters")
+	}
+	return nil
+}
+
 /*************************************************************
  * New Address
  *************************************************************/
@@ -262,7 +311,7 @@ type NewAddress struct {
 	ICommand
 }
 
-func (NewAddress) Execute(state State, args []string) (err error) {
+func (NewAddress) Execute(state IState, args []string) (err error) {
 
 	if len(args) != 3 {
 		return fmt.Errorf("Incorrect Number of Arguments")
@@ -273,26 +322,8 @@ func (NewAddress) Execute(state State, args []string) (err error) {
 	if badChar.FindStringIndex(args[2]) != nil {
 		return fmt.Errorf("Invalid name. Names must be alphanumeric or underscores")
 	}
-
-	var adr fct.IAddress
-	switch strings.ToLower(args[1]) {
-	case "ec":
-		adr, err = state.fs.GetWallet().GenerateECAddress([]byte(args[2]))
-		if err != nil {
-			return err
-		}
-		fmt.Println(args[2], "=", fct.ConvertECAddressToUserStr(adr))
-	case "fct":
-		adr, err = state.fs.GetWallet().GenerateFctAddress([]byte(args[2]), 1, 1)
-		if err != nil {
-			return err
-		}
-		fmt.Println(args[2], "=", fct.ConvertFctAddressToUserStr(adr))
-	default:
-		return fmt.Errorf("Invalid Parameters")
-	}
-
-	return nil
+	
+	return GenAddress(state, args[1],args[2])
 }
 
 func (NewAddress) Name() string {
@@ -323,7 +354,7 @@ type Balances struct {
 	ICommand
 }
 
-func (Balances) Execute(state State, args []string) (err error) {
+func (Balances) Execute(state IState, args []string) (err error) {
 
 	if len(args) != 1 {
 		return fmt.Errorf("Balances takes no arguments")

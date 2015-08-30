@@ -7,6 +7,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	fct "github.com/FactomProject/factoid"
 	"os"
 	"strings"
@@ -19,11 +20,17 @@ var _ fct.Transaction
 var _ = time.Now
 
 func main() {
-	state := NewState()
-	r := bufio.NewReader(os.Stdin)
-	for {
+	state := NewState("wallet_app_bolt.db")
+	run(state, os.Stdin,true)
+}
+	
+func run(state IState, reader io.Reader, prompt bool){	
+	r := bufio.NewScanner(reader)
+	if prompt {
 		fmt.Print(" Factom Wallet$ ")
-		line, _, _ := r.ReadLine()
+	}
+	for r.Scan() {
+		line := r.Text()
 		args := strings.Fields(string(line))
 		err := state.Execute(args)
 		if err != nil {
@@ -33,5 +40,11 @@ func main() {
 				fmt.Println(c.ShortHelp())
 			}
 		}
+		if prompt {
+			fmt.Print(" Factom Wallet$ ")
+		}
+	}
+	if prompt {
+		fmt.Println()
 	}
 }
