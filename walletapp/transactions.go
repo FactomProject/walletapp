@@ -4,13 +4,10 @@
 package main
 
 import (
-	"bytes"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
-	"net/http"
 	"strconv"
 )
 
@@ -326,154 +323,6 @@ AddECOutput <key> <n|a> <amt>       <key>  created by a previous NewTransaction 
 `
 }
 
-/************************************************************
- * Sign
- ************************************************************/
-type Sign struct {
-	ICommand
-}
 
-// Sign <k>
-//
-// Sign the given transaction identified by the given key
-func (Sign) Execute(state IState, args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("Invalid Parameters")
-	}
-	key := args[1]
-	// Get the transaction
-	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
-	trans, ok := ib.(fct.ITransaction)
-	if !ok {
-		return fmt.Errorf("Invalid Parameters")
-	}
-
-	err := state.GetFS().GetWallet().Validate(1, trans)
-	if err != nil {
-		return err
-	}
-
-	ok, err = state.GetFS().GetWallet().SignInputs(trans)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return fmt.Errorf("Error signing the transaction")
-	}
-
-	// Update our map with our new transaction to the same key.  Otherwise, all
-	// of our work will go away!
-	state.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
-
-	return nil
-
-}
-
-func (Sign) Name() string {
-	return "Sign"
-}
-
-func (Sign) ShortHelp() string {
-	return "Sign <k> -- Sign the transaction given by the key <k>"
-}
-
-func (Sign) LongHelp() string {
-	return `
-Sign <key>                          Signs the transaction specified by the given key.
-                                    Each input is found within the wallet, and if 
-                                    we have the private key for that input, we 
-                                    sign for that input.  
-                                    
-                                    Transctions can have inputs from multiple parties.
-                                    In this case, the inputs can be signed by each
-                                    party by first creating all the inputs and 
-                                    outputs for a transaction.  Then signing your
-                                    inputs.  Exporting the transaction.  Then
-                                    sending it to the other party or parties for
-                                    their signatures.
-`
-}
-
-/************************************************************
- * Submit
- ************************************************************/
-type Submit struct {
-	ICommand
-}
-
-// Submit <k>
-//
-// Submit the given transaction identified by the given key
-func (Submit) Execute(state IState, args []string) error {
-
-	if len(args) != 2 {
-		return fmt.Errorf("Invalid Parameters")
-	}
-	key := args[1]
-	// Get the transaction
-	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
-	trans, ok := ib.(fct.ITransaction)
-	if !ok {
-		return fmt.Errorf("Invalid Parameters")
-	}
-
-	err := state.GetFS().GetWallet().Validate(1, trans)
-	if err != nil {
-		return err
-	}
-
-	err = state.GetFS().GetWallet().ValidateSignatures(trans)
-	if err != nil {
-		return err
-	}
-
-	// Okay, transaction is good, so marshal and send to factomd!
-	data, err := trans.MarshalBinary()
-	if err != nil {
-		return err
-	}
-
-	transdata := string(hex.EncodeToString(data))
-
-	s := struct{ Transaction string }{transdata}
-
-	j, err := json.Marshal(s)
-	if err != nil {
-		return err
-	}
-
-	resp, err := http.Post(
-		fmt.Sprintf("http://%s/v1/factoid-submit/", state.GetServer()),
-		"application/json",
-		bytes.NewBuffer(j))
-
-	if err != nil {
-		return fmt.Errorf("Error coming back from server ")
-	}
-	resp.Body.Close()
-
-	// Clear out the transaction
-	state.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), nil)
-
-	fmt.Println("Transaction", key, "Submitted")
-
-	return nil
-}
-
-func (Submit) Name() string {
-	return "Submit"
-}
-
-func (Submit) ShortHelp() string {
-	return "Submit <k> -- Submit the transaction given by the key <k>"
-}
-
-func (Submit) LongHelp() string {
-	return `
-Submit <key>                        Submits the transaction specified by the given key.
-                                    Each input in the transaction must have  a valid
-                                    signature, or Submit will reject the transaction.
-`
-}
 
 
