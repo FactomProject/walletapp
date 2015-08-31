@@ -24,6 +24,26 @@ import (
 var badChar, _ = regexp.Compile("[^A-Za-z0-9_]")
 var badHexChar, _ = regexp.Compile("[^A-Fa-f0-9]")
 
+func GenAddress(state IState, adrType string, key string) error {
+	switch strings.ToLower(adrType) {
+		case "ec":
+			adr, err := state.GetFS().GetWallet().GenerateECAddress([]byte(key))
+			if err != nil {
+				return err
+			}
+			fmt.Println(key, "=", fct.ConvertECAddressToUserStr(adr))
+		case "fct":
+			adr, err := state.GetFS().GetWallet().GenerateFctAddress([]byte(key), 1, 1)
+			if err != nil {
+				return err
+			}
+			fmt.Println(key, "=", fct.ConvertFctAddressToUserStr(adr))
+		default:
+			return fmt.Errorf("Invalid Parameters")
+	}
+	return nil
+}
+
 // Get the Factoshis per Entry Credit Rate
 func GetRate(state IState) (int64, error) {
 	str := fmt.Sprintf("http://%s/v1/factoid-get-fee/", state.GetServer())
@@ -77,7 +97,6 @@ func FctBalance(state IState, adr string) (int64, error) {
 	str := fmt.Sprintf("http://%s/v1/factoid-balance/%s", state.GetServer(), adr)
 	resp, err := http.Get(str)
 	if err != nil {
-		fmt.Println("\n", str)
 		return 0, fmt.Errorf("Communication Error with Factom Client")
 	}
 	body, err := ioutil.ReadAll(resp.Body)
@@ -174,6 +193,7 @@ func GetBalances(state IState) []byte {
 	ecAddresses := make([]string, 0, len(keys))
 
 	var maxlen int
+	var connect = true
 	for i, k := range keys {
 		if len(k) > maxlen {
 			maxlen = len(k)
@@ -193,9 +213,13 @@ func GetBalances(state IState) []byte {
 			ecKeys = append(ecKeys, string(k))
 			bal, err := ECBalance(state, adr)
 			if err != nil {
-				fmt.Println(err)
+				connect = false
 			}
-			ecBalances = append(ecBalances, strconv.FormatInt(bal, 10))
+			if connect {
+				ecBalances = append(ecBalances, strconv.FormatInt(bal, 10))
+			}else{
+				ecBalances = append(ecBalances, "-")
+			}
 		} else {
 			address, err := we.GetAddress()
 			if err != nil {
@@ -206,10 +230,14 @@ func GetBalances(state IState) []byte {
 			fctKeys = append(fctKeys, string(k))
 			bal, err := FctBalance(state, adr)
 			if err != nil {
-				fmt.Println(err)
+				connect = false
 			}
 			sbal := fct.ConvertDecimal(uint64(bal))
-			fctBalances = append(fctBalances, sbal)
+			if connect {
+				fctBalances = append(fctBalances, sbal)
+			}else{
+				fctBalances = append(fctBalances, "-")
+			}
 		}
 	}
 	var out bytes.Buffer
@@ -228,7 +256,9 @@ func GetBalances(state IState) []byte {
 		str := fmt.Sprintf(fstr, key, ecAddresses[i], ecBalances[i])
 		out.WriteString(str)
 	}
-
+	if !connect {
+		out.WriteString("Balances are unavailable;  Wallet is offline\n")
+	}
 	return out.Bytes()
 }
 
@@ -281,26 +311,6 @@ Balance <ec|fct> <name|address>     ec      -- an Entry Credit address balance
                                     name    -- Look up address by its name
                                     address -- specify the address directly
 `
-}
-
-func GenAddress(state IState, adrType string, key string) error {
-	switch strings.ToLower(adrType) {
-		case "ec":
-			adr, err := state.GetFS().GetWallet().GenerateECAddress([]byte(key))
-			if err != nil {
-				return err
-			}
-			fmt.Println(key, "=", fct.ConvertECAddressToUserStr(adr))
-		case "fct":
-			adr, err := state.GetFS().GetWallet().GenerateFctAddress([]byte(key), 1, 1)
-			if err != nil {
-				return err
-			}
-			fmt.Println(key, "=", fct.ConvertFctAddressToUserStr(adr))
-		default:
-			return fmt.Errorf("Invalid Parameters")
-	}
-	return nil
 }
 
 /*************************************************************

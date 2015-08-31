@@ -8,6 +8,7 @@
 *.kate-swp
 *.orig
 *.db
+*.out
 
 # Folders
 _obj

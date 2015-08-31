@@ -24,10 +24,12 @@ func main() {
 	run(state, os.Stdin,true)
 }
 	
+var fsprompt string = "===============> "	
+	
 func run(state IState, reader io.Reader, prompt bool){	
 	r := bufio.NewScanner(reader)
 	if prompt {
-		fmt.Print(" Factom Wallet$ ")
+		fmt.Print(fsprompt)
 	}
 	for r.Scan() {
 		line := r.Text()
@@ -41,7 +43,7 @@ func run(state IState, reader io.Reader, prompt bool){
 			}
 		}
 		if prompt {
-			fmt.Print(" Factom Wallet$ ")
+			fmt.Print(fsprompt)
 		}
 	}
 	if prompt {
