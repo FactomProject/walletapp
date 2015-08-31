@@ -46,8 +46,9 @@ func (Print) Execute(state IState, args []string) error {
 			fmt.Println("Required Fee:       ", strings.TrimSpace(fct.ConvertDecimal(fee)))
 			tin, err1 := trans.TotalInputs()
 			tout, err2 := trans.TotalOutputs()
-			if err1 == nil && err2 == nil {
-				cfee := int64(tin) - int64(tout)
+			tec,  err3 := trans.TotalECs()
+			if err1 == nil && err2 == nil && err3 == nil {
+				cfee := int64(tin) - int64(tout) - int64(tec)
 				sign := ""
 				if cfee < 0 {
 					sign = "-"
@@ -61,6 +62,9 @@ func (Print) Execute(state IState, args []string) error {
 				}
 				if err2 != nil {
 					fmt.Println("Outputs have an error: ", err2)
+				}
+				if err3 != nil {
+					fmt.Println("Entry Credit Outputs have an error: ", err2)
 				}
 			}
 			binary, err := trans.MarshalBinary()
@@ -103,7 +107,7 @@ func (Print) ShortHelp() string {
 
 func (Print) LongHelp() string {
 	return `
-Print <v1> <v2> ...                 Prints the specified values.  If <v> is a key for 
+Print <transactions>                Prints the specified values.  If <v> is a key for 
                                     a transaction, it will print said transaction.
       Print rate                    Print the number of factoids required to buy one
                                     one entry credit
