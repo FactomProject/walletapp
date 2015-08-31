@@ -79,7 +79,7 @@ func (Print) Execute(state IState, args []string) error {
 		switch strings.ToLower(v) {
 		case "currentblock":
 			fmt.Println(state.GetFS().GetCurrentBlock())
-		case "rate":
+		case "--rate":
 			v, err := GetRate(state)
 			if err != nil {
 				fmt.Println(err)
@@ -107,9 +107,15 @@ func (Print) ShortHelp() string {
 
 func (Print) LongHelp() string {
 	return `
-Print <transactions>                Prints the specified values.  If <v> is a key for 
-                                    a transaction, it will print said transaction.
-      Print rate                    Print the number of factoids required to buy one
+Print <v1> <v2> ...                 Prints the specified values.  
+
+    for some v:
+
+         transaction key            If you specify a transaction key, the transaction will be 
+                                    printed, and the required fees, and fees being paid will 
+                                    be calculated.
+                                    
+         --rate                     Print the number of factoids required to buy one
                                     one entry credit
 `
 }
