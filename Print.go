@@ -32,7 +32,6 @@ func (Print) Execute(state IState, args []string) error {
 		ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(v))
 		trans, ok := ib.(fct.ITransaction)
 		if ib != nil && ok {
-			fmt.Println(trans)
 			v, err := GetRate(state)
 			if err != nil {
 				fmt.Println(err)

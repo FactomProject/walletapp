@@ -1,4 +1,3 @@
-setup
 
 newaddress fct fct01
 newaddress fct fct02
@@ -22,11 +21,3 @@ newaddress ec ec08
 newaddress ec ec09
 newaddress ec ec10
 
-newtransaction t
-addinput t 01-Fountain 1001
-addinput t 02-Fountain 1000
-addoutput t   fct01 1000
-addecoutput t ec01 1000
-
-sign t
-submit t
