@@ -10,6 +10,7 @@ import (
 	"fmt"
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -79,32 +80,28 @@ func GetRate(state IState) (int64, error) {
 }
 
 func FctBalance(state IState, adr string) (int64, error) {
-
-	if !fct.ValidateFUserStr(adr) {
-		if len(adr) != 64 {
-			if len(adr) > 32 {
-				return 0, fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
-			}
-
-			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
-
-			if we != nil {
-				we2 := we.(wallet.IWalletEntry)
-				addr, _ := we2.GetAddress()
-				adr = hex.EncodeToString(addr.Bytes())
-			} else {
-				return 0, fmt.Errorf("Name is undefined.")
-			}
-		} else {
-			if badHexChar.FindStringIndex(adr) != nil {
-				return 0, fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
-			}
-		}
-	} else {
+	
+	fmt.Println(adr)
+	
+	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,"FA") {
 		baddr := fct.ConvertUserStrToAddress(adr)
 		adr = hex.EncodeToString(baddr)
-	}
+	} else if Utility.IsValidHexAddress(adr) {
+		// the address is good enough.
+	} else if Utility.IsValidNickname(adr) {
+		we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 
+		if we != nil {
+			we2 := we.(wallet.IWalletEntry)
+			addr, _ := we2.GetAddress()
+			adr = hex.EncodeToString(addr.Bytes())
+		} else {
+			return 0, fmt.Errorf("Name %s is undefined.",adr)
+		}
+	} else {
+		return 0, fmt.Errorf("Invalid Name.  Check that you have entered the name correctly.")
+	}
+	
 	str := fmt.Sprintf("http://%s/v1/factoid-balance/%s", state.GetServer(), adr)
 	resp, err := http.Get(str)
 	if err != nil {
@@ -138,29 +135,23 @@ func FctBalance(state IState, adr string) (int64, error) {
 
 func ECBalance(state IState, adr string) (int64, error) {
 
-	if !fct.ValidateECUserStr(adr) {
-		if len(adr) != 64 {
-			if len(adr) > 32 {
-				return 0, fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
-			}
-
-			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
-
-			if we != nil {
-				we2 := we.(wallet.IWalletEntry)
-				addr, _ := we2.GetAddress()
-				adr = hex.EncodeToString(addr.Bytes())
-			} else {
-				return 0, fmt.Errorf("Name is undefined.")
-			}
-		} else {
-			if badHexChar.FindStringIndex(adr) != nil {
-				return 0, fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
-			}
-		}
-	} else {
+	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,"EC") {
 		baddr := fct.ConvertUserStrToAddress(adr)
 		adr = hex.EncodeToString(baddr)
+	} else if Utility.IsValidHexAddress(adr) {
+		// the address is good enough.
+	} else if Utility.IsValidNickname(adr) {
+		we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
+		
+		if we != nil {
+			we2 := we.(wallet.IWalletEntry)
+			addr, _ := we2.GetAddress()
+			adr = hex.EncodeToString(addr.Bytes())
+		} else {
+			return 0, fmt.Errorf("Name %s is undefined.",adr)
+		}
+	} else {
+		return 0, fmt.Errorf("Invalid Name.  Check that you have entered the name correctly.")
 	}
 
 	str := fmt.Sprintf("http://%s/v1/entry-credit-balance/%s", state.GetServer(), adr)
@@ -289,9 +280,9 @@ func (Balance) Execute(state IState, args []string) (err error) {
 	var bal int64
 	switch strings.ToLower(args[1]) {
 	case "ec":
-		bal, err = ECBalance(state, strings.ToLower(args[2]))
+		bal, err = ECBalance(state, args[2])
 	case "fct":
-		bal, err = FctBalance(state, strings.ToLower(args[2]))
+		bal, err = FctBalance(state, args[2])
 	default:
 		return fmt.Errorf("Invalid parameters")
 	}
