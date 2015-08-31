@@ -80,9 +80,7 @@ func GetRate(state IState) (int64, error) {
 }
 
 func FctBalance(state IState, adr string) (int64, error) {
-	
-	fmt.Println(adr)
-	
+		
 	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,"FA") {
 		baddr := fct.ConvertUserStrToAddress(adr)
 		adr = hex.EncodeToString(baddr)
