@@ -77,6 +77,7 @@ func NewState(filename string) IState {
 	s.ipaddressFD = "localhost:"
 	s.portNumberFD = "8088"
 
+	s.AddCommand(new(AddFee))
 	s.AddCommand(new(AddECOutput))
 	s.AddCommand(new(AddressFromWords))
 	s.AddCommand(new(AddInput))
