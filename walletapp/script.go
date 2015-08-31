@@ -51,7 +51,7 @@ func (Run) ShortHelp() string {
 
 func (Run) LongHelp() string {
 	return `
-Run <filename>                              -- Executes the script of the given filename
+Run <filename>                      Executes the script of the given filename
 `
 }
 

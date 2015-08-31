@@ -69,7 +69,7 @@ func (ImportKey) ShortHelp() string {
 
 func (ImportKey) LongHelp() string {
 	return `
-	ImportKey <name> <private key>     Create a new address name <addr> with the given <private key>
+ImportKey <name> <private key>      Create a new address name <addr> with the given <private key>
 `
 }
 

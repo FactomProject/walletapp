@@ -84,7 +84,7 @@ func (Import) ShortHelp() string {
 
 func (Import) LongHelp() string {
 	return `
-	Import <key> <filename>             Import the given transaction to the given filename.
+Import <key> <filename>             Import the given transaction to the given filename.
 `
 }
 
