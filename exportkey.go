@@ -63,14 +63,14 @@ func (ExportKey) Name() string {
 }
 
 func (ExportKey) ShortHelp() string {
-	return "ExportKey <name>  -- Prints the private and public keys tied to this name"
+	return "ExportKey <name>  -- Prints the private and public keys tied to this <name>"
 	
 }
 
 func (ExportKey) LongHelp() string {
 	return `
-	ExportKey <name>                   Prints the public and private keys tied to this name.
-	`
+ExportKey <name>                    Prints the public and private keys tied to this <name>.
+`
 }
 
 
