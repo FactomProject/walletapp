@@ -78,6 +78,7 @@ func NewState(filename string) IState {
 	s.portNumberFD = "8088"
 
 	s.AddCommand(new(AddECOutput))
+	s.AddCommand(new(AddressFromWords))
 	s.AddCommand(new(AddInput))
 	s.AddCommand(new(AddOutput))
 	s.AddCommand(new(Balance))

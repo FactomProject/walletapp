@@ -28,6 +28,10 @@ func (ImportKey) Execute(state IState, args []string) error {
 	name := args[1]
 	adr  := args[2]
 	
+	if err := ValidName(name); err != nil {
+		return err
+	}
+	
 	a := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(name))
 	if a != nil {
 		return fmt.Errorf("That address name is in use.  Specify a different name.")

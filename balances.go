@@ -24,6 +24,17 @@ import (
 var badChar, _ = regexp.Compile("[^A-Za-z0-9_]")
 var badHexChar, _ = regexp.Compile("[^A-Fa-f0-9]")
 
+
+func ValidName(name string) error {
+	if len(name) > 32 {
+		return fmt.Errorf("Name of address is too long")
+	}
+	if badChar.FindStringIndex(name) != nil {
+		return fmt.Errorf("Invalid name. Names must be alphanumeric or underscores")
+	}
+	return nil
+}
+
 func GenAddress(state IState, adrType string, key string) error {
 	switch strings.ToLower(adrType) {
 		case "ec":
@@ -326,11 +337,8 @@ func (NewAddress) Execute(state IState, args []string) (err error) {
 	if len(args) != 3 {
 		return fmt.Errorf("Incorrect Number of Arguments")
 	}
-	if len(args[2]) > 32 {
-		return fmt.Errorf("Name of address is too long")
-	}
-	if badChar.FindStringIndex(args[2]) != nil {
-		return fmt.Errorf("Invalid name. Names must be alphanumeric or underscores")
+	if err := ValidName(args[2]); err != nil {
+		return err
 	}
 	
 	return GenAddress(state, args[1],args[2])
