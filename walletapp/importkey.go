@@ -41,7 +41,7 @@ func (ImportKey) Execute(state IState, args []string) error {
 	fa := fct.ValidateFPrivateUserStr(adr) 
 	ec := fct.ValidateECPrivateUserStr(adr) 
 	b,err := hex.DecodeString(adr)
-	if len(b) != 32 {
+	if err == nil && len(b) != 32 {
 		err = fmt.Errorf("wrong length")
 	}
 	if fa || ec || err==nil {
