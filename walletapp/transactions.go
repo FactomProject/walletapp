@@ -95,7 +95,7 @@ func (AddInput) Execute(state IState, args []string) error {
 	if ib == nil || !ok {
 		return fmt.Errorf("Unknown Transaction")
 	}
-
+		
 	var addr fct.IAddress
 	if !fct.ValidateFUserStr(adr) {
 		if len(adr) != 64 {
@@ -113,11 +113,14 @@ func (AddInput) Execute(state IState, args []string) error {
 				return fmt.Errorf("Name is undefined.")
 			}
 		} else {
-			if badHexChar.FindStringIndex(adr) != nil {
-				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
+			badr,err := hex.DecodeString(adr)
+			if err != nil {
+				return fmt.Errorf("Invalid hex string: %s", err.Error())
 			}
+			addr = fct.NewAddress(badr)
 		}
 	} else {
+		fmt.Printf("adr: %x\n",adr)
 		addr = fct.NewAddress(fct.ConvertUserStrToAddress(adr))
 	}
 	amount, _ := fct.ConvertFixedPoint(amt)
