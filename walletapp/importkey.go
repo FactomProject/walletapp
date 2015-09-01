@@ -5,6 +5,7 @@ package main
 
 import (
 	"fmt"
+	"encoding/hex"
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/ed25519"
 )
@@ -39,8 +40,17 @@ func (ImportKey) Execute(state IState, args []string) error {
 	
 	fa := fct.ValidateFPrivateUserStr(adr) 
 	ec := fct.ValidateECPrivateUserStr(adr) 
-	if fa || ec {
-		privateKey := fct.ConvertUserStrToAddress(adr)
+	b,err := hex.DecodeString(adr)
+	if len(b) != 32 {
+		err = fmt.Errorf("wrong length")
+	}
+	if fa || ec || err==nil {
+		var privateKey []byte
+		if err != nil {
+			privateKey = fct.ConvertUserStrToAddress(adr)
+		}else{
+			privateKey = b
+		}
 		var fixed [64]byte
 		copy(fixed[:],privateKey)
 		publicKey := ed25519.GetPublicKey(&fixed)
