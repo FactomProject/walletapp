@@ -242,6 +242,34 @@ func HandleFactoidDeleteTransaction(ctx *web.Context, key string) {
 	reportResults(ctx, "Success deleting transaction", true)
 }
 
+func HandleProperties (ctx *web.Context){
+	prop,err := Wallet.GetProperties()
+	if err != nil {
+		reportResults(ctx, "Failed to retrieve properties",false)
+	}
+	
+	top := prop.Protocol_Version/1000000
+	mid := (prop.Protocol_Version%1000000)/1000
+	low := prop.Protocol_Version%1000
+	
+	ret :=      fmt.Sprintf("Protocol Version:   %d.%d.%d\n",top,mid,low)
+	
+	top  = prop.Factomd_Version/1000000
+	mid  = (prop.Factomd_Version%1000000)/1000
+	low  = prop.Factomd_Version%1000
+	
+	ret = ret+ fmt.Sprintf("factomd Version:    %d.%d.%d\n",top,mid,low)
+
+	top  = prop.Fctwallet_Version/1000000
+	mid  = (prop.Fctwallet_Version%1000000)/1000
+	low  = prop.Fctwallet_Version%1000
+	
+	ret = ret+ fmt.Sprintf("fctwallet Version:  %d.%d.%d\n",top,mid,low)
+
+	reportResults(ctx, ret, true)
+	
+}
+
 func HandleFactoidAddFee(ctx *web.Context, parms string) {
 	trans, key, _, address, _, ok := getParams_(ctx, parms, false)
 	if !ok {
