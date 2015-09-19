@@ -11,7 +11,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-
+	
+	"github.com/FactomProject/FactomCode/common"
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
 	"github.com/FactomProject/fctwallet/Wallet/Utility"
@@ -313,6 +314,27 @@ func GetFee() (int64, error) {
 	}
 
 	return b.Fee, nil
+}
+
+func GetProperties() (*common.Properties, error) {
+	str := fmt.Sprintf("http://%s/v1/properties/", ipaddressFD+portNumberFD)
+	resp, err := http.Get(str)
+	if err != nil {
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		resp.Body.Close()
+		return nil, err
+	}
+	resp.Body.Close()
+	
+	b := new(common.Properties)
+	if err := json.Unmarshal(body, b); err != nil {
+		return nil, err
+	}
+	b.Fctwallet_Version = Version
+	return b, nil
 }
 
 func GetAddresses() []wallet.IWalletEntry {
