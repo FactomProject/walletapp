@@ -216,11 +216,12 @@ func FactoidSignTransaction(key string) error {
 	}
 
 	valid, err := factoidState.GetWallet().SignInputs(trans)
+	if !valid {
+		return fmt.Errorf("Do not have all the private keys required to sign this transaction\n"+
+			err.Error())
+	}
 	if err != nil {
 		return err
-	}
-	if !valid {
-		return fmt.Errorf("Not all inputs are signed")
 	}
 	// Update our map with our new transaction to the same key.  Otherwise, all
 	// of our work will go away!
