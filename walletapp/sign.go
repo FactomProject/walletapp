@@ -61,18 +61,18 @@ func (Sign) ShortHelp() string {
 
 func (Sign) LongHelp() string {
 	return `
-	Sign <key>                          Signs the transaction specified by the given key.
-	Each input is found within the wallet, and if 
-	we have the private key for that input, we 
-	sign for that input.  
-	
-	Transctions can have inputs from multiple parties.
-	In this case, the inputs can be signed by each
-	party by first creating all the inputs and 
-	outputs for a transaction.  Then signing your
-	inputs.  Exporting the transaction.  Then
-	sending it to the other party or parties for
-	their signatures.
+Sign <key>                          Signs the transaction specified by the given key.
+                                    Each input is found within the wallet, and if 
+                                    we have the private key for that input, we 
+                                    sign for that input.  
+
+                                    Transctions can have inputs from multiple parties.
+                                    In this case, the inputs can be signed by each
+                                    party by first creating all the inputs and 
+                                    outputs for a transaction.  Then signing your
+                                    inputs.  Exporting the transaction.  Then
+                                    sending it to the other party or parties for
+                                    their signatures.
 	`
 }
 

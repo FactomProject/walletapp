@@ -14,30 +14,37 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
-
-func FactoidBalance(adr string) (int64, error) {
-	if !fct.ValidateFUserStr(adr) {
-		ok := Utility.IsValidKey(adr)
-		if !ok {
-			return 0, fmt.Errorf("Invalid name or address")
-		}
-
+func LookupAddress(adrType string, adr string) (string, error) {
+	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,adrType) {
+		baddr := fct.ConvertUserStrToAddress(adr)
+		adr = hex.EncodeToString(baddr)
+	} else if Utility.IsValidHexAddress(adr) {
+		// the address is good enough.
+	} else if Utility.IsValidNickname(adr) {
 		we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 		
 		if we != nil {
 			we2 := we.(wallet.IWalletEntry)
-			if we2.GetType() != "fct" {
-				return 0, fmt.Errorf("Cannot get a factoid balance on an Entry Credit Address")
-			}
 			addr, _ := we2.GetAddress()
 			adr = hex.EncodeToString(addr.Bytes())
+		} else {
+			return "", fmt.Errorf("Name %s is undefined.",adr)
 		}
-
 	} else {
-		baddr := fct.ConvertUserStrToAddress(adr)
-		adr = hex.EncodeToString(baddr)
+		return "", fmt.Errorf("Invalid Name.  Check that you have entered the name correctly.")
+	}
+	
+	return adr, nil
+}
+
+func FactoidBalance(adr string) (int64, error) {
+	
+	adr, err := LookupAddress("FA",adr)
+	if err != nil {
+		return 0, err
 	}
 
 	str := fmt.Sprintf("http://%s/v1/factoid-balance/%s", ipaddressFD+portNumberFD, adr)
@@ -71,30 +78,11 @@ func FactoidBalance(adr string) (int64, error) {
 
 func ECBalance(adr string) (int64, error) {
 
-	if !fct.ValidateECUserStr(adr) {
-		ok := Utility.IsValidKey(adr)
-		if !ok {
-			return 0, fmt.Errorf("Invalid name or address")
-		}
-
-		we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
-
-		if we != nil {
-			we2 := we.(wallet.IWalletEntry)
-			
-			if we2.GetType() != "ec" {
-				return 0, fmt.Errorf("Cannot get a an Entry Credit balance on a Factoid Address")
-			}
-			
-			addr, _ := we2.GetAddress()
-			adr = hex.EncodeToString(addr.Bytes())
-		}
-
-	} else {
-		baddr := fct.ConvertUserStrToAddress(adr)
-		adr = hex.EncodeToString(baddr)
+	adr, err := LookupAddress("EC",adr)
+	if err != nil {
+		return 0, err
 	}
-
+	
 	str := fmt.Sprintf("http://%s/v1/entry-credit-balance/%s", ipaddressFD+portNumberFD, adr)
 	resp, err := http.Get(str)
 	if err != nil {

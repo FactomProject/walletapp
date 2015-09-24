@@ -19,6 +19,7 @@ import (
 	"github.com/hoisie/web"
 
 	"github.com/FactomProject/fctwallet/Wallet"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 )
 
 /******************************************
@@ -149,6 +150,45 @@ func getParams_(ctx *web.Context, params string, ec bool) (
 /*************************************************************************
  * Handler Functions
  *************************************************************************/
+
+// Returns either an unbounded list of transactions, or the list of 
+// transactions that involve a given address.
+//
+func HandleGetProcessedTransactions(ctx*web.Context, parms string) {
+	cmd := ctx.Params["cmd"]
+	adr := ctx.Params["address"]
+	
+	if cmd == "all" {
+		list, err := Utility.DumpTransactions(nil)
+		if err != nil {
+			reportResults(ctx,err.Error(),false)
+			return
+		}
+		reportResults(ctx,string(list),true)
+	}else{
+		
+		adr, err := Wallet.LookupAddress("FA",adr)
+		if err != nil {
+			adr, err = Wallet.LookupAddress("EC",adr)
+			if err != nil {
+				reportResults(ctx,fmt.Sprintf("Could not understand address %s",adr),false)
+				return
+			}
+		}
+		badr,err := hex.DecodeString(adr)
+		
+		var adrs [][]byte
+		adrs = append(adrs,badr)
+		
+		list, err := Utility.DumpTransactions(adrs)
+		if err != nil {
+			reportResults(ctx,err.Error(),false)
+			return
+		}
+		reportResults(ctx,string(list),true)
+	}
+}
+
 
 // Setup:  seed --
 // Setup creates the 10 fountain Factoid Addresses, then sets address
@@ -343,7 +383,8 @@ func HandleFactoidAddOutput(ctx *web.Context, parms string) {
 
 	reportResults(ctx, "Success adding output", true)
 }
-
+		
+		
 func HandleFactoidAddECOutput(ctx *web.Context, parms string) {
 	trans, key, _, address, amount, ok := getParams_(ctx, parms, true)
 	if !ok {

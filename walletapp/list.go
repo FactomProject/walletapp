@@ -26,41 +26,36 @@ func (List) Execute(state IState, args []string) (err error) {
 		return fmt.Errorf("Nothing to list")
 	}
 	switch args[1] {
-		case "transactions" :
-			if len(args)==2 {
-				fmt.Println("Listing all transactions: ")
-				var list []byte
-				if list, err = Utility.DumpTransactions(nil); err != nil {
-					return err
-				}
-				fmt.Print(string(list))
-				break
-			}else{
-				var addresses [][]byte
-				var adr string
-				for i := 2; i < len(args); i++ {
-					adr, err = LookupAddress(state, "FA",args[i])
-					if err != nil {
-						adr, err = LookupAddress(state, "EC",args[i])
-						if err != nil {
-							return fmt.Errorf("Could not understand address %s",args[i])
-						}
-					}
-					badr,err := hex.DecodeString(adr)
+		case "all" :
+			fmt.Println("Listing all transactions: ")
+			var list []byte
+			if list, err = Utility.DumpTransactions(nil); err != nil {
+				return err
+			}
+			fmt.Print(string(list))
+			break
+		default:
+			var addresses [][]byte
+			var adr string
+			for i := 1; i < len(args); i++ {
+				adr, err = LookupAddress(state, "FA",args[i])
+				if err != nil {
+					adr, err = LookupAddress(state, "EC",args[i])
 					if err != nil {
 						return fmt.Errorf("Could not understand address %s",args[i])
 					}
-					addresses = append(addresses,badr)
 				}
-				var list []byte
-				if list, err = Utility.DumpTransactions(addresses); err != nil {
-					return err
+				badr,err := hex.DecodeString(adr)
+				if err != nil {
+					return fmt.Errorf("Could not understand address %s",args[i])
 				}
-				fmt.Print(string(list))
+				addresses = append(addresses,badr)
 			}
-				
-		default :
-			fmt.Printf("Don't understand '%s'",args[1])
+			var list []byte
+			if list, err = Utility.DumpTransactions(addresses); err != nil {
+				return err
+			}
+			fmt.Print(string(list))
 	}
 	return nil
 }
@@ -71,13 +66,17 @@ func (List) Execute(state IState, args []string) (err error) {
 }
 
 func (List) ShortHelp() string {
-	return "list transactions  -- prints all the factom transactions"
+	return "list [all|address]  -- [all] prints all transactions, while specifying\n"+
+	       "                       limits transactions to those that involve the given\n"+
+		   "                       address.  All address types supported."
 	
 }
 
 func (List) LongHelp() string {
 	return `
-list transactions                   Prints all the factom transactions to date
+list [all | address]                [all] prints all the factom transactions to date, while
+                                    address limits output to transactions that reference
+                                    the address.  All address types are supported.
 `
 }
 
