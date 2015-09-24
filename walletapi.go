@@ -139,7 +139,7 @@ func Start() {
 
 	// Get transactions
 	// localhost:8089/v1/factoid-get-addresses/
-	server.Get("/v1/factoid-get-transactions/", handlers.HandleGetTransactions)
+	server.Get("/v1/factoid-get-transactions/(.*)", handlers.HandleGetTransactions)
 
 	go server.Run(fmt.Sprintf("%s:%d", handlers.IpAddress, handlers.PortNumber))
 }
