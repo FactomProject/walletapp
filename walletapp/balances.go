@@ -79,25 +79,34 @@ func GetRate(state IState) (int64, error) {
 
 }
 
-func FctBalance(state IState, adr string) (int64, error) {
-		
-	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,"FA") {
+func LookupAddress(state IState, adrType string, adr string) (string, error) {
+	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,adrType) {
 		baddr := fct.ConvertUserStrToAddress(adr)
 		adr = hex.EncodeToString(baddr)
 	} else if Utility.IsValidHexAddress(adr) {
 		// the address is good enough.
 	} else if Utility.IsValidNickname(adr) {
 		we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
-
+		
 		if we != nil {
 			we2 := we.(wallet.IWalletEntry)
 			addr, _ := we2.GetAddress()
 			adr = hex.EncodeToString(addr.Bytes())
 		} else {
-			return 0, fmt.Errorf("Name %s is undefined.",adr)
+			return "", fmt.Errorf("Name %s is undefined.",adr)
 		}
 	} else {
-		return 0, fmt.Errorf("Invalid Name.  Check that you have entered the name correctly.")
+		return "", fmt.Errorf("Invalid Name.  Check that you have entered the name correctly.")
+	}
+	
+	return adr, nil
+}
+
+func FctBalance(state IState, adr string) (int64, error) {
+		
+	adr, err := LookupAddress(state, "FA",adr)
+	if err != nil {
+		return 0, err
 	}
 	
 	str := fmt.Sprintf("http://%s/v1/factoid-balance/%s", state.GetServer(), adr)
@@ -133,23 +142,9 @@ func FctBalance(state IState, adr string) (int64, error) {
 
 func ECBalance(state IState, adr string) (int64, error) {
 
-	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,"EC") {
-		baddr := fct.ConvertUserStrToAddress(adr)
-		adr = hex.EncodeToString(baddr)
-	} else if Utility.IsValidHexAddress(adr) {
-		// the address is good enough.
-	} else if Utility.IsValidNickname(adr) {
-		we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
-		
-		if we != nil {
-			we2 := we.(wallet.IWalletEntry)
-			addr, _ := we2.GetAddress()
-			adr = hex.EncodeToString(addr.Bytes())
-		} else {
-			return 0, fmt.Errorf("Name %s is undefined.",adr)
-		}
-	} else {
-		return 0, fmt.Errorf("Invalid Name.  Check that you have entered the name correctly.")
+	adr, err := LookupAddress(state, "EC",adr)
+	if err != nil {
+		return 0, err
 	}
 
 	str := fmt.Sprintf("http://%s/v1/entry-credit-balance/%s", state.GetServer(), adr)
