@@ -100,7 +100,7 @@ func (AddInput) Execute(state IState, args []string) error {
 	if !fct.ValidateFUserStr(adr) {
 		if len(adr) != 64 {
 			if len(adr) > 32 {
-				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
+				return fmt.Errorf("Invalid Name. Check the address or name for proper entry.", len(adr))
 			}
 
 			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
@@ -115,7 +115,7 @@ func (AddInput) Execute(state IState, args []string) error {
 		} else {
 			badr,err := hex.DecodeString(adr)
 			if err != nil {
-				return fmt.Errorf("Invalid hex string: %s", err.Error())
+				return fmt.Errorf("Looks like an Invalid hex address.  Check that you entered it correctly")
 			}
 			addr = fct.NewAddress(badr)
 		}
@@ -187,7 +187,7 @@ func (AddOutput) Execute(state IState, args []string) error {
 	if !fct.ValidateFUserStr(adr) {
 		if len(adr) != 64 {
 			if len(adr) > 32 {
-				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
+				return fmt.Errorf("Invalid Address or Name.  Check that you entered it correctly.")
 			}
 
 			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
@@ -201,7 +201,7 @@ func (AddOutput) Execute(state IState, args []string) error {
 			}
 		} else {
 			if badHexChar.FindStringIndex(adr) != nil {
-				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
+				return fmt.Errorf("Looks like an invalid Hex Address.  Check that you entered it correctly.")
 			}
 		}
 	} else {
@@ -271,7 +271,7 @@ func (AddECOutput) Execute(state IState, args []string) error {
 	if !fct.ValidateECUserStr(adr) {
 		if len(adr) != 64 {
 			if len(adr) > 32 {
-				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
+				return fmt.Errorf("Invalid Address or Name.  Check that you entered it correctly.")
 			}
 
 			we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
@@ -285,7 +285,7 @@ func (AddECOutput) Execute(state IState, args []string) error {
 			}
 		} else {
 			if badHexChar.FindStringIndex(adr) != nil {
-				return fmt.Errorf("Invalid Name.  Name is too long: %v characters", len(adr))
+				return fmt.Errorf("Looks like an invalid hex address. Check that you entered it correctly.")
 			}
 		}
 	} else {
