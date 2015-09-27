@@ -141,27 +141,65 @@ func DumpTransactions(addresses [][]byte) ([]byte, error) {
 	if err := refresh(); err != nil {
 		return nil, err
 	}
-	transcnt := 1
+	usertranscnt := 0
+	firstemptyblock := 0
+	coinbasetranscnt := 0
+	skippedblk := false
+	
 	for i,fb := range FactoidBlocks {
 		var out bytes.Buffer
-		wrt := false
-		if len(fb.GetTransactions()) > 1 {
+		
+		blkempty := true
+		out.WriteString(fmt.Sprintf("Block Height %d total transactions %d\n",i,len(fb.GetTransactions())))
+		for j, t := range fb.GetTransactions() {
 			
-			out.WriteString(fmt.Sprintf("Transactions at block height %d\n",i))
-			for j, t := range fb.GetTransactions() {
-				var _ = j
-				if j != 0 {
-					if filtertransaction(t,addresses) {
-						out.WriteString(fmt.Sprintf("Transaction %d\n",transcnt))
-						out.WriteString(fmt.Sprintf("%s\n",t.String()))
-						wrt = true
-					}
-					transcnt++
+			prtTrans := filtertransaction(t,addresses)
+			
+			if j != 0 {
+				usertranscnt++
+				if prtTrans {
+					out.WriteString(fmt.Sprintf("Transaction %d Block Height %d\n",usertranscnt,coinbasetranscnt))
+					blkempty = false
+				}
+			}else{
+				coinbasetranscnt++
+			}
+			if prtTrans {
+				if j==0 && len(t.GetOutputs()) == 0 {
+					out.WriteString("\nEmpty Coinbase Transaction\n\n")
+				}else if j==0 {
+					out.WriteString("\nCoinbase Transaction\n")
+					out.WriteString(fmt.Sprintf("%s\n",t.String()))
+				}else{
+					out.WriteString(fmt.Sprintf("%s\n",t.String()))
 				}
 			}
 		}
-		if wrt {
+		if !skippedblk && blkempty {
+			skippedblk = true
+			firstemptyblock = i
+		}
+		if blkempty {
+			skippedblk = true
+		}
+		if !blkempty && skippedblk {
+			if i-1 == firstemptyblock {
+				ret.WriteString(fmt.Sprintf("Skipped block %d",firstemptyblock))
+			}else{
+				ret.WriteString(fmt.Sprintf("Skipped blocks %d-%d\n\n",firstemptyblock,i-1))
+			}
+			skippedblk = false
+		}
+		if !blkempty {
 			ret.WriteString(out.String())
+		}
+	}
+	i := len(FactoidBlocks)-1
+	if skippedblk {
+		if i-1 == firstemptyblock {
+			ret.WriteString(fmt.Sprintf("Skipped block %d",firstemptyblock))
+		}else{
+			ret.WriteString(fmt.Sprintf("Skipped blocks %d-%d\n\n",firstemptyblock,i-1))
 		}
 	}
 	return ret.Bytes(), nil
