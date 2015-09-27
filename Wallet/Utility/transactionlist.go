@@ -158,7 +158,7 @@ func DumpTransactions(addresses [][]byte) ([]byte, error) {
 			if j != 0 {
 				usertranscnt++
 				if prtTrans {
-					out.WriteString(fmt.Sprintf("Transaction %d Block Height %d\n",usertranscnt,coinbasetranscnt))
+					out.WriteString(fmt.Sprintf("Transaction %d Block Height %d\n",usertranscnt,i))
 					blkempty = false
 				}
 			}else{
@@ -184,7 +184,7 @@ func DumpTransactions(addresses [][]byte) ([]byte, error) {
 		}
 		if !blkempty && skippedblk {
 			if i-1 == firstemptyblock {
-				ret.WriteString(fmt.Sprintf("Skipped block %d",firstemptyblock))
+				ret.WriteString(fmt.Sprintf("Skipped block %d\n\n",firstemptyblock))
 			}else{
 				ret.WriteString(fmt.Sprintf("Skipped blocks %d-%d\n\n",firstemptyblock,i-1))
 			}
@@ -196,10 +196,10 @@ func DumpTransactions(addresses [][]byte) ([]byte, error) {
 	}
 	i := len(FactoidBlocks)-1
 	if skippedblk {
-		if i-1 == firstemptyblock {
-			ret.WriteString(fmt.Sprintf("Skipped block %d",firstemptyblock))
+		if i == firstemptyblock {
+			ret.WriteString(fmt.Sprintf("Skipped block %d\n\n",firstemptyblock))
 		}else{
-			ret.WriteString(fmt.Sprintf("Skipped blocks %d-%d\n\n",firstemptyblock,i-1))
+			ret.WriteString(fmt.Sprintf("Skipped blocks %d-%d\n\n",firstemptyblock,i))
 		}
 	}
 	return ret.Bytes(), nil
