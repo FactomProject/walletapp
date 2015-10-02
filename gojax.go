@@ -50,7 +50,7 @@ package main
  		        check(err, false)
  		        w.Write([]byte("Factoid Address " + ajax_post_data + " Balance: " + strings.Trim(factoid.ConvertDecimal(uint64(printBal)), " ") + " ƒ"))
  		    case "balances":
- 		        printBal := GetBalances(factoidState)
+ 		        printBal := "Hi!"
  		        w.Write(printBal)
  		    case "addNewTx":
      		 	err := Wallet.FactoidNewTransaction(ajax_post_data)
@@ -70,9 +70,9 @@ package main
  	}
  }
 
- func main() {
+ func startServer() {
  	// http.Handler
- 	chttp.Handle("/", http.FileServer(http.Dir("./")))
+ 	chttp.Handle("/", http.FileServer(http.Dir("./extra/")))
 
  	mux := http.NewServeMux()
  	mux.HandleFunc("/", Home)
