@@ -12,6 +12,7 @@ package main
  )
 
  var chttp = http.NewServeMux()
+ var myState IState
  
  func check(e error, shouldEnd bool) {
     if e != nil {
@@ -50,7 +51,7 @@ package main
  		        check(err, false)
  		        w.Write([]byte("Factoid Address " + ajax_post_data + " Balance: " + strings.Trim(factoid.ConvertDecimal(uint64(printBal)), " ") + " ƒ"))
  		    case "balances":
- 		        printBal := []byte("Hi!")
+ 		        printBal := GetBalances(myState)
  		        w.Write(printBal)
  		    case "addNewTx":
      		 	err := Wallet.FactoidNewTransaction(ajax_post_data)
@@ -64,16 +65,16 @@ package main
      	}
  		//©
  	} else {
- 	    helpText, err := ioutil.ReadFile("help.txt")
+ 	    helpText, err := ioutil.ReadFile("./extra/help.txt")
         check(err, false)
         w.Write([]byte(helpText))
  	}
  }
 
- func startServer() {
+ func startServer(state IState) {
  	// http.Handler
+ 	myState = state
  	chttp.Handle("/", http.FileServer(http.Dir("./extra/")))
-	fmt.Println("Server starting")
  	mux := http.NewServeMux()
  	mux.HandleFunc("/", Home)
  	mux.HandleFunc("/receive", receiveAjax)

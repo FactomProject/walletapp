@@ -21,7 +21,7 @@ var _ = time.Now
 
 func main() {
 	state := NewState("wallet_app_bolt.db")
-        startServer()
+    go startServer(state)
 	run(state, os.Stdin,true)
 }
 	
