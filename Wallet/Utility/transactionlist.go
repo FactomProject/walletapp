@@ -12,6 +12,7 @@ import (
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factom"
 	"github.com/FactomProject/FactomCode/common"
+	"encoding/json"
 )
 
 /************************************************
@@ -116,6 +117,11 @@ func filtertransaction(trans fct.ITransaction, addresses [][]byte) bool {
 	if addresses == nil || len(addresses)==0 {
 		return true
 	}
+	if len(trans.GetInputs()) == 0 &&
+	   len(trans.GetOutputs())== 0 { 
+		   return false
+	}
+	
 	for _,adr := range addresses {
 		for _,in := range trans.GetInputs() {
 			if bytes.Equal(adr,in.GetAddress().Bytes()) {
@@ -135,6 +141,29 @@ func filtertransaction(trans fct.ITransaction, addresses [][]byte) bool {
 	}
 	return false
 }
+
+func DumpTransactionsJSON(addresses [][]byte) ([]byte, error) {
+	if err := refresh(); err != nil {
+		return nil, err
+	}
+
+	var transactions []fct.ITransaction
+	
+	for i,fb := range FactoidBlocks {
+		for _, t := range fb.GetTransactions() {
+			t.SetBlockHeight(i)
+			prtTrans := filtertransaction(t,addresses)
+			if prtTrans {
+				transactions = append(transactions, t)
+			}
+		}
+	}
+	
+	ret,err := json.Marshal(transactions)
+	
+	return ret,err
+}
+
 
 func DumpTransactions(addresses [][]byte) ([]byte, error) {
 	var ret bytes.Buffer

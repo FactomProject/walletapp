@@ -91,6 +91,7 @@ func NewState(filename string) IState {
 	s.AddCommand(new(Import))
 	s.AddCommand(new(ImportKey))
 	s.AddCommand(new(List))
+	s.AddCommand(new(Listj))
 	s.AddCommand(new(NewAddress))
 	s.AddCommand(new(NewTransaction))
 	s.AddCommand(new(Print))
