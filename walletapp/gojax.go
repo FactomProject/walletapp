@@ -53,6 +53,20 @@ package main
  		    case "balances":
  		        printBal := GetBalances(myState)
  		        w.Write(printBal)
+  		    case "allTxs":
+ 		        txNames, actualTxs, err := Wallet.GetTransactions()
+ 		        if err != nil {
+ 		            return
+ 		        }
+ 		        sliceTxNames := []byte("Here are all txs")
+ 		        actualTxDets := []byte("Here are all tx details")
+ 		        for i:= range txNames {
+ 		            sliceTxNames = append(sliceTxNames, txNames[i]...)
+ 		            actualTxDets = append(actualTxDets, actualTxs[i]...)
+ 		            fmt.Println(sliceTxNames)
+ 		             		            fmt.Println(actualTxDets)
+ 		        }
+ 		        w.Write(sliceTxNames)
  		    case "addNewTx":
      		 	err := Wallet.FactoidNewTransaction(ajax_post_data)
      		 	if err != nil {
@@ -61,7 +75,7 @@ package main
      		 	    }
      		 	    return
      		 	}
-     		 	w.Write([]byte("Created tx " + ajax_post_data))
+     		 	w.Write([]byte(ajax_post_data))
      	}
  		//©
  	} else {
