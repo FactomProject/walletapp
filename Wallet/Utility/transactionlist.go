@@ -153,6 +153,15 @@ func DumpTransactionsJSON(addresses [][]byte) ([]byte, error) {
 		for _, t := range fb.GetTransactions() {
 			t.SetBlockHeight(i)
 			t.GetSigHash()
+			for _,input := range t.GetInputs() {
+				input.SetUserAddress(fct.ConvertFctAddressToUserStr(input.GetAddress()))
+			}
+			for _,output := range t.GetOutputs() {
+				output.SetUserAddress(fct.ConvertFctAddressToUserStr(output.GetAddress()))
+			}
+			for _,ecoutput := range t.GetECOutputs() {
+				ecoutput.SetUserAddress(fct.ConvertECAddressToUserStr(ecoutput.GetAddress()))
+			}
 			prtTrans := filtertransaction(t,addresses)
 			if prtTrans {
 				transactions = append(transactions, t)
