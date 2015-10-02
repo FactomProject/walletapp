@@ -124,6 +124,19 @@ func getParams_(ctx *web.Context, params string, ec bool) (
 		we := Wallet.GetRaw([]byte(fct.W_NAME), []byte(name))
 		if we != nil {
 			address, err = we.(wallet.IWalletEntry).GetAddress()
+			if we.(wallet.IWalletEntry).GetType() == "ec" {
+				if !ec {
+					reportResults(ctx,"Was Expecting a Factoid Address",false)
+					ok = false
+					return
+				}
+			}else{
+				if ec {
+					reportResults(ctx,"Was Expecting an Entry Credit Address",false)
+					ok = false
+					return
+				}	
+			}
 			if err != nil || address == nil {
 				reportResults(ctx, "Should not get an error geting a address from a Wallet Entry", false)
 				ok = false
