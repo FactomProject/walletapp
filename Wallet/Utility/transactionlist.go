@@ -152,6 +152,7 @@ func DumpTransactionsJSON(addresses [][]byte) ([]byte, error) {
 	for i,fb := range FactoidBlocks {
 		for _, t := range fb.GetTransactions() {
 			t.SetBlockHeight(i)
+			t.GetSigHash()
 			prtTrans := filtertransaction(t,addresses)
 			if prtTrans {
 				transactions = append(transactions, t)
