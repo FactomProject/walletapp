@@ -121,25 +121,31 @@ func filtertransaction(trans fct.ITransaction, addresses [][]byte) bool {
 	   len(trans.GetOutputs())== 0 { 
 		   return false
 	}
+
+	if len(addresses)==1  && bytes.Equal(addresses[0],trans.GetSigHash().Bytes()) {
+		return true
+	}
 	
-	for _,adr := range addresses {
+	Search: for _,adr := range addresses {
+		
 		for _,in := range trans.GetInputs() {
 			if bytes.Equal(adr,in.GetAddress().Bytes()) {
-				return true
+				continue Search
 			}
 		}
 		for _,out := range trans.GetOutputs() {
 			if bytes.Equal(adr,out.GetAddress().Bytes()) {
-				return true
+				continue Search
 			}
 		}
 		for _,ec := range trans.GetECOutputs() {
 			if bytes.Equal(adr,ec.GetAddress().Bytes()) {
-				return true
+				continue Search
 			}
 		}
+		return false
 	}
-	return false
+	return true
 }
 
 func DumpTransactionsJSON(addresses [][]byte) ([]byte, error) {

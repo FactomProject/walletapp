@@ -87,6 +87,7 @@ func NewState(filename string) IState {
 	s.AddCommand(new(Export))
 	s.AddCommand(new(ExportKey))
 	s.AddCommand(new(Exit))
+	s.AddCommand(new(Height))
 	s.AddCommand(new(Help))
 	s.AddCommand(new(Import))
 	s.AddCommand(new(ImportKey))
