@@ -185,7 +185,7 @@ func TotalFactoids() (uint64, error){
 		return 0,err
 	}
 	var total uint64
-	for i,fb := range FactoidBlocks {
+	for _,fb := range FactoidBlocks {
 		for _,t := range fb.GetTransactions() {
 			for _,input := range t.GetInputs() {
 				amt := input.GetAmount()
