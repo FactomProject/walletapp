@@ -180,6 +180,43 @@ func DumpTransactionsJSON(addresses [][]byte) ([]byte, error) {
 	return ret,err
 }
 
+func TotalFactoids() (uint64, error){
+	if err := refresh(); err != nil {
+		return 0,err
+	}
+	var total uint64
+	for i,fb := range FactoidBlocks {
+		for _,t := range fb.GetTransactions() {
+			for _,input := range t.GetInputs() {
+				amt := input.GetAmount()
+				total -= amt
+			}
+			for _,output := range t.GetOutputs() {
+				amt := output.GetAmount()
+				total += amt
+			}
+		}
+	}
+	return total, nil
+}
+
+func TotalEntryCredits() (uint64, error){
+	if err := refresh(); err != nil {
+		return 0,err
+	}
+	var total uint64
+	for _,fb := range FactoidBlocks {
+		for _,t := range fb.GetTransactions() {
+			for _,ecoutput := range t.GetECOutputs() {
+				amt := ecoutput.GetAmount()/fb.GetExchRate()
+				total += amt
+			}
+		}
+	}
+	return total, nil
+}
+
+
 
 func DumpTransactions(addresses [][]byte) ([]byte, error) {
 	var ret bytes.Buffer
