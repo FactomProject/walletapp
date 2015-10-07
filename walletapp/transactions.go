@@ -93,11 +93,7 @@ func (AddInput) Execute(state IState, args []string) error {
 	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	trans, ok := ib.(fct.ITransaction)
 	if ib == nil || !ok {
-<<<<<<< HEAD
 		return fmt.Errorf("Unknown Transaction: " + key)
-=======
-		return fmt.Errorf("Unknown Transaction")
->>>>>>> 0c1aca35c0b5a6414d0243dc2b486561825a17b1
 	}
 		
 	var addr fct.IAddress

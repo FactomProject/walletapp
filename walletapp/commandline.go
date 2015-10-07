@@ -12,10 +12,7 @@ import (
 	"os"
 	"strings"
 	"time"
-<<<<<<< HEAD
 	"github.com/toqueteos/webbrowser"
-=======
->>>>>>> 0c1aca35c0b5a6414d0243dc2b486561825a17b1
 	// "golang.org/x/crypto/ssh/terminal"
 )
 
@@ -25,11 +22,8 @@ var _ = time.Now
 
 func main() {
 	state := NewState("wallet_app_bolt.db")
-    go startServer(state)
-<<<<<<< HEAD
-    webbrowser.Open("http://localhost:2337")
-=======
->>>>>>> 0c1aca35c0b5a6414d0243dc2b486561825a17b1
+        go startServer(state)
+        webbrowser.Open("http://localhost:2337")
 	run(state, os.Stdin,true)
 }
 	
