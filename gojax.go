@@ -194,6 +194,10 @@ package main
                     w.Write(buffer.Bytes())
                 case "save":
                     fileToSaveTo := r.FormValue("fileName")
+                    if len(fileToSaveTo) < 1 {
+                        w.Write([]byte("Filename cannot be empty!"))
+                        return
+                    }
                     saveFeedString := []string{"Export", string(txKey), string(fileToSaveTo)}    
                     saveErr := myState.Execute(saveFeedString)
                     if saveErr != nil {
@@ -207,21 +211,24 @@ package main
                 case"send":
                     testPrintTx := []string{"Print", string(txKey)}   
 
-                    oneTestErr := myState.Execute(testPrintTx)
-                    if oneTestErr != nil {
-                        fmt.Println(oneTestErr)
+                    printErr := myState.Execute(testPrintTx)
+                    if printErr != nil {
+                         w.Write([]byte(printErr.Error()))
+                         return
                     }      
                     
-                    testSignFeed := []string{"Sign", string(txKey)}    
-                    quadrupleTestErr := myState.Execute(testSignFeed)
-                    if quadrupleTestErr != nil {
-                        fmt.Println(quadrupleTestErr)
+                    signFeedString := []string{"Sign", string(txKey)}    
+                    signErr := myState.Execute(signFeedString)
+                    if signErr != nil {
+                        w.Write([]byte(signErr.Error()))
+                        return
                     }
 
-                    testSubmitFeed := []string{"Submit", string(txKey)}    
-                    fiveTestErr := myState.Execute(testSubmitFeed)
-                    if fiveTestErr != nil {
-                        fmt.Println(fiveTestErr)
+                    submitFeedString := []string{"Submit", string(txKey)}    
+                    submitErr := myState.Execute(submitFeedString)
+                    if submitErr != nil {
+                        w.Write([]byte(submitErr.Error()))
+                        return
                     }
                        
                     buffer.WriteString("\n\nTransaction ")
