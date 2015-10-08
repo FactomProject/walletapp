@@ -253,26 +253,21 @@
         color: white; 
         background-color: transparent;
     }
-    #help-button, #addi-button, #addo-button, #refresh-button, #new-button, #view-button, #balances-button, #send-button, #save-button {
+    button {
         background-color: Transparent;
         border: none;
         outline:none;
         cursor:pointer;
+        color: white;
     }
-    .add-button  {
-        background-color: Transparent;
-        border: none;
-        outline:none;
-        cursor:pointer;
+    button img {
+        display: block;
+        height: 30px;  
+        width: 30px;
     }
     #inTotalInput, #outTotalInput {
         background-color: Transparent;
         color: white;
-    }
-    #help-button img, #addi-button img, #addo-button img, #refresh-button img, #new-button img, #view-button img, #balances-button img, #send-button img, #save-button img {
-        display: block;
-        height: 30px;  
-        width: 30px;
     }
     #container { width: 99%; height: 10%; margin-left: 5px; margin:auto; }
     #bottomButtons {
@@ -384,11 +379,12 @@
                     <br><br><br><br><br><br><label id="goodFee" style="font-size: 40px;"></label>
                     <br><br><br><br>Export<br> Transaction<br>
                     <button type="submit" id="save-button" class="save-button" title="Save Transaction" onclick="saveTx()"><img src="./images/white-save.png"></button> 
+
                 </div>
             </div>
 
         </div>
-                   <div id="addressButtons"><input type="button" id="addFactoidButton" onclick="newFCTAddress()" value="+Factoid Address"> <input type="button" id="addECButton" onclick="newECAddress()" value="+Entry Credit Address"> 
+                    <div id="addressButtons"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎  <button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC <button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importPK()"><img src="./images/key.png"></button> <button type="submit" id="seed-button" class="seed-button" title="Generate From Seed" onclick="seedWallet()"><img src="./images/white-seed.png"></button> 
                     </div>
     </div>
 
@@ -653,6 +649,16 @@
           
           var saveTx = function() {
                 buildTxFromPage("save");
+          };
+          
+          var seedWallet = function() {
+                var inputSeed = prompt("What is your wallet seed?");
+                console.log(inputSeed);
+          };
+
+          var importPK = function() {
+                var privateKey = prompt("What is the private key you would like to import?");
+                console.log(privateKey);
           };
 </script>
 </html>
