@@ -117,11 +117,12 @@ package main
    		actionToDo := r.FormValue("action")
    		
         execStrings := []string{"NewTransaction", txKey}
-        newErr := myState.Execute(execStrings)
-        if newErr != nil {
-            myR := FactoidDeleteTx(txKey)
-            if myR != nil {
-                fmt.Println(myR)
+        newTXErr := myState.Execute(execStrings)
+        if newTXErr != nil {
+            deleteErr := FactoidDeleteTx(txKey)
+            if deleteErr != nil {
+                w.Write([]byte(deleteErr.Error()))
+                return
             }
         } 
         
@@ -135,7 +136,8 @@ package main
             var inRes []inputList
             err := json.Unmarshal([]byte(inputStr), &inRes)
 	        if err != nil {
-		        fmt.Println("error:", err)
+		        w.Write([]byte("Error: " + err.Error()))
+		        return
 	        }
 	        
             
@@ -143,40 +145,42 @@ package main
             var outRes []outputList
             json.Unmarshal([]byte(outputStr), &outRes)
             
-            var testInputFeed []string
-            var testOutputFeed []string
+            var inputFeed []string
+            var outputFeed []string
             totalInputs := 0.0
             totalOutputs := 0.0
             
             for _, inputElement := range(inRes) {
-                testInputFeed = []string{"AddInput", string(txKey), string(inputElement.InputAddress), strconv.FormatFloat(inputElement.InputSize, 'f', -1, 64)}
+                inputFeed = []string{"AddInput", string(txKey), string(inputElement.InputAddress), strconv.FormatFloat(inputElement.InputSize, 'f', -1, 64)}
                 totalInputs += inputElement.InputSize
-                doubleTestErr := myState.Execute(testInputFeed)
-                if doubleTestErr != nil {
-                    fmt.Println(doubleTestErr)
+                inputFeedErr := myState.Execute(inputFeed)
+                if inputFeedErr != nil {
+                    w.Write([]byte(inputFeedErr.Error() + " (INPUTS)"))
+                    return
                 }
                 
                 buffer.WriteString("\tInput: " + inputElement.InputAddress + " : " + strconv.FormatFloat(inputElement.InputSize, 'f', -1, 64) + "\n")
             }
             
-            myTest := []string{"Print", string(txKey)}   
-                    myTestErr := myState.Execute(myTest)
-                    if myTestErr != nil {
-                        fmt.Println(myTestErr)
+            /*printTest := []string{"Print", string(txKey)}   
+                    printTestErr := myState.Execute(printTest)
+                    if printTestErr != nil {
+                        w.Write([]byte(printTestErr.Error()))
                     }    
-            
+            */
             
             for _, outputElement := range(outRes) {
                 totalOutputs += outputElement.OutputSize
                 if outputElement.OutputType == "fct" {
-                    testOutputFeed = []string{"AddOutput", string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64)}
+                    outputFeed = []string{"AddOutput", string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64)}
                 } else {
-                    testOutputFeed = []string{"AddECOutput", string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64)}
+                    outputFeed = []string{"AddECOutput", string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64)}
                 }
                 
-                tripleTestErr := myState.Execute(testOutputFeed)
-                if tripleTestErr != nil {
-                    fmt.Println(tripleTestErr)
+                outputFeedErr := myState.Execute(outputFeed)
+                if outputFeedErr != nil {
+                    w.Write([]byte(outputFeedErr.Error() + " (OUTPUTS)"))
+                    return
                 }   
                 
                 buffer.WriteString("\tOutput: " + outputElement.OutputAddress + " : " + strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64) + " (" + outputElement.OutputType + 
@@ -191,6 +195,11 @@ package main
       	        case "fee":
                     w.Write(showFee(txKey))
                 case "print":
+                    printTest := []string{"Print", string(txKey)}   
+                    printTestErr := myState.Execute(printTest)
+                    if printTestErr != nil {
+                        w.Write([]byte(printTestErr.Error()))
+                    }
                     w.Write(buffer.Bytes())
                 case "save":
                     fileToSaveTo := r.FormValue("fileName")
@@ -287,7 +296,7 @@ package main
  		        }
  		        w.Write(sliceTxNames)
  		    case "addNewAddress":
- 		        if ajax_post_data != "" {
+ 		        if len(ajax_post_data) > 0 {
      		        genErr := GenAddress(myState, "fct", ajax_post_data)
      		        if genErr != nil {
  		                w.Write([]byte(genErr.Error()))
@@ -296,13 +305,28 @@ package main
      		        w.Write([]byte(ajax_post_data + " has been added to your wallet successfully."));
                 }
  		    case "addNewEC":
- 		        if ajax_post_data != "" {
+ 		        if len(ajax_post_data) > 0 {
      		        genErr := GenAddress(myState, "ec", ajax_post_data)
      		        if genErr != nil {
  		                w.Write([]byte(genErr.Error()))
      		            return
      		        }
      		        w.Write([]byte(ajax_post_data + " has been added to your wallet successfully."));
+     		    }
+     		case "importPrivKey":
+     		    addressName := r.FormValue("addressName")
+ 		        if len(ajax_post_data) > 0 && len(addressName) > 0 {
+
+                    importFeedString := []string{"ImportKey", string(addressName), string(ajax_post_data)}    
+                    importErr := myState.Execute(importFeedString)
+                    if importErr != nil {
+                        w.Write([]byte(importErr.Error()))
+                        return
+                    }
+
+     		        w.Write([]byte("The contents of the private key have been added to " + addressName + " successfully!"));
+     		    } else {
+     		        w.Write([]byte("You must include a non-empty private key and name for the address to import it into."));
      		    }
  		    /*
  		    case "addNewTx":
@@ -318,7 +342,6 @@ package main
 
              	w.Write([]byte(ajax_post_data))*/
         }
- 		//©
  	} else {
  	    helpText, err := ioutil.ReadFile("./extra/help.txt")
         check(err, false)

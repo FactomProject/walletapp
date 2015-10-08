@@ -102,7 +102,7 @@ Sign <key>                          Signs the transaction specified by the given
                                     we have the private key for that input, we 
                                     sign for that input.  
 
-                                    Transctions can have inputs from multiple parties.
+                                    Transactions can have inputs from multiple parties.
                                     In this case, the inputs can be signed by each
                                     party by first creating all the inputs and 
                                     outputs for a transaction.  Then signing your
