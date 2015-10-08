@@ -61,7 +61,6 @@
                            data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: performAction, fileName: fileToSaveTo },
                            success : function(data) {
                                  if(performAction === "fee") {
-                                    //console.log("DDD" + data);
                                      if(data === '' || typeof(data) === 'undefined') {
                                          $('#reqdFee').val("...");
                                      } else {
@@ -85,7 +84,6 @@
                            data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: performAction },
                            success : function(data) {
                                  if(performAction === "fee") {
-                                    //console.log("DDD" + data);
                                      if(data === '' || typeof(data) === 'undefined') {
                                          $('#reqdFee').val("...");
                                      } else {
@@ -199,6 +197,24 @@
                      });
         
           };
+
+          
+          var importFromPK = function () {
+                var privateKey = prompt("What is the private key you would like to import?");
+                var addName = prompt("Please enter a name for the new address this will import into.");
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "importPrivKey", ajax_post_data: privateKey, addressName: addName },
+                       success : function(data) {
+                             if(data != '') {
+                                 $("#txtBox").text(data);
+                             }
+                       },
+                     });
+        
+          };
               /*            
           var addNewTx = function () {
                 var newTxName = prompt("Please enter the name of the new transaction")
@@ -240,6 +256,7 @@
 <style type="text/css">
     html, body {
         background-image:url('images/bg.png');
+        /*background-color:#1e2884;*/
         color:white;
         margin: 0;
         padding: 0;
@@ -329,7 +346,7 @@
                             <td><button title="Delete Output" class="btnDelete">✖</button></td>
                          </tr> 
                          <tr>
-                            <td align="center"><form id="outTypeForm"><input type="radio" name="outType" value="fct" checked>⨎<input type="radio" name="outType" value="ec">EC</form>
+                            <td align="center"><form id="outTypeForm"><input type="radio" name="outType" class="addresstype" value="fct" checked>⨎<input type="radio" name="outType" class="addresstype" value="ec">EC</form>
                             </td>
                             <td></td>
                             <td></td>
@@ -384,7 +401,7 @@
             </div>
 
         </div>
-                    <div id="addressButtons"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎  <button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC <button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importPK()"><img src="./images/key.png"></button> <button type="submit" id="seed-button" class="seed-button" title="Generate From Seed" onclick="seedWallet()"><img src="./images/white-seed.png"></button> 
+                    <div id="addressButtons"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎  <button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC <button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button>
                     </div>
     </div>
 
@@ -451,6 +468,9 @@
             
             function ensureFeeRefresh() {
                 $( ".qty" ).change(function() {
+                    refreshFee();
+                });
+                $( ".addresstype" ).change(function() {
                     refreshFee();
                 });
             }
@@ -555,7 +575,8 @@
                 updateFeeLabel();
                 var reqFee = parseFloat($('#reqdFee').val());
                 var currFee = parseFloat($('#feeLabel').text());
-                if(currFee >= reqFee) {
+                //console.log("REQ : " + reqFee);
+                if(currFee >= reqFee && !isNaN(reqFee)) {
                     $('#goodFee').css("color", "green");
                     $('#goodFee').text("✔");
                 } else {
@@ -656,9 +677,6 @@
                 console.log(inputSeed);
           };
 
-          var importPK = function() {
-                var privateKey = prompt("What is the private key you would like to import?");
-                console.log(privateKey);
-          };
+
 </script>
 </html>
