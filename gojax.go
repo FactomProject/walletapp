@@ -86,11 +86,36 @@ package main
 	    }
 			
  }
+
+ func showFee(txKey string) []byte {
+        
+        ib := myState.GetFS().GetDB().GetRaw([]byte(factoid.DB_BUILD_TRANS), []byte(txKey))
+		trans, ok := ib.(factoid.ITransaction)
+		if ib != nil && ok {
+			
+			
+			v, err := GetRate(myState)
+			if err != nil {
+				fmt.Println(err)
+	            return []byte("...")
+			}
+			fee, err := trans.CalculateFee(uint64(v))
+			if err != nil {
+				fmt.Println(err)
+	            return []byte("...")
+			}
+			return []byte(strings.TrimSpace(factoid.ConvertDecimal(fee)))
+	    } else {
+	        return []byte("...")
+	    }
+			
+ }
  
  
  func craftTx(w http.ResponseWriter, r *http.Request) {
    		txKey := r.FormValue("key")
-
+   		actionToDo := r.FormValue("action")
+   		
         execStrings := []string{"NewTransaction", txKey}
         newErr := myState.Execute(execStrings)
         if newErr != nil {
@@ -162,10 +187,24 @@ package main
       	    buffer.WriteString("\n\tFee: " + strconv.FormatFloat(currFee, 'f', -1, 64))
 
                                    
-      	    if r.Method == "GET" {
+      	    switch actionToDo {
+      	        case "fee":
+                    w.Write(showFee(txKey))
+                case "print":
                     w.Write(buffer.Bytes())
-            } else { //r.Method == "POST"
-            
+                case "save":
+                    fileToSaveTo := r.FormValue("fileName")
+                    saveFeedString := []string{"Export", string(txKey), string(fileToSaveTo)}    
+                    saveErr := myState.Execute(saveFeedString)
+                    if saveErr != nil {
+                        fmt.Println(saveErr)
+                    }
+                    buffer.WriteString("\n\nTransaction ")
+                    buffer.WriteString(txKey)
+                    buffer.WriteString(" has been saved to ./")
+                    buffer.WriteString(string(fileToSaveTo))
+                    w.Write(buffer.Bytes())
+                case"send":
                     testPrintTx := []string{"Print", string(txKey)}   
 
                     oneTestErr := myState.Execute(testPrintTx)
