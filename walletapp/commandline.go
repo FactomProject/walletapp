@@ -12,7 +12,6 @@ import (
 	"os"
 	"strings"
 	"time"
-	"github.com/toqueteos/webbrowser"
 	// "golang.org/x/crypto/ssh/terminal"
 )
 
@@ -21,10 +20,10 @@ var _ fct.Transaction
 var _ = time.Now
 
 func main() {
-	state := NewState("wallet_app_bolt.db")
+	    state := NewState("wallet_app_bolt.db")
         go startServer(state)
-        webbrowser.Open("http://localhost:2337")
-	run(state, os.Stdin,true)
+        Open("http://localhost:2337")
+	    run(state, os.Stdin,true)
 }
 	
 var fsprompt string = "===============> "	
