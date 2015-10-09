@@ -77,6 +77,12 @@
                          });
                      }  else {          
 
+                        if(performAction === "send") {
+                            if(!balanceCheck()) {
+                                  $('#txtBox').text("Transaction imbalanced (the fee is much higher than it should be)!\n\nPlease make sure that you're using the majority of your inputs.");
+                                  return
+                            }
+                         }
                          $.ajax({
                            url: 'tx',
                            type: 'get',
@@ -101,28 +107,42 @@
                      }  
                   };
                   
-                  
+          var balanceCheck = function() {
+                refreshFee();
+                var reqFee = parseFloat($('#reqdFee').val());
+                var currFee = parseFloat($('#feeLabel').text());
+                if(!isNaN(reqFee)) {
+                    if(currFee <= (reqFee*10)) {
+                            return true;
+                      } else {
+                            return false;
+                      }
+                } else {
+                    return false;
+                }
+          };
                   
           var submitTx = function (txInputs, txOutputs) {
-                     var txKey = $("#transactionNameInput").val(); 
-                     if(!txKey || txKey.length < 1) {
-                        txKey = "UITX"
-                        $("#transactionNameInput").val(txKey)
-                     }
-                         $.ajax({
-                           url: 'tx',
-                           type: 'post',
-                           dataType: 'html',
-                           data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: "send" },
-                           success : function(data) {
-                                 if(data === '' || typeof(data) === 'undefined') {
-                                     $('#txtBox').text("Transaction invalid");
-                                 } else {
-                                     $('#txtBox').text(data);
-                                 }
-                           },
-                         });
-                  };
+                 var txKey = $("#transactionNameInput").val(); 
+                 if(!txKey || txKey.length < 1) {
+                    txKey = "UITX"
+                    $("#transactionNameInput").val(txKey)
+                 }
+                     $.ajax({
+                       url: 'tx',
+                       type: 'get',
+                       dataType: 'html',
+                       data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: "send" },
+                       success : function(data) {
+                             if(data === '' || typeof(data) === 'undefined') {
+                                 $('#txtBox').text("Transaction invalid");
+                             } else {
+                                 $('#txtBox').text(data);
+                             }
+                       },
+                     });
+
+          };
                   
                           
           var updateFeeLabel = function () {
@@ -484,21 +504,6 @@
                 }
                 return -1;
             }
-
-
-            function onlyNumbers(evt) {
-                // SOME OPTIONS LIKE ENTER, BACKSPACE, HOME, END, ARROWS, ETC.
-                var arrayExceptions = [8, 13, 16, 17, 18, 20, 27, 35, 36, 37,
-                    38, 39, 40, 45, 46, 144, 190];
-                if ((evt.keyCode < 48 || evt.keyCode > 57) &&
-                        (evt.keyCode < 96 || evt.keyCode > 106) && // NUMPAD
-                          inArray(evt.keyCode, arrayExceptions) === -1) {
-                    return false;
-                }
-            }
-            
-            //document.getElementById('inputQuantity').onkeydown = onlyNumbers;
-            //document.getElementById('outputQuantity').onkeydown = onlyNumbers;
             
             function ensureFeeRefresh() {
                 $( ".qty" ).change(function() {
