@@ -146,6 +146,29 @@
           var getBalances = function () {
                  sendPost("balances", '', "#txtBox", "NO BALANCES TO DISPLAY!");
           };
+
+          var loadTxFromFile = function (fileName) {
+                     var txKey = $("#transactionNameInput").val(); 
+                     if(!txKey || txKey.length < 1) {
+                        txKey = "UITX"
+                        $("#transactionNameInput").val(txKey)
+                     }
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "loadTx", ajax_post_data: fileName, txName: txKey },
+                       success : function(data) {
+                             if(data === '') {
+                                 $("#txtBox").text("No such file.");
+                             } else {
+                                 $("#txtBox").text(data);
+                                 //updateTxSelect(data);
+                             }
+                       },
+                     });
+        
+          };
                       
           var getTxs = function () {
                      $.ajax({
@@ -290,12 +313,12 @@
     #bottomButtons {
         left: 20px;
         position: fixed;
-        bottom: 20px;
+        bottom: 60px;
         width: 90%;
     }
     #addressButtons {
         float: left;
-        bottom: 40px;
+        bottom: 60px;
         position: relative;
         margin-left: 10px;
     }
@@ -359,7 +382,7 @@
                         </table>
                     </div>
                 </div>
-                <div id="txtOutDiv" style="float: left; margin-right: 10px;">
+                <div id="txtOutDiv" style="float: left; margin-right: 10px; margin-bottom:100px;">
                      <textarea id="txtBox" type="text" value="" rows="22" cols="100" text-align=left disabled>
                      </textarea>
                 </div>
@@ -381,13 +404,10 @@
                             <br>
                             <button type="submit" id="view-button" class="view-button" title="View Transaction" onclick="getTx()"><img src="./images/white-eye.png"></button> 
                             </div><br>
-                            View All Balances
+                            Sign 
+                            <br>Transaction
                             <br>
-                            <button type="submit" id="balances-button" class="balances-button" title="View Balances" onclick="getBalances()"><img src="./images/white-list-icon.png"></button> 
-                            <br><br>
-                            Sign & Send Transaction
-                            <br>
-                            <button type="submit" id="send-button" class="send-button" title="Sign&Submit Transaction" onclick="prepareTxSend()"><img src="./images/arrow-white.png"></button> 
+                            <button type="submit" id="sign-button" class="sign-button" title="Sign Transaction" onclick="signTx()"><img src="./images/white-sign.png"></button> 
                             <!--<input type="button" id="getBalButton" onclick="getBalance()" value="Individual Balance"> <br> --> 
                         </div>
                    </div>
@@ -396,12 +416,26 @@
                     <br><br><br><br><br><br><label id="goodFee" style="font-size: 40px;"></label>
                     <br><br><br><br>Export<br> Transaction<br>
                     <button type="submit" id="save-button" class="save-button" title="Save Transaction" onclick="saveTx()"><img src="./images/white-save.png"></button> 
-
+                    <br><br>
+                    Send
+                    <br>Transaction
+                    <br>
+                    <button type="submit" id="send-button" class="send-button" title="Sign&Submit Transaction" onclick="prepareTxSend()"><img src="./images/arrow-white.png">
                 </div>
             </div>
 
         </div>
-                    <div id="addressButtons"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎  <button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC <button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button>
+                    <div id="addressButtons">
+                    <table id="bottomButtonsTable">
+                        <tr>
+                         <td></td><td></td><td></td><td><td align="center">View All Balances</td>
+                        </tr>
+                        <tr>
+                            <td><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
+                            <td><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
+                            <td align="center"><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
+                            <td align="center"><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
+                            <td align="center"><button type="submit" id="balances-button" class="balances-button" title="View Balances" onclick="getBalances()"><img src="./images/white-list-icon.png"></button></td>
                     </div>
     </div>
 
@@ -670,6 +704,15 @@
           
           var saveTx = function() {
                 buildTxFromPage("save");
+          };
+
+          var loadTx = function() {
+                var loadFile = prompt("What is the path/name of the file to load the transaction from?");
+                loadTxFromFile(loadFile);
+          };
+
+          var signTx = function() {
+                buildTxFromPage("sign");
           };
           
           var seedWallet = function() {
