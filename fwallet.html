@@ -185,6 +185,21 @@
                                  $("#txtBox").text(data);
                                  //updateTxSelect(data);
                              }
+
+                            try {
+                                var returnedTX = JSON.parse(data);
+                            } catch (e) {
+                                 $("#txtBox").text(data + "\n\nThe output above is not a properly-JSON-formatted factoid transaction.");
+                            }
+                            $("#txtBox").text(data);
+                            var inString = "Inputs:\n\n";
+                            for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
+                                var thisInput = returnedTX.Inputs[inIdx];
+                                inString = inString.concat(thisInput.Address);
+                                inString = inString.concat(" : " + thisInput.Amount + "\n");
+                            }
+                            console.log(inString);
+                            //$("#txtBox").text(inString);
                        },
                      });
         
