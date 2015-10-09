@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Factoid Wallet GUI</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="shortcut icon" type="image/png" href="./images/favicon.png">
+<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+
+
+        <script type="text/javascript" charset="utf-8">
+            var currTabIdx = 5;
+            
+            function showRate(){
+              var elem = document.getElementById('conversionRate');
+              elem.style.display = 'inline';
+              $.ajax({
+                   url: 'rate',
+                   type: 'get',
+                   dataType: 'html',
+                   success : function(data) {
+                         if(data === '') {
+                             $(elem).text('...');
+                         } else {
+                             $(elem).text('1 EC = ' + data + '⨎');
+                         }
+                   }
+               });
+            }
+
+          var sendPost = function (calltype, postdata, outputBox, ifEmptyString) {
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: calltype, ajax_post_data: postdata },
+                       success : function(data) {
+                             if(data === '') {
+                                 $(outputBox).text(ifEmptyString);
+                             } else {
+                                 $(outputBox).text(data);
+                             }
+                       },
+                     });
+                  };
+                  
+                  
+          var updateTransaction = function (txInputs, txOutputs, performAction) {
+                     var txKey = $("#transactionNameInput").val(); 
+                     if(!txKey || txKey.length < 1) {
+                        txKey = "UITX"
+                        $("#transactionNameInput").val(txKey)
+                     }
+
+                    if (performAction === "save") {
+                       var fileToSaveTo = prompt("What is the filename you would like to save this transaction to?");
+
+                         $.ajax({
+                           url: 'tx',
+                           type: 'get',
+                           dataType: 'html',
+                           data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: performAction, fileName: fileToSaveTo },
+                           success : function(data) {
+                                 if(performAction === "fee") {
+                                     if(data === '' || typeof(data) === 'undefined') {
+                                         $('#reqdFee').val("...");
+                                     } else {
+                                         $('#reqdFee').val(data);
+                                     }
+                                 } else {
+                                     if(data === '' || typeof(data) === 'undefined') {
+                                         $('#txtBox').text("Transaction invalid");
+                                     } else {
+                                         $('#txtBox').text(data);
+                                     }
+                                 }
+                           },
+                         });
+                     }  else {          
+
+                        if(performAction === "send") {
+                            if(!balanceCheck()) {
+                                  $('#txtBox').text("Transaction imbalanced (the fee is much higher than it should be)!\n\nPlease make sure that you're using the majority of your inputs.");
+                                  return
+                            }
+                         }
+                         $.ajax({
+                           url: 'tx',
+                           type: 'get',
+                           dataType: 'html',
+                           data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: performAction },
+                           success : function(data) {
+                                 if(performAction === "fee") {
+                                     if(data === '' || typeof(data) === 'undefined') {
+                                         $('#reqdFee').val("...");
+                                     } else {
+                                         $('#reqdFee').val(data);
+                                     }
+                                 } else {
+                                     if(data === '' || typeof(data) === 'undefined') {
+                                         $('#txtBox').text("Transaction invalid");
+                                     } else {
+                                         $('#txtBox').text(data);
+                                     }
+                                 }
+                           },
+                         });
+                     }  
+                  };
+                  
+          var balanceCheck = function() {
+                refreshFee();
+                var reqFee = parseFloat($('#reqdFee').val());
+                var currFee = parseFloat($('#feeLabel').text());
+                if(!isNaN(reqFee)) {
+                    if(currFee <= (reqFee*10)) {
+                            return true;
+                      } else {
+                            return false;
+                      }
+                } else {
+                    return false;
+                }
+          };
+                  
+          var submitTx = function (txInputs, txOutputs) {
+                 var txKey = $("#transactionNameInput").val(); 
+                 if(!txKey || txKey.length < 1) {
+                    txKey = "UITX"
+                    $("#transactionNameInput").val(txKey)
+                 }
+                     $.ajax({
+                       url: 'tx',
+                       type: 'get',
+                       dataType: 'html',
+                       data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: "send" },
+                       success : function(data) {
+                             if(data === '' || typeof(data) === 'undefined') {
+                                 $('#txtBox').text("Transaction invalid");
+                             } else {
+                                 $('#txtBox').text(data);
+                             }
+                       },
+                     });
+
+          };
+                  
+                          
+          var updateFeeLabel = function () {
+                var inputSize = parseFloat($('#inTotalInput').val());                
+                var outputSize = parseFloat($('#outTotalInput').val());
+                if (isNaN(outputSize) || outputSize === 0.0) {
+                    var feeSize = inputSize
+                } else {
+                    var feeSize = inputSize - outputSize
+                }
+                if (isNaN(feeSize)) {
+                    feeSize = 0.00
+                }
+                $('#feeLabel').text((feeSize.toPrecision(8) / 1).toString());   //divide by 1 to truncate trailing 0's without any regex
+          };
+          
+          var getBalance = function () {
+                 sendPost("balance", $('#txInput').val(), "#txtBox", "0.0 ⨎");
+          };
+                          
+          var getBalances = function () {
+                 sendPost("balances", '', "#txtBox", "NO BALANCES TO DISPLAY!");
+          };
+
+          var loadTxFromFile = function (fileName) {
+                     var txKey = $("#transactionNameInput").val(); 
+                     if(!txKey || txKey.length < 1) {
+                        txKey = "UITX"
+                        $("#transactionNameInput").val(txKey)
+                     }
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "loadTx", ajax_post_data: fileName, txName: txKey },
+                       success : function(data) {
+                             if(data === '') {
+                                 $("#txtBox").text("No such file.");
+                             } else {
+                                 $("#txtBox").text(data);
+                                 //updateTxSelect(data);
+                             }
+
+                            try {
+                                var returnedTX = JSON.parse(data);
+                            } catch (e) {
+                                 $("#txtBox").text(data + "\n\nThe output above is not a properly-JSON-formatted factoid transaction.");
+                            }
+                            $("#txtBox").text(data);
+                            var inString = "Inputs:\n\n";
+                            for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
+                                var thisInput = returnedTX.Inputs[inIdx];
+                                inString = inString.concat(thisInput.Address);
+                                inString = inString.concat(" : " + thisInput.Amount + "\n");
+                            }
+                            console.log(inString);
+                            //$("#txtBox").text(inString);
+                       },
+                     });
+        
+          };
+                      
+          var getTxs = function () {
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "allTxs", ajax_post_data: "" },
+                       success : function(data) {
+                             if(data === '') {
+                                 $("#txtBox").text("NO TRANSACTIONS TO DISPLAY!");
+                             } else {
+                                 $("#txtBox").text(data);
+                                 //updateTxSelect(data);
+                             }
+                       },
+                     });
+        
+          };
+          
+
+          var newFCTAddress = function () {
+                var addName = prompt("Enter key ID for new Factoid address");
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "addNewAddress", ajax_post_data: addName },
+                       success : function(data) {
+                             if(data != '') {
+                                 $("#txtBox").text(data);
+                             }
+                       },
+                     });
+        
+          };
+          
+          var newECAddress = function () {
+                var addName = prompt("Enter key ID for new Entry Credit address");
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "addNewEC", ajax_post_data: addName },
+                       success : function(data) {
+                             if(data != '') {
+                                 $("#txtBox").text(data);
+                             }
+                       },
+                     });
+        
+          };
+
+          
+          var importFromPK = function () {
+                var privateKey = prompt("What is the private key you would like to import?");
+                var addName = prompt("Please enter a name for the new address this will import into.");
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "importPrivKey", ajax_post_data: privateKey, addressName: addName },
+                       success : function(data) {
+                             if(data != '') {
+                                 $("#txtBox").text(data);
+                             }
+                       },
+                     });
+        
+          };
+              /*            
+          var addNewTx = function () {
+                var newTxName = prompt("Please enter the name of the new transaction")
+                             $.ajax({
+                               url: 'receive',
+                               type: 'post',
+                               dataType: 'html',
+                                                              
+                               data : { call_type: "addNewTx", ajax_post_data: newTxName},
+                               success : function(data) {
+                                     if(typeof data === 'undefined' || data === '') {
+                                         return
+                                     } else {
+                                        $('#txSelect')
+                                            .append($("<option></option>")
+                                             .attr("value",data)
+                                             .text(data));  
+                                             showSelect();
+                                     }
+                                 }
+                             });
+                          };*/
+          
+              
+          var displayHelp = function () {
+                             $.ajax({
+                               url: 'receive',
+                               type: 'get',
+                               dataType: 'html',
+                               success : function(data) {
+                                 $('#txtBox').text(data);
+                               },
+                             });
+                          };
+            
+          </script>
+
+
+<style type="text/css">
+    html, body {
+        background-image:url('images/bg.png');
+        /*background-color:#1e2884;*/
+        color:white;
+        margin: 0;
+        padding: 0;
+        height: 98%;
+        width: 100%;
+        font: 18px Georgia, "Times New Roman", Times, serif;
+    }
+    #txtBox {
+        font-size: large; 
+        font-weight: bold; 
+        color: white; 
+        background-color: transparent;
+    }
+    button {
+        background-color: Transparent;
+        border: none;
+        outline:none;
+        cursor:pointer;
+        color: white;
+    }
+    button img {
+        display: block;
+        height: 30px;  
+        width: 30px;
+    }
+    #inTotalInput, #outTotalInput {
+        background-color: Transparent;
+        color: white;
+    }
+    #container { width: 99%; height: 10%; margin-left: 5px; margin:auto; }
+    #bottomButtons {
+        left: 20px;
+        position: fixed;
+        bottom: 60px;
+        width: 90%;
+    }
+    #addressButtons {
+        float: left;
+        bottom: 60px;
+        position: relative;
+        margin-left: 10px;
+    }
+    input { text-align:center; }
+</style>
+
+</head>
+<body>
+    <div style="width:100%; height:100%;">
+        <div align="center" style="float:right;"><font size="2">Help<br></font>
+            <button id="help-button" title="Help" onclick="displayHelp();"><img src="./images/qmark2.png"></button>
+        </div>
+        <div align="center" style="float:center;"><h1 class="heading">Factoid Wallet GUI</h1></div>
+        <div id="container">
+            <div id="actionBar" align="center">
+                <div id="txDetails"> <!-- style="display:none;">-->
+                    <div id="inputsDiv" style="float: left; margin-right: 100px;">
+                        <font size=25 align="center">Inputs</font><br>
+                         <table id="inputTable" cellspacing="0" cellpadding="2">
+                         <tr>
+                            <td align="center">Input Address</td>
+                            <td align="center"><label id="inputLabel" for="inputQuantity">Amount</label></td>
+                            <td align="center"><button type="submit" id="addi-button" class="addi-button" title="New Transaction"><img src="./images/addbutton.png"></button></td>
+                         </tr>
+                         <tr>
+                            <td><input type="text" id="txInput" size=54 class="keys" tabindex="1"></td>
+                            <td><input type="number" id="inputQuantity" class="qty" tabindex="2" min="0"></td> 
+                            <td><button title="Delete Input" class="btnDelete">✖</button></td>
+                         </tr>
+                         <tr id="inTotal">
+                            <td align="right">Input Total: </td>
+                            <td><input id="inTotalInput" type="text" value="0.0" disabled></td>
+                            <td></td>
+                         </tr>
+                        </table>
+                    </div>
+                    <div id="outputDiv" style="float: left;">
+                        <font size=25 align="center">Outputs</font><br>
+                        <table id="outputTable">
+                         <tr>
+                            <td align="center">Output Address</td>
+                            <td align="center"><label id="outLabel" for="outQuantity">Amount</label></td>
+                            <td align="center"><button type="submit" id="addo-button" class="addo-button" title="New Transaction"><img src="./images/addbutton.png"></button></td>
+                         </tr>
+                         <tr>                        
+                            <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3"></td>
+                            <td><input type="number" id="outputQuantity" class="qty" tabindex="4" min="0"></td> 
+                            <td><button title="Delete Output" class="btnDelete">✖</button></td>
+                         </tr> 
+                         <tr>
+                            <td align="center"><form id="outTypeForm"><input type="radio" name="outType" class="addresstype" value="fct" checked>⨎<input type="radio" name="outType" class="addresstype" value="ec">EC</form>
+                            </td>
+                            <td></td>
+                            <td></td>
+                         </tr>
+                         <tr id="outTotal">
+                            <td align="right">Output Total: </td>
+                            <td><input id="outTotalInput" type="text" value="0.0" disabled></td>
+                            <td></td>
+                         </tr>
+                        </table>
+                    </div>
+                </div>
+                <div id="txtOutDiv" style="float: left; margin-right: 10px; margin-bottom:100px;">
+                     <textarea id="txtBox" type="text" value="" rows="22" cols="100" text-align=left disabled>
+                     </textarea>
+                </div>
+                <div id="controlDiv" style="float: left; margin-left: 10px; margin-top: 10px;">
+                  <div align="center">
+                     <br>Transaction Name
+                     <br>
+                     <input type="text" id="transactionNameInput" size=32 maxlength=32>
+                     <br><br>
+                        <div id="conversionRate"></div>
+                        <br><br>
+                        <div id="fees" align="center">Currently Paying Fee: <label id="feeLabel">0.0</label>⨎
+                            <br>Required Fee: <input type="text" id="reqdFee" size=7 style="border: none; background-color: transparent; color: white;" value="0.0" disabled>⨎
+                            <br>
+                            <button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();"><img src="./images/refresh.png"></button>
+                            </div>
+                            <br>
+                            View<br>Transaction
+                            <br>
+                            <button type="submit" id="view-button" class="view-button" title="View Transaction" onclick="getTx()"><img src="./images/white-eye.png"></button> 
+                            </div><br>
+                            Sign 
+                            <br>Transaction
+                            <br>
+                            <button type="submit" id="sign-button" class="sign-button" title="Sign Transaction" onclick="signTx()"><img src="./images/white-sign.png"></button> 
+                            <!--<input type="button" id="getBalButton" onclick="getBalance()" value="Individual Balance"> <br> --> 
+                        </div>
+                   </div>
+                </div>
+                <div id="goodFeeDiv" align="center" style="float: left; margin-left: 10px;">
+                    <br><br><br><br><br><br><label id="goodFee" style="font-size: 40px;"></label>
+                    <br><br><br><br>Export<br> Transaction<br>
+                    <button type="submit" id="save-button" class="save-button" title="Save Transaction" onclick="saveTx()"><img src="./images/white-save.png"></button> 
+                    <br><br>
+                    Send
+                    <br>Transaction
+                    <br>
+                    <button type="submit" id="send-button" class="send-button" title="Sign&Submit Transaction" onclick="prepareTxSend()"><img src="./images/arrow-white.png">
+                </div>
+            </div>
+
+        </div>
+                    <div id="addressButtons">
+                    <table id="bottomButtonsTable">
+                        <tr>
+                         <td></td><td></td><td></td><td><td align="center">View All Balances</td>
+                        </tr>
+                        <tr>
+                            <td><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
+                            <td><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
+                            <td align="center"><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
+                            <td align="center"><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
+                            <td align="center"><button type="submit" id="balances-button" class="balances-button" title="View Balances" onclick="getBalances()"><img src="./images/white-list-icon.png"></button></td>
+                    </div>
+    </div>
+
+</body>
+
+<script>
+        
+            $( document ).ready(function() {
+                showRate();
+                ensureFeeRefresh();
+                
+                var inputRows = 1;
+                $("#addi-button").click(function() {
+                    $("#inputTable tr").eq(1).clone().find("input").each(function() {
+                        $(this).val('').attr('id', function(_, id) { return id + inputRows }).attr('tabindex', currTabIdx.toString());
+                    }).end().insertBefore("#inTotal");
+                    inputRows++;
+                    currTabIdx++;
+                    $('#inputTable input').on('keyup change', updateInputTotals);
+                });
+                
+                var outputRows = 1;
+                $("#addo-button").click(function() {
+                    $("#outputTable tr").eq(1).clone().find("input").each(function() {
+                        $(this).val('').attr('id', function(_, id) { return id + outputRows }).attr('tabindex', currTabIdx.toString());
+                    }).end().insertBefore("#outTotal");
+                    $("#outputTable tr").eq(2).clone().find("input").each(function() {
+                        $(this).attr('name', function(_, name) { return name + outputRows });
+                    }).end().insertBefore("#outTotal");
+                    outputRows++;
+                    currTabIdx++;
+                    $('#outputTable input').on('keyup change', updateOutputTotals);
+                });
+
+                
+                
+                getTxs()
+                getBalances()
+            });
+
+            function inArray(value, arr) {
+                for(var i = 0; i < arr.length; i++) {
+                    if (value === arr[i]) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+            
+            function ensureFeeRefresh() {
+                $( ".qty" ).change(function() {
+                    refreshFee();
+                });
+                $( ".addresstype" ).change(function() {
+                    refreshFee();
+                });
+            }
+            
+            $( ".keys" ).change(function() {
+                //refreshFee();
+            });  
+            
+            $("#outputTable").on('click', '.btnDelete', function () {
+                if($('#outputTable tr').length > 4) {
+                    $(this).closest('tr').next('tr').remove();
+                    $(this).closest('tr').remove();
+                    currTabIdx--;
+                }
+            });
+            
+            $("#inputTable").on('click', '.btnDelete', function () {
+                if($('#inputTable tr').length > 3) {
+                    $(this).closest('tr').remove();
+                    currTabIdx--;
+                }
+            });
+            
+            $('#inputTable input').on('keyup change', updateInputTotals);            
+            $('#outputTable input').on('keyup change', updateOutputTotals);
+            
+        function updateInputTotals() {
+          $('td:not(:first-child):not(:last-child)',
+            '#inputTable tr:eq(1)').each(function() {
+            var ci= this.cellIndex;
+            var total = 0;
+            $('td', 
+              '#inputTable tr:gt(0)')
+              .filter(function() {
+                return this.cellIndex === ci;
+              })
+              .each(function() {
+                var inp= $('input', this);
+                if(inp.length) {
+                  if(!$(this).closest('tr').is(':last-child')) {
+                    total+= $('input', this).val()*1;
+                  }
+                  else {
+                    $('input', this).val(parseFloat(total));
+                  }
+                }
+              });
+
+            ensureFeeRefresh();
+            
+          });
+          
+          
+          $('#inputTable tr:gt(0)').each(function() {
+                var total = 0;
+                $('td:not(:first-child):not(:last-child)',
+                  this).each(function() {
+                  total+= $('input', this).val()*1;
+                });
+                //$('input', this).last().val(total);
+              });
+            };
+
+        function updateOutputTotals() {
+          $('td:not(:first-child):not(:last-child)',
+            '#outputTable tr:eq(1)').each(function() {
+            var ci= this.cellIndex;
+            var total = 0;
+            $('td', 
+              '#outputTable tr:gt(0)')
+              .filter(function() {
+                return this.cellIndex === ci;
+              })
+              .each(function() {
+                var inp= $('input', this);
+                if(inp.length) {
+                  if(!$(this).closest('tr').is(':last-child')) {
+                    total+= $('input', this).val()*1;
+                  }
+                  else {
+                    $('input', this).val(parseFloat(total));
+                  }
+                }
+              });
+              
+             ensureFeeRefresh();
+          });
+          
+          
+          $('#outputTable tr:gt(0)').each(function() {
+                var total = 0;
+                $('td:not(:first-child):not(:last-child)',
+                  this).each(function() {
+                  total+= $('input', this).val()*1;
+                });
+                //$('input', this).last().val(total);
+              });
+            };
+          
+            var refreshFee = function() {
+                buildTxFromPage("fee");
+                updateFeeLabel();
+                var reqFee = parseFloat($('#reqdFee').val());
+                var currFee = parseFloat($('#feeLabel').text());
+                //console.log("REQ : " + reqFee);
+                if(currFee >= reqFee && !isNaN(reqFee)) {
+                    $('#goodFee').css("color", "green");
+                    $('#goodFee').text("✔");
+                } else {
+                    $('#goodFee').css("color", "red");
+                    $('#goodFee').text("✗")
+                }
+            };
+            
+          var buildTxFromPage = function(actionToDo) {
+                var inputQuantity, inputAddress, inString, outputQuantity, outputAddress, outputType, outString;
+
+                var table = document.getElementById("inputTable");
+                for (var i = 0, row; row = table.rows[i]; i++) {
+                //iterate through rows
+                    if(i === 0) {
+                        inString = "[";
+                    } else {
+                        if(i >= table.rows.length - 1) {
+                            inString = inString.concat(']');
+                            break
+                        }
+                        inputAddress = table.rows[i].cells[0].childNodes[0].value;
+                        inputQuantity =  table.rows[i].cells[1].childNodes[0].value;
+                        
+                        if (inputQuantity && inputQuantity > 0 && inputAddress && inputAddress.length > 0) {
+                            if(i > 1 && i < table.rows.length - 1) {
+                                inString = inString.concat(',');
+                            }
+                            inString = inString.concat('{"inputSize": ')
+                            inString = inString.concat(inputQuantity) 
+                            inString = inString.concat(', "inputAddress": "')
+                            inString = inString.concat(inputAddress)
+                            inString = inString.concat('"}')
+                        }
+                    }
+                }
+                
+                table = document.getElementById("outputTable");
+                for (var j = 0, row; row = table.rows[j]; j++) {
+                    if(j === 0) {
+                        outString = "[";
+                    } else {
+                        if(j >= table.rows.length - 1) {
+                            outString = outString.concat(']');
+                            break
+                        }
+                        if(j % 2 == 0) {
+                            if(table.rows[j].cells[0].childNodes[0].childNodes[0].checked){
+                                outputType = "fct";
+                            } else {
+                                outputType = "ec";
+                            }
+                            
+                            if (outputQuantity && outputQuantity > 0 && outputAddress && outputAddress.length > 0) {
+                                if(j > 2 && j < table.rows.length - 1) {
+                                    outString = outString.concat(',');
+                                }
+                                outString = outString.concat('{"outputSize": ')
+                                outString = outString.concat(outputQuantity) 
+                                outString = outString.concat(', "outputAddress": "')
+                                outString = outString.concat(outputAddress)
+                                outString = outString.concat('", "outputType": "')
+                                outString = outString.concat(outputType)
+                                outString = outString.concat('"}')
+                            }
+                            
+                        } else {
+                            outputAddress = table.rows[j].cells[0].childNodes[0].value;
+                            outputQuantity = table.rows[j].cells[1].childNodes[0].value;
+                        }
+                   }
+                }
+                console.log("IN: ", inString, " OUT: ", outString);
+                updateTransaction(inString, outString, actionToDo); 
+                //refreshFee();
+          };
+          
+          
+          var prepareTxSend = function() {
+                var shouldWeSend = confirm("Are you sure you want to send this transaction?");
+                if(shouldWeSend) {
+                    buildTxFromPage("send");
+                }
+                //refreshFee();
+          };
+          
+          var getTx = function() {
+                buildTxFromPage("print");
+                //refreshFee();
+          };
+          
+          var saveTx = function() {
+                buildTxFromPage("save");
+          };
+
+          var loadTx = function() {
+                var loadFile = prompt("What is the path/name of the file to load the transaction from?");
+                loadTxFromFile(loadFile);
+          };
+
+          var signTx = function() {
+                buildTxFromPage("sign");
+          };
+          
+          var seedWallet = function() {
+                var inputSeed = prompt("What is your wallet seed?");
+                console.log(inputSeed);
+          };
+
+
+</script>
+</html>
