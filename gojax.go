@@ -204,9 +204,16 @@ package main
                 case "save":
                     fileToSaveTo := r.FormValue("fileName")
                     if len(fileToSaveTo) < 1 {
-                        w.Write([]byte("Filename cannot be empty!"))
+                        w.Write([]byte("Filename cannot be empty!\n\n"))
                         return
                     }
+                    
+                    signFeedString := []string{"Sign", string(txKey)}    
+                    signErr := myState.Execute(signFeedString)
+                    if signErr != nil {
+                        w.Write([]byte(signErr.Error()))
+                    }
+
                     saveFeedString := []string{"Export", string(txKey), string(fileToSaveTo)}    
                     saveErr := myState.Execute(saveFeedString)
                     if saveErr != nil {
@@ -214,10 +221,22 @@ package main
                     }
                     buffer.WriteString("\n\nTransaction ")
                     buffer.WriteString(txKey)
-                    buffer.WriteString(" has been saved to ./")
+                    buffer.WriteString(" has been saved to file: ")
                     buffer.WriteString(string(fileToSaveTo))
                     w.Write(buffer.Bytes())
-                case"send":
+                case "sign":
+                    signFeedString := []string{"Sign", string(txKey)}    
+                    signErr := myState.Execute(signFeedString)
+                    if signErr != nil {
+                        w.Write([]byte(signErr.Error()))
+                        return
+                    }
+                    
+                    buffer.WriteString("\n\nTransaction ")
+                    buffer.WriteString(txKey)
+                    buffer.WriteString(" has been signed.")
+                    w.Write(buffer.Bytes())
+                case "send":
                     testPrintTx := []string{"Print", string(txKey)}   
 
                     printErr := myState.Execute(testPrintTx)
@@ -327,6 +346,19 @@ package main
      		        w.Write([]byte("The contents of the private key have been added to " + addressName + " successfully!"));
      		    } else {
      		        w.Write([]byte("You must include a non-empty private key and name for the address to import it into."));
+     		    }
+     		case "loadTx":
+     		    txName := r.FormValue("addressName")
+ 		        if len(ajax_post_data) > 0 {
+                    loadFeedString := []string{"Import", string(txName), string(ajax_post_data)}    
+                    loadErr := myState.Execute(loadFeedString)
+                    if loadErr != nil {
+                        w.Write([]byte(loadErr.Error()))
+                        return
+                    }
+     		        w.Write([]byte("The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
+     		    } else {
+     		        w.Write([]byte("You must include a filename to load the transaction from."));
      		    }
  		    /*
  		    case "addNewTx":
