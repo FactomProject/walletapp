@@ -348,7 +348,7 @@ package main
      		        w.Write([]byte("You must include a non-empty private key and name for the address to import it into."));
      		    }
      		case "loadTx":
-     		    txName := r.FormValue("addressName")
+     		    txName := r.FormValue("txName")
  		        if len(ajax_post_data) > 0 {
                     loadFeedString := []string{"Import", string(txName), string(ajax_post_data)}    
                     loadErr := myState.Execute(loadFeedString)
@@ -356,7 +356,14 @@ package main
                         w.Write([]byte(loadErr.Error()))
                         return
                     }
-     		        w.Write([]byte("The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
+                    
+                    ib := myState.GetFS().GetDB().GetRaw([]byte(factoid.DB_BUILD_TRANS), []byte(txName))
+                    jib, jerr := json.Marshal(ib)
+                    if jerr != nil {
+                        w.Write([]byte(jerr.Error()))
+                        return
+                    }
+     		        w.Write([]byte(jib))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
      		    } else {
      		        w.Write([]byte("You must include a filename to load the transaction from."));
      		    }
