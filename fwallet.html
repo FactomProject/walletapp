@@ -4,8 +4,10 @@
 <title>Factoid Wallet GUI</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <link rel="shortcut icon" type="image/png" href="./images/favicon.png">
-<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+<link rel="stylesheet" href="jquery-ui.css">
 
+<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="jquery-ui.js"></script>
 
         <script type="text/javascript" charset="utf-8">
             var currTabIdx = 5;
@@ -44,43 +46,23 @@
                   };
                   
                   
-          var updateTransaction = function (txInputs, txOutputs, performAction) {
+          var updateTransaction = function (txInformation, performAction) {
                      var txKey = $("#transactionNameInput").val(); 
                      if(!txKey || txKey.length < 1) {
                         txKey = "UITX"
                         $("#transactionNameInput").val(txKey)
                      }
-
-                    if (performAction === "save") {
-                       var fileToSaveTo = prompt("What is the filename you would like to save this transaction to?");
-
-                         $.ajax({
-                           url: 'tx',
-                           type: 'get',
-                           dataType: 'html',
-                           data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: performAction, fileName: fileToSaveTo },
-                           success : function(data) {
-                                 if(performAction === "fee") {
-                                     if(data === '' || typeof(data) === 'undefined') {
-                                         $('#reqdFee').val("...");
-                                     } else {
-                                         $('#reqdFee').val(data);
-                                     }
-                                 } else {
-                                     if(data === '' || typeof(data) === 'undefined') {
-                                         $('#txtBox').text("Transaction invalid");
-                                     } else {
-                                         $('#txtBox').text(data);
-                                     }
-                                 }
-                           },
-                         });
-                     }  else {          
-
+         
+                     if(txInformation.length < 2) {
+                        console.log("Error with # of stuff in txInfo");
+                        return;
+                     } else {
+                        txInputs = txInformation[0];
+                        txOutputs = txInformation[1];
                         if(performAction === "send") {
                             if(!balanceCheck()) {
                                   $('#txtBox').text("Transaction imbalanced (the fee is much higher than it should be)!\n\nPlease make sure that you're using the majority of your inputs.");
-                                  return
+                                  return;
                             }
                          }
                          $.ajax({
@@ -103,8 +85,8 @@
                                      }
                                  }
                            },
-                         });
-                     }  
+                         }); 
+                      }
                   };
                   
           var balanceCheck = function() {
@@ -192,13 +174,27 @@
                                  $("#txtBox").text(data + "\n\nThe output above is not a properly-JSON-formatted factoid transaction.");
                             }
                             $("#txtBox").text(data);
-                            var inString = "Inputs:\n\n";
-                            for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
-                                var thisInput = returnedTX.Inputs[inIdx];
-                                inString = inString.concat(thisInput.Address);
-                                inString = inString.concat(" : " + thisInput.Amount + "\n");
+                            $("#inputTable").find("tr:gt(1)").not(':last').remove();
+                            if(returnedTX) {
+                                for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
+                                    var thisInput = returnedTX.Inputs[inIdx];
+                                    $( "#inputTable tr:nth-last-child(2)" ).children("td:first").find("input").val(thisInput.Address);
+                                    $( "#inputTable tr:nth-last-child(2)" ).children("td:eq(1)").find("input").val(thisInput.Amount / 100000000);
+                                    $("#addi-button").trigger("click");
+                                }
+                                  $( "#inputTable tr:nth-last-child(2)" ).children("td:last").find("button").trigger("click");
+                                  
+                                  
+                                for(var outIdx=0; outIdx < returnedTX.Outputs.length; outIdx++) {
+                                    var thisOutput = returnedTX.Outputs[outIdx];
+                                    $( "#outputTable tr:nth-last-child(3)" ).children("td:first").find("input").val(thisOutput.Address);
+                                    $( "#outputTable tr:nth-last-child(3)" ).children("td:eq(1)").find("input").val(thisOutput.Amount / 100000000);
+                                    $( "#outputTable tr:nth-last-child(2)" ).children("td:first").find("input").val("fct");
+                                    $("#addo-button").trigger("click");
+                                }
+                                  $( "#outputTable tr:nth-last-child(3)" ).children("td:last").find("button").trigger("click");
+                                  refreshFee();
                             }
-                            console.log(inString);
                             //$("#txtBox").text(inString);
                        },
                      });
@@ -335,10 +331,18 @@
         cursor:pointer;
         color: white;
     }
+    td {
+        text-align: center;
+    }
     button img {
         display: block;
         height: 30px;  
         width: 30px;
+    }
+    textarea {
+        box-sizing:border-box;
+        -moz-box-sizing:border-box;
+        -webkit-box-sizing:border-box;
     }
     #inTotalInput, #outTotalInput {
         background-color: Transparent;
@@ -357,11 +361,60 @@
         position: relative;
         margin-left: 10px;
     }
+
+    #feedbackDiv{
+        float:left;
+        /*border: 1px solid white;*/
+        min-width: 300px;
+        width:65%;
+        padding:10px;
+        display:inline;
+    }
+    #controlDiv{
+        float:left;
+        /*border: 1px solid white;*/
+        min-width: 400px;
+        padding:10px;
+        width:30%;
+        display:inline;
+    } 
+    .ui-dialog .ui-state-error { padding: .3em; }
+            .validateTips { border: 1px solid transparent; padding: 0.1em; }
+        /*body { font-size: 62.5%; }*/
+        /*label, input { display:block; }*/
+        input.text { margin-bottom:12px; width:97%; padding: .4em; }
+        fieldset { padding:0; border:0; margin-top:25px; }
+        h1 { font-size: 1.2em; margin: .6em 0; }
+        div#users-contain { width: 350px; margin: 20px 0; }
+        div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+        div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+        .ui-dialog .ui-state-error { padding: .3em; }
+        .validateTips { border: 1px solid transparent; padding: 0.3em; }
     input { text-align:center; }
 </style>
 
 </head>
 <body>
+    <div id="dialog-form" title="Direct coinflow">
+
+      <p class="validateTips">Please enter the name of the file to load from:</p>
+      <form>
+        <fieldset>
+          <label for="primaryDialogInput">File:</label>
+          <input type="text" name="primaryDialogInput" id="primaryDialogInput" value="" class="text ui-widget-content ui-corner-all">
+          <!--<label for="sendAmount">Amount To Send:</label>
+          <input type="text" name="sendAmount" id="sendAmount" value="0.00" class="text ui-widget-content ui-corner-all" oninput="updateWhatsLeft()">-->
+
+     
+          <!-- Allow form submission with keyboard without duplicating the dialog button -->
+          <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+        </fieldset>
+      </form>
+
+      <br><br>
+      <!--<div><label>Still left to spend:</label><br><div id="remainingUTXO"></div></div>-->
+    </div>
+    
     <div style="width:100%; height:100%;">
         <div align="center" style="float:right;"><font size="2">Help<br></font>
             <button id="help-button" title="Help" onclick="displayHelp();"><img src="./images/qmark2.png"></button>
@@ -370,13 +423,13 @@
         <div id="container">
             <div id="actionBar" align="center">
                 <div id="txDetails"> <!-- style="display:none;">-->
-                    <div id="inputsDiv" style="float: left; margin-right: 100px;">
+                    <div id="inputsDiv" style="float: left; margin-right: 100px; margin-bottom: 10px;">
                         <font size=25 align="center">Inputs</font><br>
                          <table id="inputTable" cellspacing="0" cellpadding="2">
                          <tr>
-                            <td align="center">Input Address</td>
-                            <td align="center"><label id="inputLabel" for="inputQuantity">Amount</label></td>
-                            <td align="center"><button type="submit" id="addi-button" class="addi-button" title="New Transaction"><img src="./images/addbutton.png"></button></td>
+                            <td>Input Address</td>
+                            <td><label id="inputLabel" for="inputQuantity">Amount</label></td>
+                            <td><button type="submit" id="addi-button" class="addi-button" title="New Transaction"><img src="./images/addbutton.png"></button></td>
                          </tr>
                          <tr>
                             <td><input type="text" id="txInput" size=54 class="keys" tabindex="1"></td>
@@ -390,13 +443,13 @@
                          </tr>
                         </table>
                     </div>
-                    <div id="outputDiv" style="float: left;">
+                    <div id="outputDiv" style="float: left; margin-bottom: 10px; margin-right: 100px;">
                         <font size=25 align="center">Outputs</font><br>
                         <table id="outputTable">
                          <tr>
-                            <td align="center">Output Address</td>
-                            <td align="center"><label id="outLabel" for="outQuantity">Amount</label></td>
-                            <td align="center"><button type="submit" id="addo-button" class="addo-button" title="New Transaction"><img src="./images/addbutton.png"></button></td>
+                            <td>Output Address</td>
+                            <td><label id="outLabel" for="outQuantity">Amount</label></td>
+                            <td><button type="submit" id="addo-button" class="addo-button" title="New Transaction"><img src="./images/addbutton.png"></button></td>
                          </tr>
                          <tr>                        
                             <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3"></td>
@@ -404,7 +457,7 @@
                             <td><button title="Delete Output" class="btnDelete">✖</button></td>
                          </tr> 
                          <tr>
-                            <td align="center"><form id="outTypeForm"><input type="radio" name="outType" class="addresstype" value="fct" checked>⨎<input type="radio" name="outType" class="addresstype" value="ec">EC</form>
+                            <td><form id="outTypeForm"><input type="radio" name="outType" class="addresstype" value="fct" checked>⨎<input type="radio" name="outType" class="addresstype" value="ec">EC</form>
                             </td>
                             <td></td>
                             <td></td>
@@ -417,60 +470,65 @@
                         </table>
                     </div>
                 </div>
-                <div id="txtOutDiv" style="float: left; margin-right: 10px; margin-bottom:100px;">
-                     <textarea id="txtBox" type="text" value="" rows="22" cols="100" text-align=left disabled>
-                     </textarea>
-                </div>
-                <div id="controlDiv" style="float: left; margin-left: 10px; margin-top: 10px;">
-                  <div align="center">
-                     <br>Transaction Name 
-                     <br>
-                     <input type="text" id="transactionNameInput" size=32 maxlength=32><button type="submit" id="loadName-button" class="loadName-button" title="Load Transaction To Form" onclick="loadName()"><img src="./images/loadarrow.png"></button>
-                     <br><br>
-                        <div id="conversionRate"></div>
-                        <br><br>
-                        <div id="fees" align="center">Currently Paying Fee: <label id="feeLabel">0.0</label>⨎
-                            <br>Required Fee: <input type="text" id="reqdFee" size=7 style="border: none; background-color: transparent; color: white;" value="0.0" disabled>⨎
-                            <br>
-                            <button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();"><img src="./images/refresh.png"></button>
-                            </div>
-                            <br>
-                            View<br>Transaction
-                            <br>
-                            <button type="submit" id="view-button" class="view-button" title="View Transaction" onclick="getTx()"><img src="./images/white-eye.png"></button> 
-                            </div><br>
-                            Sign 
-                            <br>Transaction
-                            <br>
-                            <button type="submit" id="sign-button" class="sign-button" title="Sign Transaction" onclick="signTx()"><img src="./images/white-sign.png"></button> 
-                            <!--<input type="button" id="getBalButton" onclick="getBalance()" value="Individual Balance"> <br> --> 
-                        </div>
-                   </div>
-                </div>
-                <div id="goodFeeDiv" align="center" style="float: left; margin-left: 10px;">
-                    <br><br><br><br><br><br><label id="goodFee" style="font-size: 40px;"></label>
-                    <br><br><br><br>Export<br> Transaction<br>
-                    <button type="submit" id="save-button" class="save-button" title="Save Transaction" onclick="saveTx()"><img src="./images/white-save.png"></button> 
-                    <br><br>
-                    Send
-                    <br>Transaction
-                    <br>
-                    <button type="submit" id="send-button" class="send-button" title="Sign&Submit Transaction" onclick="prepareTxSend()"><img src="./images/arrow-white.png">
-                </div>
-            </div>
 
-        </div>
-                    <div id="addressButtons">
+
+                <br><br><br><br>
+
+              <div id="controlDiv"> <!-- style="min-width: 100px; margin-left: 100px; margin-top: 10px; display:block; padding:1px;">-->
+                     <table id="controlButtons" cellspacing="5" cellpadding="2">
+                     <tr><td>Transaction Name</td></tr> 
+                     <tr>
+                       <td><input type="text" id="transactionNameInput" size=32 maxlength=32></td>
+                       <td><button type="submit" id="loadName-button" class="loadName-button" title="Load Transaction To Form" onclick="loadName()"><img src="./images/loadarrow.png"></button></td></tr>
+                     <tr>
+                       <td><div id="conversionRate"></div></td></tr>
+                     <tr>
+                       <td>Currently Paying Fee: <label id="feeLabel">0.0</label>⨎</td>
+                       <td><label id="goodFee" style="font-size: 40px;"></label></td></tr>
+                     <tr>
+                       <td>Required Fee: <input type="text" id="reqdFee" size=7 style="border: none; background-color: transparent; color: white;" value="0.0" disabled>⨎</td></tr>
+                     <tr>
+                       <td><button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();"><img src="./images/refresh.png"></button></td></tr>
+                     <tr>
+                       <td>View Transaction</td>
+                       <td>Export Transaction</td></tr>
+                     <tr>
+                       <td><button type="submit" id="view-button" class="view-button" title="View Transaction" onclick="getTx()"><img src="./images/eye-white.png"></button></td>
+                       <td><button type="submit" id="save-button" class="save-button" title="Save Transaction" onclick="saveTx()"><img src="./images/white-save.png"></button></td></tr>
+                     <tr>
+                       <td>Sign Transaction</td>
+                       <td>Send Transaction</td></tr>
+                     <tr>
+                       <td><button type="submit" id="sign-button" class="sign-button" title="Sign Transaction" onclick="signTx()"><img src="./images/white-sign.png"></button></td>
+                       <td><button type="submit" id="send-button" class="send-button" title="Sign&Submit Transaction" onclick="prepareTxSend()"><img src="./images/arrow-white.png"></button></td></tr>
+                     </table>
+                            <!--<input type="button" id="getBalButton" onclick="getBalance()" value="Individual Balance"> <br> --> 
+                </div>
+                <div id="feedbackDiv"> <!-- style="min-width: 100px; width: 30%; margin-right: 10px; margin-bottom:10px; display:inline-block; padding:1px;">-->
+                     <textarea id="txtBox" type="text" value="" rows="22" cols="93" text-align=left disabled>
+                     </textarea>
+
+                    <br><br>
                     <table id="bottomButtonsTable">
                         <tr>
-                         <td></td><td></td><td></td><td><td align="center">View All Balances</td>
+                         <td></td><td></td><td></td><td><td>View All Balances</td>
                         </tr>
                         <tr>
                             <td><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
                             <td><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
-                            <td align="center"><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
-                            <td align="center"><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
-                            <td align="center"><button type="submit" id="balances-button" class="balances-button" title="View Balances" onclick="getBalances()"><img src="./images/white-list-icon.png"></button></td>
+                            <td><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
+                            <td><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
+                            <td><button type="submit" id="balances-button" class="balances-button" title="View Balances" onclick="getBalances()"><img src="./images/white-list-icon.png"></button></td>
+                    </table>
+                </div>
+
+
+
+                
+            </div>
+        </div>
+                    <div id="addressButtons">
+
                     </div>
     </div>
 
@@ -625,7 +683,7 @@
             };
           
             var refreshFee = function() {
-                buildTxFromPage("fee");
+                updateTransaction(buildTxFromPage(), "fee");
                 updateFeeLabel();
                 var reqFee = parseFloat($('#reqdFee').val());
                 var currFee = parseFloat($('#feeLabel').text());
@@ -639,7 +697,7 @@
                 }
             };
             
-          var buildTxFromPage = function(actionToDo) {
+          var buildTxFromPage = function() {
                 var inputQuantity, inputAddress, inString, outputQuantity, outputAddress, outputType, outString;
 
                 var table = document.getElementById("inputTable");
@@ -704,7 +762,8 @@
                    }
                 }
                 console.log("IN: ", inString, " OUT: ", outString);
-                updateTransaction(inString, outString, actionToDo); 
+
+                return [inString, outString];
                 //refreshFee();
           };
           
@@ -712,33 +771,162 @@
           var prepareTxSend = function() {
                 var shouldWeSend = confirm("Are you sure you want to send this transaction?");
                 if(shouldWeSend) {
-                    buildTxFromPage("send");
+                    updateTransaction(buildTxFromPage(), "send");
                 }
                 //refreshFee();
           };
           
           var getTx = function() {
-                buildTxFromPage("print");
+                updateTransaction(buildTxFromPage(), "print");
                 //refreshFee();
           };
           
-          var saveTx = function() {
-                buildTxFromPage("save");
-          };
+          var saveTxToFile = function(txInformation, fileToSaveTo) {
+                 var txKey = $("#transactionNameInput").val(); 
+                 if(!txKey || txKey.length < 1) {
+                    txKey = "UITX"
+                    $("#transactionNameInput").val(txKey)
+                 }
+         
+             if(txInformation.length < 2) {
+                console.log("Error with # of stuff in txInfo");
+                return;
+             } else {
+                txInputs = txInformation[0];
+                txOutputs = txInformation[1];                 
 
+                 $.ajax({
+                   url: 'tx',
+                   type: 'get',
+                   dataType: 'html',
+                   data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: "save", fileName: fileToSaveTo },
+                   success : function(data) {
+                             if(data === '' || typeof(data) === 'undefined') {
+                                 $('#txtBox').text("Transaction invalid");
+                             } else {
+                                 $('#txtBox').text(data);
+                             }
+                   },
+                 });
+                         
+              }      
+                //buildTxFromPage("save");
+          };
+          
           var loadTx = function() {
-                var loadFile = prompt("What is the path/name of the file to load the transaction from?");
-                loadTxFromFile(loadFile);
+                $( "#dialog-form" ).dialog('option', 'title', ("Load Transaction From File"))
+                    .data('formType', "loadTx")
+                    .dialog('open');
+
+          };
+          
+          var saveTx = function() {
+                $( "#dialog-form" ).dialog('option', 'title', ("Save Transaction To File"))
+                    .data('formType', "saveTx")
+                    .dialog('open');
+                
+                /*var loadFile = prompt("What is the path/name of the file to load the transaction from?");
+                loadTxFromFile(loadFile);*/
           };
 
           var signTx = function() {
-                buildTxFromPage("sign");
+                updateTransaction(buildTxFromPage(), "sign");
           };
           
           var seedWallet = function() {
                 var inputSeed = prompt("What is your wallet seed?");
                 console.log(inputSeed);
           };
+
+//This is all from giuseppe
+
+    $(function() {
+        var dialog, form,
+     
+          primaryDialogInput = $( "#primaryDialogInput" ),
+          //amountToSend = $( "#sendAmount" ),
+          allFields = $( [] ).add( primaryDialogInput );//.add( amountToSend ),
+          tips = $( ".validateTips" );
+     
+        function updateTips( t ) {
+          tips
+            .text( t )
+            .addClass( "ui-state-highlight" );
+          setTimeout(function() {
+            tips.removeClass( "ui-state-highlight", 1500 );
+          }, 500 );
+        }
+     
+        function checkLength( o, n, min, max ) {
+          if ( o.val().length > max || o.val().length < min ) {
+            o.addClass( "ui-state-error" );
+            updateTips( "Please make sure 'Recipient Address' is a valid Bitcoin address." );
+            return false;
+          } else {
+            return true;
+          }
+        }
+     
+        function checkRegexp( o, regexp, n ) {
+          if ( !( regexp.test( o.val() ) ) ) {
+            o.addClass( "ui-state-error" );
+            updateTips( n );
+            return false;
+          } else {
+            return true;
+          }
+        }
+     
+        function checkDialogInput() {
+          var valid = true;
+          var formType = $("#dialog-form").data('formType');
+          allFields.removeClass( "ui-state-error" );
+     
+          switch(formType) {
+            case "loadTx":
+                loadTxFromFile(primaryDialogInput.val());
+                break;
+            case "saveTx":
+                saveTxToFile(buildTxFromPage(), primaryDialogInput.val());
+                break;
+            default:
+                console.log("NOT YET IMPLEMENTED FORMTYPE: " + formType.toString());
+          }
+          dialog.dialog( "close" );
+          /*
+          valid = valid && checkLength( primaryDialogInput, "Recipient Address", 26, 35 );
+          if ( valid ) {
+            socket.emit('addNewAddress', primaryDialogInput.val(), "recipient", parentNID, parseFloat(amountToSend.val()));
+            dialog.dialog( "close" );
+            doMagic();
+          }
+          return valid;*/
+        }
+          
+        //Dialog prompt for sending coins from origin to recipient
+        dialog = $( "#dialog-form" ).dialog({
+          autoOpen: false,
+          height: 375,
+          width: 590,
+          modal: true,
+          buttons: {
+            "Done": checkDialogInput,
+            Cancel: function() {
+              dialog.dialog( "close" );
+            }
+          },
+          close: function() {
+            form[ 0 ].reset();
+            allFields.removeClass( "ui-state-error" );
+          }
+        });
+     
+        form = dialog.find( "form" ).on( "submit", function( event ) {
+          event.preventDefault();
+          checkDialogInput();
+        });
+     
+      });
 
 
 </script>

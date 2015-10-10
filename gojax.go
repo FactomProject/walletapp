@@ -27,7 +27,12 @@ package main
     OutputAddress string `json:"outputAddress"`
     OutputType string `json:"outputType"`
     }
- 
+
+ type pseudoTran struct {
+		Inputs []string
+		Outputs []string
+	}
+    
  func check(e error, shouldEnd bool) {
     if e != nil {
         if shouldEnd {
@@ -198,7 +203,7 @@ package main
                     printTest := []string{"Print", string(txKey)}   
                     printTestErr := myState.Execute(printTest)
                     if printTestErr != nil {
-                        w.Write([]byte(printTestErr.Error()))
+                        w.Write([]byte("PRINTERR: " + printTestErr.Error()))
                     }
                     w.Write(buffer.Bytes())
                 case "save":
@@ -211,7 +216,7 @@ package main
                     signFeedString := []string{"Sign", string(txKey)}    
                     signErr := myState.Execute(signFeedString)
                     if signErr != nil {
-                        w.Write([]byte(signErr.Error()))
+                        w.Write([]byte("SIGNERR: " + signErr.Error()))
                     }
 
                     saveFeedString := []string{"Export", string(txKey), string(fileToSaveTo)}    
@@ -358,12 +363,59 @@ package main
                     }
                     
                     ib := myState.GetFS().GetDB().GetRaw([]byte(factoid.DB_BUILD_TRANS), []byte(txName))
+                    /*meme, sumErr := ib.TotalInputs()
+                    if sumErr != nil {
+                        fmt.Println("XXXXXXXXxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+                    }
+                    fmt.Println("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+                    fmt.Println(meme)*/
+                    /*for idx, nonReadable := range(ib.GetInputs()) {
+                        ib.Inputs[idx] = factoid.ConvertFctAddressToUserStr(nonReadable)
+                    }*/
                     jib, jerr := json.Marshal(ib)
+                    var dat map[string]interface{}
+
+                        if err := json.Unmarshal(jib, &dat); err != nil {
+                            panic(err)
+                        }
+                        fmt.Printf("%+v", dat)
+                        
+                        inputObjects := dat["Inputs"].([]interface{})
+                        myInps := make([]string, len(inputObjects))
+                        if len(inputObjects) > 0 {
+                            currInput := inputObjects[0].(map[string]interface{})
+                            for i := range(inputObjects) {
+                                currInput = inputObjects[i].(map[string]interface{})
+                                myInps[i] = factoid.ConvertFctAddressToUserStr(factoid.NewAddress([]byte(currInput["Address"].(string))))
+                            }
+                        }
+                        outputObjects := dat["Outputs"].([]interface{})
+                        myOuts := make([]string, len(outputObjects))
+                        if len(inputObjects) > 0 {
+                            currOutput := outputObjects[0].(map[string]interface{})
+                            for i := range(outputObjects) {
+                                currOutput = outputObjects[i].(map[string]interface{})
+                                myOuts[i] = factoid.ConvertFctAddressToUserStr(factoid.NewAddress([]byte(currOutput["Address"].(string))))
+                            }
+                        }
+                        
+                    returnTran := pseudoTran{
+                        Inputs: myInps,
+                        Outputs: myOuts,
+                    }
+                    
+                    lastTry, jayErr := json.Marshal(returnTran)
+                    if jayErr != nil {
+                        w.Write([]byte(jerr.Error()))
+                        return
+                    }
+     		        //w.Write([]byte(jib))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
+                        
                     if jerr != nil {
                         w.Write([]byte(jerr.Error()))
                         return
                     }
-     		        w.Write([]byte(jib))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
+     		        w.Write([]byte(lastTry))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
      		    } else {
      		        w.Write([]byte("You must include a filename to load the transaction from."));
      		    }
