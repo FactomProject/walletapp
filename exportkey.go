@@ -45,10 +45,10 @@ func (ExportKey) Execute(state IState, args []string) error {
 	var usrPublic, usrPrivate string
 	if adrtype == "fct" {
 		usrPublic = fct.ConvertFctAddressToUserStr(fct.NewAddress(public.Bytes()))
-		usrPrivate = fct.ConvertFctPrivateToUserStr(fct.NewAddress(private))
+		usrPrivate = fct.ConvertFctPrivateToUserStr(fct.NewAddress(private[:32]))
 	}else{
 		usrPublic = fct.ConvertECAddressToUserStr(fct.NewAddress(public.Bytes()))
-		usrPrivate = fct.ConvertECPrivateToUserStr(fct.NewAddress(private))
+		usrPrivate = fct.ConvertECPrivateToUserStr(fct.NewAddress(private[:32]))
 	}
 	
 	fmt.Println("Private Key:")
