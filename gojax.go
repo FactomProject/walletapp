@@ -365,7 +365,7 @@ package main
                         if err := json.Unmarshal(jib, &dat); err != nil {
                             panic(err)
                         }
-                        fmt.Printf("%+v", dat)
+                        //fmt.Printf("%+v", dat)
                         if dat["Inputs"] != nil {
                                 inputObjects := dat["Inputs"].([]interface{})
                                 myInps := make([]inputList, len(inputObjects))

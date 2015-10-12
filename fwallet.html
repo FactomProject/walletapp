@@ -163,7 +163,7 @@
                          if(data === '') {
                              $("#txtBox").text("No such transaction.");
                          } else {
-                             $("#txtBox").text(data);
+                             $("#txtBox").text("Transaction loaded into " + txKey + " successfully!");
                              populatePageFields(data);
                          }
                    },
@@ -186,11 +186,9 @@
                              if(data === '') {
                                  $("#txtBox").text("No such file.");
                              } else {
-                                 $("#txtBox").text(data);
-                                 //updateTxSelect(data);
+                                $("#txtBox").text("Transaction loaded into " + txKey + " successfully!");
+                                populatePageFields(data);
                              }
-
-                            populatePageFields(data);
                        },
                      });
         
@@ -202,7 +200,7 @@
                     } catch (e) {
                          $("#txtBox").text(data + "\n\nThe output above is not a properly-JSON-formatted factoid transaction.");
                     }
-                    $("#txtBox").text(data);
+                    //$("#txtBox").text(data);
                     $("#inputTable").find("tr:gt(1)").not(':last').remove();
                     if(returnedTX) {
                         for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
@@ -232,7 +230,6 @@
                           updateOutputTotals();
                           refreshFee();
                     }
-                    //$("#txtBox").text(inString);
           };
                       
           var getTxs = function () {
@@ -246,7 +243,6 @@
                                  $("#txtBox").text("NO TRANSACTIONS TO DISPLAY!");
                              } else {
                                  $("#txtBox").text(data);
-                                 //updateTxSelect(data);
                              }
                        },
                      });
@@ -421,7 +417,6 @@
       </form>
 
       <br><br>
-      <!--<div><label>Still left to spend:</label><br><div id="remainingUTXO"></div></div>-->
     </div>
     
     <div style="width:100%; height:100%;">
@@ -431,9 +426,9 @@
         <div align="center" style="float:center;"><h1 class="heading">Factoid Wallet GUI</h1></div>
         <div id="container">
             <div id="actionBar" align="center">
-                <div id="txDetails"> <!-- style="display:none;">-->
+                <div id="txDetails"> 
                     <div id="inputsDiv" style="float: left; margin-right: 100px; margin-bottom: 10px;">
-                        <font size=25 align="center">Inputs</font><br>
+                        <font size=17 align="center">Inputs</font><br>
                          <table id="inputTable" cellspacing="0" cellpadding="2">
                          <tr>
                             <td>Input Address</td>
@@ -453,7 +448,7 @@
                         </table>
                     </div>
                     <div id="outputDiv" style="float: left; margin-bottom: 10px; margin-right: 100px;">
-                        <font size=25 align="center">Outputs</font><br>
+                        <font size=17 align="center">Outputs</font><br>
                         <table id="outputTable">
                          <tr>
                             <td>Output Address</td>
@@ -514,7 +509,7 @@
                             <!--<input type="button" id="getBalButton" onclick="getBalance()" value="Individual Balance"> <br> --> 
                 </div>
                 <div id="feedbackDiv"> <!-- style="min-width: 100px; width: 30%; margin-right: 10px; margin-bottom:10px; display:inline-block; padding:1px;">-->
-                     <textarea id="txtBox" type="text" value="" rows="22" cols="93" text-align=left disabled>
+                     <textarea id="txtBox" type="text" value="" rows="22" cols="93" text-align=left readonly=true> <!-- disabled>-->
                      </textarea>
 
                     <br><br>
