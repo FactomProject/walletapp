@@ -254,8 +254,7 @@
           };
           
 
-          var newFCTAddress = function () {
-                var addName = prompt("Enter key ID for new Factoid address");
+          var addFCTAddress = function (addName) {
                      $.ajax({
                        url: 'receive',
                        type: 'post',
@@ -270,8 +269,7 @@
         
           };
           
-          var newECAddress = function () {
-                var addName = prompt("Enter key ID for new Entry Credit address");
+          var addECAddress = function (addName) {
                      $.ajax({
                        url: 'receive',
                        type: 'post',
@@ -285,11 +283,8 @@
                      });
         
           };
-
           
-          var importFromPK = function () {
-                var privateKey = prompt("What is the private key you would like to import?");
-                var addName = prompt("Please enter a name for the new address this will import into.");
+          var importPrivKey = function (privateKey, addName) {
                      $.ajax({
                        url: 'receive',
                        type: 'post',
@@ -303,29 +298,7 @@
                      });
         
           };
-              /*            
-          var addNewTx = function () {
-                var newTxName = prompt("Please enter the name of the new transaction")
-                             $.ajax({
-                               url: 'receive',
-                               type: 'post',
-                               dataType: 'html',
-                                                              
-                               data : { call_type: "addNewTx", ajax_post_data: newTxName},
-                               success : function(data) {
-                                     if(typeof data === 'undefined' || data === '') {
-                                         return
-                                     } else {
-                                        $('#txSelect')
-                                            .append($("<option></option>")
-                                             .attr("value",data)
-                                             .text(data));  
-                                             showSelect();
-                                     }
-                                 }
-                             });
-                          };*/
-          
+
               
           var displayHelp = function () {
                              $.ajax({
@@ -423,7 +396,7 @@
         div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
         div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
         .ui-dialog .ui-state-error { padding: .3em; }
-        .validateTips { border: 1px solid transparent; padding: 0.3em; }
+        .validateTips .privateKeyName { border: 1px solid transparent; padding: 0.3em; }
     input { text-align:center; }
 </style>
 
@@ -431,13 +404,15 @@
 <body>
     <div id="dialog-form" title="Direct coinflow">
 
-      <p class="validateTips">Please enter the name of the file to load from:</p>
+      <p class="validateTips"></p>
       <form>
         <fieldset>
-          <label for="primaryDialogInput">File:</label>
+          <label class="dialogInputLabel"></label>
           <input type="text" name="primaryDialogInput" id="primaryDialogInput" value="" class="text ui-widget-content ui-corner-all">
-          <!--<label for="sendAmount">Amount To Send:</label>
-          <input type="text" name="sendAmount" id="sendAmount" value="0.00" class="text ui-widget-content ui-corner-all" oninput="updateWhatsLeft()">-->
+          <div id="pkPart">
+            <label class="privateKeyName">Name:<br></label>
+            <input type="text" id="privateKeyName" class="text ui-widget-content ui-corner-all" size=32 maxlength=32>
+          </div>
 
      
           <!-- Allow form submission with keyboard without duplicating the dialog button -->
@@ -719,16 +694,18 @@
             var refreshFee = function() {
                 updateTransaction(buildTxFromPage(), "fee");
                 updateFeeLabel();
-                var reqFee = parseFloat($('#reqdFee').val());
-                var currFee = parseFloat($('#feeLabel').text());
-                //console.log("REQ : " + reqFee);
-                if(currFee >= reqFee && !isNaN(reqFee)) {
-                    $('#goodFee').css("color", "green");
-                    $('#goodFee').text("✔");
-                } else {
-                    $('#goodFee').css("color", "red");
-                    $('#goodFee').text("✗")
-                }
+                setTimeout(function(){
+                    var reqFee = parseFloat($('#reqdFee').val());
+                    var currFee = parseFloat($('#feeLabel').text());
+                    //console.log("REQ : " + reqFee);
+                    if(currFee >= reqFee && !isNaN(reqFee)) {
+                        $('#goodFee').css("color", "green");
+                        $('#goodFee').text("✔");
+                    } else {
+                        $('#goodFee').css("color", "red");
+                        $('#goodFee').text("✗")
+                    }
+                }, 500);
             };
             
           var buildTxFromPage = function() {
@@ -848,6 +825,9 @@
           };
           
           var loadTx = function() {
+                $(".validateTips").text("Please enter the name of the file to load from.");
+                $("#pkPart").hide();
+                $(".dialogInputLabel").text("File:");
                 $( "#dialog-form" ).dialog('option', 'title', ("Load Transaction From File"))
                     .data('formType', "loadTx")
                     .dialog('open');
@@ -855,13 +835,45 @@
           };
           
           var saveTx = function() {
+                $(".validateTips").text("Please enter the name of the file to save to.");
+                $("#pkPart").hide();
+                $(".dialogInputLabel").text("File:");
                 $( "#dialog-form" ).dialog('option', 'title', ("Save Transaction To File"))
                     .data('formType', "saveTx")
                     .dialog('open');
                 
-                /*var loadFile = prompt("What is the path/name of the file to load the transaction from?");
-                loadTxFromFile(loadFile);*/
           };
+          
+          var newFCTAddress = function() {
+                $(".validateTips").text("Please enter a name for the new factoid address.");
+                $("#pkPart").hide();
+                $(".dialogInputLabel").text("Name:");
+                $( "#dialog-form" ).dialog('option', 'title', ("New Address Name"))
+                    .data('formType', "newFCTAddress")
+                    .dialog('open');
+
+          };
+
+          var newECAddress = function() {
+                $(".validateTips").text("Please enter a name for the new Entry Credit address.");
+                $("#pkPart").hide();
+                $(".dialogInputLabel").text("Name:");
+                $( "#dialog-form" ).dialog('option', 'title', ("New Address Name"))
+                    .data('formType', "newECAddress")
+                    .dialog('open');
+
+          };
+ 
+          var importFromPK = function() {
+                $(".validateTips").text("");
+                $("#pkPart").show();
+                $(".dialogInputLabel").text("Private Key:");
+                $( "#dialog-form" ).dialog('option', 'title', ("Import Private Key"))
+                    .data('formType', "importPrivate")
+                    .dialog('open');
+
+          };         
+          
 
           var signTx = function() {
                 updateTransaction(buildTxFromPage(), "sign");
@@ -873,7 +885,6 @@
           };
 
 //This is all from giuseppe
-
     $(function() {
         var dialog, form,
      
@@ -891,26 +902,6 @@
           }, 500 );
         }
      
-        function checkLength( o, n, min, max ) {
-          if ( o.val().length > max || o.val().length < min ) {
-            o.addClass( "ui-state-error" );
-            updateTips( "Please make sure 'Recipient Address' is a valid Bitcoin address." );
-            return false;
-          } else {
-            return true;
-          }
-        }
-     
-        function checkRegexp( o, regexp, n ) {
-          if ( !( regexp.test( o.val() ) ) ) {
-            o.addClass( "ui-state-error" );
-            updateTips( n );
-            return false;
-          } else {
-            return true;
-          }
-        }
-     
         function checkDialogInput() {
           var valid = true;
           var formType = $("#dialog-form").data('formType');
@@ -923,24 +914,26 @@
             case "saveTx":
                 saveTxToFile(buildTxFromPage(), primaryDialogInput.val());
                 break;
+            case "newFCTAddress":
+                addFCTAddress(primaryDialogInput.val());
+                break;
+            case "newECAddress":
+                addECAddress(primaryDialogInput.val());
+                break;
+            case "importPrivate":
+                importPrivKey(primaryDialogInput.val(), $("#privateKeyName").val());
+                break;
             default:
                 console.log("NOT YET IMPLEMENTED FORMTYPE: " + formType.toString());
           }
           dialog.dialog( "close" );
-          /*
-          valid = valid && checkLength( primaryDialogInput, "Recipient Address", 26, 35 );
-          if ( valid ) {
-            socket.emit('addNewAddress', primaryDialogInput.val(), "recipient", parentNID, parseFloat(amountToSend.val()));
-            dialog.dialog( "close" );
-            doMagic();
-          }
-          return valid;*/
+
         }
           
         //Dialog prompt for sending coins from origin to recipient
         dialog = $( "#dialog-form" ).dialog({
           autoOpen: false,
-          height: 375,
+          height: 400,
           width: 590,
           modal: true,
           buttons: {
