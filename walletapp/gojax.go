@@ -168,12 +168,6 @@ package main
                 buffer.WriteString("\tInput: " + inputElement.InputAddress + " : " + strconv.FormatFloat(inputElement.InputSize, 'f', -1, 64) + "\n")
             }
             
-            /*printTest := []string{"Print", string(txKey)}   
-                    printTestErr := myState.Execute(printTest)
-                    if printTestErr != nil {
-                        w.Write([]byte(printTestErr.Error()))
-                    }    
-            */
             
             for _, outputElement := range(outRes) {
                 totalOutputs += outputElement.OutputSize
@@ -445,13 +439,12 @@ package main
                                 w.Write([]byte(jerr.Error()))
                                 return
                             }
-             		        //w.Write([]byte(jib))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
                                 
                             if jerr != nil {
                                 w.Write([]byte(jerr.Error()))
                                 return
                             }
-             		        w.Write([]byte(lastTry))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
+             		        w.Write([]byte(lastTry))    
              		        
              		   }
         }
