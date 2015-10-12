@@ -11,7 +11,8 @@ package main
     "encoding/json"
     "encoding/hex"
     "github.com/FactomProject/fctwallet/Wallet"
-    "github.com/FactomProject/factoid"
+    "github.com/FactomProject/factoid/wallet"
+    fct "github.com/FactomProject/factoid"
     "log"
  )
 
@@ -65,14 +66,14 @@ package main
 			fmt.Println(err)
             return
 		}
-		w.Write([]byte(factoid.ConvertDecimal(uint64(v))))
+		w.Write([]byte(fct.ConvertDecimal(uint64(v))))
  }
  
  func reqFee(w http.ResponseWriter, r *http.Request) {
         txKey := r.FormValue("key")
         
-        ib := myState.GetFS().GetDB().GetRaw([]byte(factoid.DB_BUILD_TRANS), []byte(txKey))
-		trans, ok := ib.(factoid.ITransaction)
+        ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
+		trans, ok := ib.(fct.ITransaction)
 		if ib != nil && ok {
 			
 			
@@ -86,7 +87,7 @@ package main
 				fmt.Println(err)
 				return
 			}
-			w.Write([]byte(strings.TrimSpace(factoid.ConvertDecimal(fee))))
+			w.Write([]byte(strings.TrimSpace(fct.ConvertDecimal(fee))))
 	    } else {
 	        w.Write([]byte("..."))
 	    }
@@ -95,8 +96,8 @@ package main
 
  func showFee(txKey string) []byte {
         
-        ib := myState.GetFS().GetDB().GetRaw([]byte(factoid.DB_BUILD_TRANS), []byte(txKey))
-		trans, ok := ib.(factoid.ITransaction)
+        ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
+		trans, ok := ib.(fct.ITransaction)
 		if ib != nil && ok {
 			
 			
@@ -110,7 +111,7 @@ package main
 				fmt.Println(err)
 	            return []byte("...")
 			}
-			return []byte(strings.TrimSpace(factoid.ConvertDecimal(fee)))
+			return []byte(strings.TrimSpace(fct.ConvertDecimal(fee)))
 	    } else {
 	        return []byte("...")
 	    }
@@ -121,7 +122,7 @@ package main
  func craftTx(w http.ResponseWriter, r *http.Request) {
    		txKey := r.FormValue("key")
    		actionToDo := r.FormValue("action")
-   		
+   		/*
         execStrings := []string{"NewTransaction", txKey}
         newTXErr := myState.Execute(execStrings)
         if newTXErr != nil {
@@ -130,10 +131,25 @@ package main
                 w.Write([]byte(deleteErr.Error()))
                 return
             }
-        } 
+        } */
+
+	    // Make sure we don't already have a transaction in process with this key
+	    t := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
+	    if t != nil {
+            deleteErr := FactoidDeleteTx(txKey)
+            if deleteErr != nil {
+                w.Write([]byte(deleteErr.Error()))
+                return
+            }
+	    }
+	    // Create a transaction
+	    t = myState.GetFS().GetWallet().CreateTransaction(myState.GetFS().GetTimeMilli())
+	    // Save it with the key
+	    myState.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey), t)
+
+            
         
-        
-            myState.Execute(execStrings)
+            //myState.Execute(execStrings)
 
             var buffer bytes.Buffer
             buffer.WriteString("Transaction " + txKey + ":\n\n")
@@ -151,15 +167,12 @@ package main
             var outRes []outputList
             json.Unmarshal([]byte(outputStr), &outRes)
             
-            var inputFeed []string
-            var outputFeed []string
             totalInputs := 0.0
             totalOutputs := 0.0
             
             for _, inputElement := range(inRes) {
-                inputFeed = []string{"AddInput", string(txKey), string(inputElement.InputAddress), strconv.FormatFloat(inputElement.InputSize, 'f', -1, 64)}
                 totalInputs += inputElement.InputSize
-                inputFeedErr := myState.Execute(inputFeed)
+                inputFeedErr := SilentAddInput(string(txKey), string(inputElement.InputAddress), strconv.FormatFloat(inputElement.InputSize, 'f', -1, 64))
                 if inputFeedErr != nil {
                     w.Write([]byte(inputFeedErr.Error() + " (INPUTS)"))
                     return
@@ -168,16 +181,16 @@ package main
                 buffer.WriteString("\tInput: " + inputElement.InputAddress + " : " + strconv.FormatFloat(inputElement.InputSize, 'f', -1, 64) + "\n")
             }
             
+            var outputFeedErr error
             
             for _, outputElement := range(outRes) {
                 totalOutputs += outputElement.OutputSize
                 if outputElement.OutputType == "fct" {
-                    outputFeed = []string{"AddOutput", string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64)}
+                    outputFeedErr = SilentAddOutput(string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64))
                 } else {
-                    outputFeed = []string{"AddECOutput", string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64)}
+                    outputFeedErr = SilentAddECOutput(string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64))
                 }
                 
-                outputFeedErr := myState.Execute(outputFeed)
                 if outputFeedErr != nil {
                     w.Write([]byte(outputFeedErr.Error() + " (OUTPUTS)"))
                     return
@@ -266,13 +279,141 @@ package main
             }
  }
  
+ func SilentAddInput(txKey string, inputAddress string, inputSize string) error {
+ 	ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
+	trans, ok := ib.(fct.ITransaction)
+	if ib == nil || !ok {
+		return fmt.Errorf("Unknown Transaction: " + txKey)
+	}
+		
+	var addr fct.IAddress
+	if !fct.ValidateFUserStr(inputAddress) {
+		if len(inputAddress) != 64 {
+			if len(inputAddress) > 32 {
+				return fmt.Errorf("Invalid Name. Check the address or name for proper entry.", len(inputAddress))
+			}
+
+			we := myState.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(inputAddress))
+
+			if we != nil {
+				we2 := we.(wallet.IWalletEntry)
+				addr, _ = we2.GetAddress()
+				inputAddress = hex.EncodeToString(addr.Bytes())
+			} else {
+				return fmt.Errorf("Name is undefined.")
+			}
+		} else {
+			badr,err := hex.DecodeString(inputAddress)
+			if err != nil {
+				return fmt.Errorf("Looks like an Invalid hex address.  Check that you entered it correctly")
+			}
+			addr = fct.NewAddress(badr)
+		}
+	} else {
+		//fmt.Printf("adr: %x\n",adr)
+		addr = fct.NewAddress(fct.ConvertUserStrToAddress(inputAddress))
+	}
+	amount, _ := fct.ConvertFixedPoint(inputSize)
+	bamount, _ := strconv.ParseInt(amount, 10, 64)
+	err := myState.GetFS().GetWallet().AddInput(trans, addr, uint64(bamount))
+
+	if err != nil {
+		return err
+	}
+	return nil
+ }
+
+ func SilentAddOutput(txKey string, outputAddress string, outputSize string) error {
+ 	ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
+	trans, ok := ib.(fct.ITransaction)
+	if ib == nil || !ok {
+		return fmt.Errorf("Unknown Transaction")
+	}
+
+	var addr fct.IAddress
+	if !fct.ValidateFUserStr(outputAddress) {
+		if len(outputAddress) != 64 {
+			if len(outputAddress) > 32 {
+				return fmt.Errorf("Invalid Address or Name.  Check that you entered it correctly.")
+			}
+
+			we := myState.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(outputAddress))
+
+			if we != nil {
+				we2 := we.(wallet.IWalletEntry)
+				addr, _ = we2.GetAddress()
+				outputAddress = hex.EncodeToString(addr.Bytes())
+			} else {
+				return fmt.Errorf("Name is undefined.")
+			}
+		} else {
+			if badHexChar.FindStringIndex(outputAddress) != nil {
+				return fmt.Errorf("Looks like an invalid Hex Address.  Check that you entered it correctly.")
+			}
+		}
+	} else {
+		addr = fct.NewAddress(fct.ConvertUserStrToAddress(outputAddress))
+	}
+	amount, _ := fct.ConvertFixedPoint(outputSize)
+	bamount, _ := strconv.ParseInt(amount, 10, 64)
+	err := myState.GetFS().GetWallet().AddOutput(trans, addr, uint64(bamount))
+	if err != nil {
+		return err
+	}
+
+
+	return nil
+ }
+
+ func SilentAddECOutput(txKey string, outputAddress string, outputSize string) error {
+
+	ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
+	trans, ok := ib.(fct.ITransaction)
+	if ib == nil || !ok {
+		return fmt.Errorf("Unknown Transaction")
+	}
+
+	var addr fct.IAddress
+	if !fct.ValidateECUserStr(outputAddress) {
+		if len(outputAddress) != 64 {
+			if len(outputAddress) > 32 {
+				return fmt.Errorf("Invalid Address or Name.  Check that you entered it correctly.")
+			}
+
+			we := myState.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(outputAddress))
+
+			if we != nil {
+				we2 := we.(wallet.IWalletEntry)
+				addr, _ = we2.GetAddress()
+				outputAddress = hex.EncodeToString(addr.Bytes())
+			} else {
+				return fmt.Errorf("Name is undefined.")
+			}
+		} else {
+			if badHexChar.FindStringIndex(outputAddress) != nil {
+				return fmt.Errorf("Looks like an invalid hex address. Check that you entered it correctly.")
+			}
+		}
+	} else {
+		addr = fct.NewAddress(fct.ConvertUserStrToAddress(outputAddress))
+	}
+	amount, _ := fct.ConvertFixedPoint(outputSize)
+	bamount, _ := strconv.ParseInt(amount, 10, 64)
+	err := myState.GetFS().GetWallet().AddECOutput(trans, addr, uint64(bamount))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+ 
  func FactoidDeleteTx(key string) error {
 	// Make sure we have a key
 	if len(key) == 0 {
 		return fmt.Errorf("Missing transaction key")
 	}
 	// Wipe out the key
-	myState.GetFS().GetDB().DeleteKey([]byte(factoid.DB_BUILD_TRANS), []byte(key))
+	myState.GetFS().GetDB().DeleteKey([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	return nil
  }
  
@@ -285,7 +426,7 @@ package main
  		    case "balance":
  		        printBal, err := Wallet.FactoidBalance(ajax_post_data)
  		        check(err, false)
- 		        w.Write([]byte("Factoid Address " + ajax_post_data + " Balance: " + strings.Trim(factoid.ConvertDecimal(uint64(printBal)), " ") + " ⨎"))
+ 		        w.Write([]byte("Factoid Address " + ajax_post_data + " Balance: " + strings.Trim(fct.ConvertDecimal(uint64(printBal)), " ") + " ⨎"))
  		    case "balances":
  		        printBal := GetBalances(myState)
  		        testErr := myState.Execute([]string{"balances"})
@@ -358,7 +499,7 @@ package main
                     }
                 }
                     
-                    ib := myState.GetFS().GetDB().GetRaw([]byte(factoid.DB_BUILD_TRANS), []byte(txName))
+                    ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txName))
                     jib, jerr := json.Marshal(ib)
                     var dat map[string]interface{}
 
@@ -378,7 +519,7 @@ package main
 			                                fmt.Println("Error: " + hexErr.Error())
 			                                return
 			                            }
-                                        myInps[i].InputAddress = factoid.ConvertFctAddressToUserStr(factoid.NewAddress(decodeAddr))
+                                        myInps[i].InputAddress = fct.ConvertFctAddressToUserStr(fct.NewAddress(decodeAddr))
                                         myInps[i].InputSize = currInput["Amount"].(float64)
                                     }
                                 }
@@ -405,7 +546,7 @@ package main
 			                                    fmt.Println("Error: " + hexErr.Error())
 			                                    return
 			                                }
-                                            myOuts[i].OutputAddress = factoid.ConvertFctAddressToUserStr(factoid.NewAddress(decodeAddr))
+                                            myOuts[i].OutputAddress = fct.ConvertFctAddressToUserStr(fct.NewAddress(decodeAddr))
                                             myOuts[i].OutputSize = currOutput["Amount"].(float64)
                                             myOuts[i].OutputType = "fct"
                                         }
@@ -422,7 +563,7 @@ package main
 			                                    fmt.Println("Error: " + hexErr.Error())
 			                                    return
 			                                }
-                                            myOuts[(i+len(outputObjects))].OutputAddress = factoid.ConvertECAddressToUserStr(factoid.NewAddress(decodeAddr))
+                                            myOuts[(i+len(outputObjects))].OutputAddress = fct.ConvertECAddressToUserStr(fct.NewAddress(decodeAddr))
                                             myOuts[(i+len(outputObjects))].OutputSize = currOutput["Amount"].(float64)
                                             myOuts[(i+len(outputObjects))].OutputType = "ec"
                                         }

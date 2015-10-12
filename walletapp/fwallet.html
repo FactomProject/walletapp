@@ -600,6 +600,8 @@
                     $(this).closest('tr').next('tr').remove();
                     $(this).closest('tr').remove();
                     currTabIdx--;
+                    updateOutputTotals();
+                    refreshFee();
                 }
             });
             
@@ -607,6 +609,8 @@
                 if($('#inputTable tr').length > 3) {
                     $(this).closest('tr').remove();
                     currTabIdx--;
+                    updateInputTotals();
+                    refreshFee();
                 }
             });
             
@@ -928,7 +932,7 @@
         //Dialog prompt for sending coins from origin to recipient
         dialog = $( "#dialog-form" ).dialog({
           autoOpen: false,
-          height: 400,
+          height: 420,
           width: 590,
           modal: true,
           buttons: {
