@@ -372,99 +372,88 @@ package main
                             panic(err)
                         }
                         fmt.Printf("%+v", dat)
-                        
-                        inputObjects := dat["Inputs"].([]interface{})
-                        myInps := make([]inputList, len(inputObjects))
-                        if len(inputObjects) > 0 {
-                            currInput := inputObjects[0].(map[string]interface{})
-                            for i := range(inputObjects) {
-                                currInput = inputObjects[i].(map[string]interface{})
-			                    decodeAddr, hexErr := hex.DecodeString(currInput["Address"].(string))
-			                    if hexErr != nil {
-			                        fmt.Println("Error: " + hexErr.Error())
-			                        return
-			                    }
-                                myInps[i].InputAddress = factoid.ConvertFctAddressToUserStr(factoid.NewAddress(decodeAddr))
-                                myInps[i].InputSize = currInput["Amount"].(float64)
-                            }
-                        }
-                        loo := 0
-                        loeco := 0
-                        var outputObjects []interface{}
-                        var outputECObjects []interface{}
-                        if dat["Outputs"] != nil {
-                            outputObjects = dat["Outputs"].([]interface{})
-                            loo = len(outputObjects)
-                        }
-                        if dat["OutECs"] != nil {
-                            outputECObjects = dat["OutECs"].([]interface{})
-                            loeco = len(outputECObjects)
-                        }
-                        myOuts := make([]outputList, (loo + loeco))
-                        if outputObjects != nil {
-                            if loo > 0 {
-                                currOutput := outputObjects[0].(map[string]interface{})
-                                for i := range(outputObjects) {
-                                    currOutput = outputObjects[i].(map[string]interface{})
-			                        decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
-			                        if hexErr != nil {
-			                            fmt.Println("Error: " + hexErr.Error())
-			                            return
-			                        }
-                                    myOuts[i].OutputAddress = factoid.ConvertFctAddressToUserStr(factoid.NewAddress(decodeAddr))
-                                    myOuts[i].OutputSize = currOutput["Amount"].(float64)
-                                    myOuts[i].OutputType = "fct"
+                        if dat["Inputs"] != nil {
+                                inputObjects := dat["Inputs"].([]interface{})
+                                myInps := make([]inputList, len(inputObjects))
+                                if len(inputObjects) > 0 {
+                                    currInput := inputObjects[0].(map[string]interface{})
+                                    for i := range(inputObjects) {
+                                        currInput = inputObjects[i].(map[string]interface{})
+			                            decodeAddr, hexErr := hex.DecodeString(currInput["Address"].(string))
+			                            if hexErr != nil {
+			                                fmt.Println("Error: " + hexErr.Error())
+			                                return
+			                            }
+                                        myInps[i].InputAddress = factoid.ConvertFctAddressToUserStr(factoid.NewAddress(decodeAddr))
+                                        myInps[i].InputSize = currInput["Amount"].(float64)
+                                    }
                                 }
-                            }
-                        }
-                        
-                        if outputECObjects != nil {
-                            if loeco > 0 {
-                                currOutput := outputECObjects[0].(map[string]interface{})
-                                for i := range(outputECObjects) {
-                                    currOutput = outputECObjects[i].(map[string]interface{})
-			                        decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
-			                        if hexErr != nil {
-			                            fmt.Println("Error: " + hexErr.Error())
-			                            return
-			                        }
-                                    myOuts[(i+len(outputObjects))].OutputAddress = factoid.ConvertECAddressToUserStr(factoid.NewAddress(decodeAddr))
-                                    myOuts[(i+len(outputObjects))].OutputSize = currOutput["Amount"].(float64)
-                                    myOuts[(i+len(outputObjects))].OutputType = "ec"
+                                loo := 0
+                                loeco := 0
+                                var outputObjects []interface{}
+                                var outputECObjects []interface{}
+                                if dat["Outputs"] != nil {
+                                    outputObjects = dat["Outputs"].([]interface{})
+                                    loo = len(outputObjects)
                                 }
+                                if dat["OutECs"] != nil {
+                                    outputECObjects = dat["OutECs"].([]interface{})
+                                    loeco = len(outputECObjects)
+                                }
+                                myOuts := make([]outputList, (loo + loeco))
+                                if outputObjects != nil {
+                                    if loo > 0 {
+                                        currOutput := outputObjects[0].(map[string]interface{})
+                                        for i := range(outputObjects) {
+                                            currOutput = outputObjects[i].(map[string]interface{})
+			                                decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
+			                                if hexErr != nil {
+			                                    fmt.Println("Error: " + hexErr.Error())
+			                                    return
+			                                }
+                                            myOuts[i].OutputAddress = factoid.ConvertFctAddressToUserStr(factoid.NewAddress(decodeAddr))
+                                            myOuts[i].OutputSize = currOutput["Amount"].(float64)
+                                            myOuts[i].OutputType = "fct"
+                                        }
+                                    }
+                                }
+                                
+                                if outputECObjects != nil {
+                                    if loeco > 0 {
+                                        currOutput := outputECObjects[0].(map[string]interface{})
+                                        for i := range(outputECObjects) {
+                                            currOutput = outputECObjects[i].(map[string]interface{})
+			                                decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
+			                                if hexErr != nil {
+			                                    fmt.Println("Error: " + hexErr.Error())
+			                                    return
+			                                }
+                                            myOuts[(i+len(outputObjects))].OutputAddress = factoid.ConvertECAddressToUserStr(factoid.NewAddress(decodeAddr))
+                                            myOuts[(i+len(outputObjects))].OutputSize = currOutput["Amount"].(float64)
+                                            myOuts[(i+len(outputObjects))].OutputType = "ec"
+                                        }
+                                    }
+                                }
+                                
+                            returnTran := pseudoTran{
+                                Inputs: myInps,
+                                Outputs: myOuts,
                             }
-                        }
-                        
-                    returnTran := pseudoTran{
-                        Inputs: myInps,
-                        Outputs: myOuts,
-                    }
-                    
-                    lastTry, jayErr := json.Marshal(returnTran)
-                    if jayErr != nil {
-                        w.Write([]byte(jerr.Error()))
-                        return
-                    }
-     		        //w.Write([]byte(jib))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
-                        
-                    if jerr != nil {
-                        w.Write([]byte(jerr.Error()))
-                        return
-                    }
-     		        w.Write([]byte(lastTry))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
- 		    /*
- 		    case "addNewTx":
- 		        execStrings := []string{"NewTransaction", ajax_post_data}
-                newErr := myState.Execute(execStrings)
-     		 	if newErr != nil {
-     		 	    if newErr.Error()[:13] == "Duplicate key" {
-     		 	        return //w.Write([]byte("Already have TX: " + ajax_post_data))
-     		 	    }
-     		 	    return
-     		 	}
-     		 	//Wallet.FactoidNewTransaction(ajax_post_data)	
-
-             	w.Write([]byte(ajax_post_data))*/
+                            
+                            lastTry, jayErr := json.Marshal(returnTran)
+                            if jayErr != nil {
+                                w.Write([]byte(jerr.Error()))
+                                return
+                            }
+             		        //w.Write([]byte(jib))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
+                                
+                            if jerr != nil {
+                                w.Write([]byte(jerr.Error()))
+                                return
+                            }
+             		        w.Write([]byte(lastTry))    //"The contents of " + ajax_post_data + " have been added as transaction " + txName + " ."));
+             		        
+             		   }
         }
  	} else {
  	    helpText, err := ioutil.ReadFile("./extra/help.txt")
