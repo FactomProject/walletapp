@@ -148,6 +148,28 @@
           var getBalances = function () {
                  sendPost("balances", '', "#txtBox", "NO BALANCES TO DISPLAY!");
           };
+          
+          var grabTx = function () {
+                 var txKey = $("#transactionNameInput").val(); 
+                 if(!txKey || txKey.length < 1) {
+                     $("#txtBox").text("Cannot load a no-name transaction.");
+                 }
+                 $.ajax({
+                   url: 'receive',
+                   type: 'post',
+                   dataType: 'html',
+                   data : { call_type: "loadTx", ajax_post_data: "", txName: txKey },
+                   success : function(data) {
+                         if(data === '') {
+                             $("#txtBox").text("No such transaction.");
+                         } else {
+                             $("#txtBox").text(data);
+                             populatePageFields(data);
+                         }
+                   },
+                 });
+          
+          };
 
           var loadTxFromFile = function (fileName) {
                      var txKey = $("#transactionNameInput").val(); 
@@ -168,37 +190,49 @@
                                  //updateTxSelect(data);
                              }
 
-                            try {
-                                var returnedTX = JSON.parse(data);
-                            } catch (e) {
-                                 $("#txtBox").text(data + "\n\nThe output above is not a properly-JSON-formatted factoid transaction.");
-                            }
-                            $("#txtBox").text(data);
-                            $("#inputTable").find("tr:gt(1)").not(':last').remove();
-                            if(returnedTX) {
-                                for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
-                                    var thisInput = returnedTX.Inputs[inIdx];
-                                    $( "#inputTable tr:nth-last-child(2)" ).children("td:first").find("input").val(thisInput.Address);
-                                    $( "#inputTable tr:nth-last-child(2)" ).children("td:eq(1)").find("input").val(thisInput.Amount / 100000000);
-                                    $("#addi-button").trigger("click");
-                                }
-                                  $( "#inputTable tr:nth-last-child(2)" ).children("td:last").find("button").trigger("click");
-                                  
-                                  
-                                for(var outIdx=0; outIdx < returnedTX.Outputs.length; outIdx++) {
-                                    var thisOutput = returnedTX.Outputs[outIdx];
-                                    $( "#outputTable tr:nth-last-child(3)" ).children("td:first").find("input").val(thisOutput.Address);
-                                    $( "#outputTable tr:nth-last-child(3)" ).children("td:eq(1)").find("input").val(thisOutput.Amount / 100000000);
-                                    $( "#outputTable tr:nth-last-child(2)" ).children("td:first").find("input").val("fct");
-                                    $("#addo-button").trigger("click");
-                                }
-                                  $( "#outputTable tr:nth-last-child(3)" ).children("td:last").find("button").trigger("click");
-                                  refreshFee();
-                            }
-                            //$("#txtBox").text(inString);
+                            populatePageFields(data);
                        },
                      });
         
+          };
+
+          var populatePageFields = function(data) {
+                    try {
+                        var returnedTX = JSON.parse(data);
+                    } catch (e) {
+                         $("#txtBox").text(data + "\n\nThe output above is not a properly-JSON-formatted factoid transaction.");
+                    }
+                    $("#txtBox").text(data);
+                    $("#inputTable").find("tr:gt(1)").not(':last').remove();
+                    if(returnedTX) {
+                        for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
+                            var thisInput = returnedTX.Inputs[inIdx];
+                            $( "#inputTable tr:nth-last-child(2)" ).children("td:first").find("input").val(thisInput.inputAddress);
+                            $( "#inputTable tr:nth-last-child(2)" ).children("td:eq(1)").find("input").val(thisInput.inputSize / 100000000);
+                            $("#addi-button").trigger("click");
+                        }
+                          $( "#inputTable tr:nth-last-child(2)" ).children("td:last").find("button").trigger("click");
+                          
+                          
+                        for(var outIdx=0; outIdx < returnedTX.Outputs.length; outIdx++) {
+                            var thisOutput = returnedTX.Outputs[outIdx];
+                            $( "#outputTable tr:nth-last-child(3)" ).children("td:first").find("input").val(thisOutput.outputAddress);
+                            $( "#outputTable tr:nth-last-child(3)" ).children("td:eq(1)").find("input").val(thisOutput.outputSize / 100000000);
+                            if(thisOutput.outputType === "ec") {
+                                $( "#outputTable tr:nth-last-child(2)" ).children("td:first").find("input[value=fct]").prop('checked', false);
+                                $( "#outputTable tr:nth-last-child(2)" ).children("td:first").find("input[value=ec]").prop('checked', true);
+                            } else {
+                                $( "#outputTable tr:nth-last-child(2)" ).children("td:first").find("input[value=fct]").prop('checked', true);
+                                $( "#outputTable tr:nth-last-child(2)" ).children("td:first").find("input[value=ec]").prop('checked', false);
+                            }
+                            $("#addo-button").trigger("click");
+                        }
+                          $( "#outputTable tr:nth-last-child(3)" ).children("td:last").find("button").trigger("click");
+                          updateInputTotals();
+                          updateOutputTotals();
+                          refreshFee();
+                    }
+                    //$("#txtBox").text(inString);
           };
                       
           var getTxs = function () {
@@ -479,7 +513,7 @@
                      <tr><td>Transaction Name</td></tr> 
                      <tr>
                        <td><input type="text" id="transactionNameInput" size=32 maxlength=32></td>
-                       <td><button type="submit" id="loadName-button" class="loadName-button" title="Load Transaction To Form" onclick="loadName()"><img src="./images/loadarrow.png"></button></td></tr>
+                       <td><button type="submit" id="loadName-button" class="loadName-button" title="Load Transaction To Form" onclick="grabTx()"><img src="./images/loadarrow.png"></button></td></tr>
                      <tr>
                        <td><div id="conversionRate"></div></td></tr>
                      <tr>
