@@ -515,9 +515,10 @@
                     <br><br>
                     <table id="bottomButtonsTable">
                         <tr>
-                         <td></td><td></td><td></td><td><td>View All Balances</td>
+                         <td>View Transactions</td><td></td><td></td><td></td><td><td>View All Balances</td>
                         </tr>
                         <tr>
+                            <td><button type="submit" id="transactions-button" class="transactions-button" title="View In-Progress Transactions" onclick="getTxs()"><img src="./images/ellipsis.png"></button></td>
                             <td><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
                             <td><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
                             <td><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
@@ -569,7 +570,7 @@
 
                 
                 
-                getTxs()
+                //getTxs()
                 getBalances()
             });
 

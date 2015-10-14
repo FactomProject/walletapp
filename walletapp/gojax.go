@@ -10,7 +10,6 @@ package main
     "io/ioutil"
     "encoding/json"
     "encoding/hex"
-    //"github.com/FactomProject/fctwallet/Wallet"
     "github.com/FactomProject/factoid/wallet"
     fct "github.com/FactomProject/factoid"
     "log"
@@ -403,6 +402,36 @@ package main
 	myState.GetFS().GetDB().DeleteKey([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	return nil
  }
+
+  func GetTransactions() ([][]byte, error) {
+	    // Get the transactions in flight.
+	    keys, values := myState.GetFS().GetDB().GetKeysValues([]byte(fct.DB_BUILD_TRANS))
+
+	    for i := 0; i < len(keys)-1; i++ {
+		    for j := 0; j < len(keys)-i-1; j++ {
+			    if bytes.Compare(keys[j], keys[j+1]) > 0 {
+				    t := keys[j]
+				    keys[j] = keys[j+1]
+				    keys[j+1] = t
+				    t2 := values[j]
+				    values[j] = values[j+1]
+				    values[j+1] = t2
+			    }
+		    }
+	    }
+	    theKeys := [][]byte{}
+	
+
+	
+	    for i, _ := range values {
+		    if values[i] == nil {
+			    continue
+		    }
+		    theKeys = append(theKeys,keys[i])
+	    }
+
+	    return theKeys, nil
+  }
  
  
  func receiveAjax(w http.ResponseWriter, r *http.Request) {
@@ -423,8 +452,8 @@ package main
                     return
                 }
  		        w.Write(printBal)
-  		    /*case "allTxs":
- 		        txNames, _, err := Wallet.GetTransactions()
+  		    case "allTxs":
+ 		        txNames, err := GetTransactions()
  		        if err != nil {
  		            fmt.Println(err.Error())
  		            w.Write([]byte(err.Error()))
@@ -441,7 +470,7 @@ package main
  		                sliceTxNames = append(sliceTxNames, byte('\n'))
  		            }
  		        }
- 		        w.Write(sliceTxNames)*/
+ 		        w.Write(sliceTxNames)
  		    case "addNewAddress":
  		        if len(ajax_post_data) > 0 {
      		        genErr := GenAddress(myState, "fct", ajax_post_data)
