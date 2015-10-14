@@ -37,6 +37,10 @@ func ValidName(name string) error {
 }
 
 func GenAddress(state IState, adrType string, key string) error {
+    validErr := ValidName(key)
+    if validErr != nil {
+		return validErr
+    }
 	switch strings.ToLower(adrType) {
 		case "ec":
 			adr, err := state.GetFS().GetWallet().GenerateECAddress([]byte(key))

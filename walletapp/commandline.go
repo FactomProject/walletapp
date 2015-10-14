@@ -20,8 +20,9 @@ var _ fct.Transaction
 var _ = time.Now
 
 func main() {
-	    state := NewState("wallet_app_bolt.db")
-        go startServer(state)
+ 	    configDir := os.Getenv("HOME") + "/.factom/"
+	    state := NewState(configDir + "factoid_wallet_bolt.db")
+        go startServer(state, configDir)
         Open("http://localhost:2337")
 	    run(state, os.Stdin,true)
 }
@@ -50,5 +51,5 @@ func run(state IState, reader io.Reader, prompt bool){
 	}
 	if prompt {
 		fmt.Println()
-	}
+	} 
 }
