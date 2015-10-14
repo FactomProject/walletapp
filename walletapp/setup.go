@@ -20,7 +20,6 @@ package main
 import (
 	"fmt"
 	fct "github.com/FactomProject/factoid"
-	"github.com/FactomProject/fctwallet/Wallet"
 	"time"
 	// "golang.org/x/crypto/ssh/terminal"
 )
@@ -64,7 +63,7 @@ func (r Setup) Execute(state IState, args []string) error {
 	}
 	
 	seedprime := fct.Sha([]byte(fmt.Sprintf("%s%v", args[1], time.Now().UnixNano()))).Bytes()
-	Wallet.NewSeed(seedprime)
+	NewSeed(state, seedprime)
 	
 	if setFountian {
 		fmt.Println("New seed set, fountain addresses defined")
@@ -92,5 +91,9 @@ Setup <seed>                        Sets up Fountain addresses, and seeds the wa
                                     If addresses exist, no Fountain addresses are created.
                                     But the wallet gets a new seed in any case.
 `
+}
+
+func NewSeed(state IState, data []byte) {
+	state.GetFS().GetWallet().NewSeed(data)
 }
 
