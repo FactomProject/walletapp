@@ -10,7 +10,7 @@ package main
     "io/ioutil"
     "encoding/json"
     "encoding/hex"
-    "github.com/FactomProject/fctwallet/Wallet"
+    //"github.com/FactomProject/fctwallet/Wallet"
     "github.com/FactomProject/factoid/wallet"
     fct "github.com/FactomProject/factoid"
     "log"
@@ -18,6 +18,8 @@ package main
 
  var chttp = http.NewServeMux()
  var myState IState
+ var configDir string
+ var staticDir string
  
  type inputList struct {
     InputSize float64 `json:"inputSize"`
@@ -47,11 +49,10 @@ package main
 
 
  func Home(w http.ResponseWriter, r *http.Request) {
- 
     if (strings.Contains(r.URL.Path, ".")) {
         chttp.ServeHTTP(w, r)
     } else {
-        t, err := template.ParseFiles("fwallet.html")
+        t, err := template.ParseFiles(staticDir + "fwallet.html")
         if err != nil {
             fmt.Println("err: ", err)
         }
@@ -122,16 +123,6 @@ package main
  func craftTx(w http.ResponseWriter, r *http.Request) {
    		txKey := r.FormValue("key")
    		actionToDo := r.FormValue("action")
-   		/*
-        execStrings := []string{"NewTransaction", txKey}
-        newTXErr := myState.Execute(execStrings)
-        if newTXErr != nil {
-            deleteErr := FactoidDeleteTx(txKey)
-            if deleteErr != nil {
-                w.Write([]byte(deleteErr.Error()))
-                return
-            }
-        } */
 
 	    // Make sure we don't already have a transaction in process with this key
 	    t := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
@@ -146,10 +137,6 @@ package main
 	    t = myState.GetFS().GetWallet().CreateTransaction(myState.GetFS().GetTimeMilli())
 	    // Save it with the key
 	    myState.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey), t)
-
-            
-        
-            //myState.Execute(execStrings)
 
             var buffer bytes.Buffer
             buffer.WriteString("Transaction " + txKey + ":\n\n")
@@ -305,7 +292,7 @@ package main
 		} else {
 			badr,err := hex.DecodeString(inputAddress)
 			if err != nil {
-				return fmt.Errorf("Looks like an Invalid hex address.  Check that you entered it correctly")
+				return fmt.Errorf("Looks like an Invalid hex address.  Check that you entered it correctly.")
 			}
 			addr = fct.NewAddress(badr)
 		}
@@ -424,7 +411,7 @@ package main
  		call_type := r.FormValue("call_type")
  		switch call_type {
  		    case "balance":
- 		        printBal, err := Wallet.FactoidBalance(ajax_post_data)
+ 		        printBal, err := FctBalance(myState, ajax_post_data)
  		        check(err, false)
  		        w.Write([]byte("Factoid Address " + ajax_post_data + " Balance: " + strings.Trim(fct.ConvertDecimal(uint64(printBal)), " ") + " ⨎"))
  		    case "balances":
@@ -436,7 +423,7 @@ package main
                     return
                 }
  		        w.Write(printBal)
-  		    case "allTxs":
+  		    /*case "allTxs":
  		        txNames, _, err := Wallet.GetTransactions()
  		        if err != nil {
  		            fmt.Println(err.Error())
@@ -454,7 +441,7 @@ package main
  		                sliceTxNames = append(sliceTxNames, byte('\n'))
  		            }
  		        }
- 		        w.Write(sliceTxNames)
+ 		        w.Write(sliceTxNames)*/
  		    case "addNewAddress":
  		        if len(ajax_post_data) > 0 {
      		        genErr := GenAddress(myState, "fct", ajax_post_data)
@@ -590,22 +577,24 @@ package main
              		   }
         }
  	} else {
- 	    helpText, err := ioutil.ReadFile("./extra/help.txt")
+ 	    helpText, err := ioutil.ReadFile(staticDir + "help.txt")
         check(err, false)
         w.Write([]byte(helpText))
  	}
  }
 
- func startServer(state IState) {
+ func startServer(state IState, configDir string) {
  	// http.Handler
  	myState = state
- 	chttp.Handle("/", http.FileServer(http.Dir("./extra/")))
+ 	staticDir = configDir + "static/"
+
+ 	chttp.Handle("/", http.FileServer(http.Dir(staticDir)))
  	mux := http.NewServeMux()
  	mux.HandleFunc("/", Home)
  	mux.HandleFunc("/receive", receiveAjax)
  	mux.HandleFunc("/rate", currRate)
  	mux.HandleFunc("/tx", craftTx)
  	mux.HandleFunc("/fee", reqFee)
- 	
+
  	http.ListenAndServe(":2337", mux)
  }
