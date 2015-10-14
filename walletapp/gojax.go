@@ -13,6 +13,7 @@ package main
     "github.com/FactomProject/factoid/wallet"
     fct "github.com/FactomProject/factoid"
     "log"
+    "os"
  )
 
  var chttp = http.NewServeMux()
@@ -207,22 +208,27 @@ package main
                         return
                     }
                     
-                    signFeedString := []string{"Sign", string(txKey)}    
-                    signErr := myState.Execute(signFeedString)
-                    if signErr != nil {
-                        w.Write([]byte("SIGNERR: " + signErr.Error()))
-                    }
+                    if _, err := os.Stat(fileToSaveTo); os.IsNotExist(err) {
+                        signFeedString := []string{"Sign", string(txKey)}    
+                        signErr := myState.Execute(signFeedString)
+                        if signErr != nil {
+                            w.Write([]byte("SIGNERR: " + signErr.Error()))
+                        }
 
-                    saveFeedString := []string{"Export", string(txKey), string(fileToSaveTo)}    
-                    saveErr := myState.Execute(saveFeedString)
-                    if saveErr != nil {
-                        fmt.Println(saveErr)
+                        saveFeedString := []string{"Export", string(txKey), string(fileToSaveTo)}    
+                        saveErr := myState.Execute(saveFeedString)
+                        if saveErr != nil {
+                            fmt.Println(saveErr)
+                        }
+                        buffer.WriteString("\n\nTransaction ")
+                        buffer.WriteString(txKey)
+                        buffer.WriteString(" has been saved to file: ")
+                        buffer.WriteString(string(fileToSaveTo))
+                        w.Write(buffer.Bytes())
+                    } else {
+                        w.Write([]byte(string(fileToSaveTo) + " already exists, please choose another filename to save to."))
                     }
-                    buffer.WriteString("\n\nTransaction ")
-                    buffer.WriteString(txKey)
-                    buffer.WriteString(" has been saved to file: ")
-                    buffer.WriteString(string(fileToSaveTo))
-                    w.Write(buffer.Bytes())
+                    return
                 case "sign":
                     signFeedString := []string{"Sign", string(txKey)}    
                     signErr := myState.Execute(signFeedString)
