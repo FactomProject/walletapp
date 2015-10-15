@@ -510,112 +510,116 @@ package main
      		    } else {
      		        w.Write([]byte("You must include a non-empty private key and name for the address to import it into."));
      		    }
-     		case "loadTx":
-     		    txName := r.FormValue("txName")
- 		        if len(ajax_post_data) > 0 {
-                    loadFeedString := []string{"Import", string(txName), string(ajax_post_data)}    
-                    loadErr := myState.Execute(loadFeedString)
-                    if loadErr != nil {
-                        w.Write([]byte(loadErr.Error()))
-                        return
-                    }
-                }
-                    
-                    ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txName))
-                    jib, jerr := json.Marshal(ib)
-                    var dat map[string]interface{}
-
-                        if err := json.Unmarshal(jib, &dat); err != nil {
-                            panic(err)
-                        }
-                        //fmt.Printf("%+v", dat)
-                        if dat["Inputs"] != nil {
-                                inputObjects := dat["Inputs"].([]interface{})
-                                myInps := make([]inputList, len(inputObjects))
-                                if len(inputObjects) > 0 {
-                                    currInput := inputObjects[0].(map[string]interface{})
-                                    for i := range(inputObjects) {
-                                        currInput = inputObjects[i].(map[string]interface{})
-			                            decodeAddr, hexErr := hex.DecodeString(currInput["Address"].(string))
-			                            if hexErr != nil {
-			                                fmt.Println("Error: " + hexErr.Error())
-			                                return
-			                            }
-                                        myInps[i].InputAddress = fct.ConvertFctAddressToUserStr(fct.NewAddress(decodeAddr))
-                                        myInps[i].InputSize = currInput["Amount"].(float64)
-                                    }
-                                }
-                                loo := 0
-                                loeco := 0
-                                var outputObjects []interface{}
-                                var outputECObjects []interface{}
-                                if dat["Outputs"] != nil {
-                                    outputObjects = dat["Outputs"].([]interface{})
-                                    loo = len(outputObjects)
-                                }
-                                if dat["OutECs"] != nil {
-                                    outputECObjects = dat["OutECs"].([]interface{})
-                                    loeco = len(outputECObjects)
-                                }
-                                myOuts := make([]outputList, (loo + loeco))
-                                if outputObjects != nil {
-                                    if loo > 0 {
-                                        currOutput := outputObjects[0].(map[string]interface{})
-                                        for i := range(outputObjects) {
-                                            currOutput = outputObjects[i].(map[string]interface{})
-			                                decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
-			                                if hexErr != nil {
-			                                    fmt.Println("Error: " + hexErr.Error())
-			                                    return
-			                                }
-                                            myOuts[i].OutputAddress = fct.ConvertFctAddressToUserStr(fct.NewAddress(decodeAddr))
-                                            myOuts[i].OutputSize = currOutput["Amount"].(float64)
-                                            myOuts[i].OutputType = "fct"
-                                        }
-                                    }
-                                }
-                                
-                                if outputECObjects != nil {
-                                    if loeco > 0 {
-                                        currOutput := outputECObjects[0].(map[string]interface{})
-                                        for i := range(outputECObjects) {
-                                            currOutput = outputECObjects[i].(map[string]interface{})
-			                                decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
-			                                if hexErr != nil {
-			                                    fmt.Println("Error: " + hexErr.Error())
-			                                    return
-			                                }
-                                            myOuts[(i+len(outputObjects))].OutputAddress = fct.ConvertECAddressToUserStr(fct.NewAddress(decodeAddr))
-                                            myOuts[(i+len(outputObjects))].OutputSize = currOutput["Amount"].(float64)
-                                            myOuts[(i+len(outputObjects))].OutputType = "ec"
-                                        }
-                                    }
-                                }
-                                
-                            returnTran := pseudoTran{
-                                Inputs: myInps,
-                                Outputs: myOuts,
-                            }
-                            
-                            lastTry, jayErr := json.Marshal(returnTran)
-                            if jayErr != nil {
-                                w.Write([]byte(jerr.Error()))
-                                return
-                            }
-                                
-                            if jerr != nil {
-                                w.Write([]byte(jerr.Error()))
-                                return
-                            }
-             		        w.Write([]byte(lastTry))    
-             		        
-             		   }
         }
  	} else {
  	    helpText, err := ioutil.ReadFile(staticDir + "help.txt")
         check(err, false)
         w.Write([]byte(helpText))
  	}
+ }
+
+
+ func loadTx(w http.ResponseWriter, r *http.Request) {
+        ajax_post_data := r.FormValue("ajax_post_data")
+        txName := r.FormValue("txName")
+        if len(ajax_post_data) > 0 {
+            loadFeedString := []string{"Import", string(txName), string(ajax_post_data)}    
+            loadErr := myState.Execute(loadFeedString)
+            if loadErr != nil {
+                w.Write([]byte(loadErr.Error()))
+                return
+            }
+        }
+        
+        ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txName))
+        jib, jerr := json.Marshal(ib)
+        var dat map[string]interface{}
+
+            if err := json.Unmarshal(jib, &dat); err != nil {
+                panic(err)
+            }
+            //fmt.Printf("%+v", dat)
+            if dat["Inputs"] != nil {
+                    inputObjects := dat["Inputs"].([]interface{})
+                    myInps := make([]inputList, len(inputObjects))
+                    if len(inputObjects) > 0 {
+                        currInput := inputObjects[0].(map[string]interface{})
+                        for i := range(inputObjects) {
+                            currInput = inputObjects[i].(map[string]interface{})
+                            decodeAddr, hexErr := hex.DecodeString(currInput["Address"].(string))
+                            if hexErr != nil {
+                                fmt.Println("Error: " + hexErr.Error())
+                                return
+                            }
+                            myInps[i].InputAddress = fct.ConvertFctAddressToUserStr(fct.NewAddress(decodeAddr))
+                            myInps[i].InputSize = currInput["Amount"].(float64)
+                        }
+                    }
+                    loo := 0
+                    loeco := 0
+                    var outputObjects []interface{}
+                    var outputECObjects []interface{}
+                    if dat["Outputs"] != nil {
+                        outputObjects = dat["Outputs"].([]interface{})
+                        loo = len(outputObjects)
+                    }
+                    if dat["OutECs"] != nil {
+                        outputECObjects = dat["OutECs"].([]interface{})
+                        loeco = len(outputECObjects)
+                    }
+                    myOuts := make([]outputList, (loo + loeco))
+                    if outputObjects != nil {
+                        if loo > 0 {
+                            currOutput := outputObjects[0].(map[string]interface{})
+                            for i := range(outputObjects) {
+                                currOutput = outputObjects[i].(map[string]interface{})
+                                decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
+                                if hexErr != nil {
+                                    fmt.Println("Error: " + hexErr.Error())
+                                    return
+                                }
+                                myOuts[i].OutputAddress = fct.ConvertFctAddressToUserStr(fct.NewAddress(decodeAddr))
+                                myOuts[i].OutputSize = currOutput["Amount"].(float64)
+                                myOuts[i].OutputType = "fct"
+                            }
+                        }
+                    }
+                    
+                    if outputECObjects != nil {
+                        if loeco > 0 {
+                            currOutput := outputECObjects[0].(map[string]interface{})
+                            for i := range(outputECObjects) {
+                                currOutput = outputECObjects[i].(map[string]interface{})
+                                decodeAddr, hexErr := hex.DecodeString(currOutput["Address"].(string))
+                                if hexErr != nil {
+                                    fmt.Println("Error: " + hexErr.Error())
+                                    return
+                                }
+                                myOuts[(i+len(outputObjects))].OutputAddress = fct.ConvertECAddressToUserStr(fct.NewAddress(decodeAddr))
+                                myOuts[(i+len(outputObjects))].OutputSize = currOutput["Amount"].(float64)
+                                myOuts[(i+len(outputObjects))].OutputType = "ec"
+                            }
+                        }
+                    }
+                    
+                returnTran := pseudoTran{
+                    Inputs: myInps,
+                    Outputs: myOuts,
+                }
+                
+                lastTry, jayErr := json.Marshal(returnTran)
+                if jayErr != nil {
+                    w.Write([]byte(jerr.Error()))
+                    return
+                }
+                    
+                if jerr != nil {
+                    w.Write([]byte(jerr.Error()))
+                    return
+                }
+ 		        w.Write([]byte(lastTry))    
+ 		        
+ 		   }
  }
 
  func startServer(state IState, configDir string) {
@@ -630,6 +634,7 @@ package main
  	mux.HandleFunc("/receive", receiveAjax)
  	mux.HandleFunc("/rate", currRate)
  	mux.HandleFunc("/tx", craftTx)
+ 	mux.HandleFunc("/loadtx", loadTx)
  	mux.HandleFunc("/fee", reqFee)
  	
  	http.ListenAndServe(":2337", mux)
