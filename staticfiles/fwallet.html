@@ -61,7 +61,7 @@
                         txOutputs = txInformation[1];
                         if(performAction === "send") {
                             if(!balanceCheck()) {
-                                  $('#txtBox').text("Transaction imbalanced (the fee is much higher than it should be)!\n\nPlease make sure that you're using the majority of your inputs.");
+                                  $('#txtBox').text("Transaction imbalanced (the fee is much higher than it should be)!\n\nTransaction was not sent to network as a result.\n\nTo ensure the transaction is sent successfully, please make sure that the transaction fee being paid is less than 10 times the required fee.");
                                   return;
                             }
                          }
