@@ -720,13 +720,14 @@
             };
           
             var refreshFee = function() {
-                //updateTransaction(buildTxFromPage(), "fee");
+                updateTransaction(buildTxFromPage(), "fee");
                 updateFee();
                 updateFeeLabel();
                 setTimeout(function(){
                     var reqFee = parseFloat($('#reqdFee').val());
                     var currFee = parseFloat($('#feeLabel').text());
-                    //console.log("REQ : " + reqFee);
+                    console.log("REQ : " + reqFee);
+                    console.log("curr! : " + currFee);
                     if(currFee >= reqFee && !isNaN(reqFee)) {
                         $('#goodFee').css("color", "green");
                         $('#goodFee').text("✔");
