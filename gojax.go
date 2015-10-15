@@ -622,6 +622,7 @@ package main
  	// http.Handler
  	myState = state
  	staticDir = configDir + "static/"
+ 	//serverPort := strings.Split(myState.GetServer(), ":")[1]
 
  	chttp.Handle("/", http.FileServer(http.Dir(staticDir)))
  	mux := http.NewServeMux()
@@ -630,6 +631,7 @@ package main
  	mux.HandleFunc("/rate", currRate)
  	mux.HandleFunc("/tx", craftTx)
  	mux.HandleFunc("/fee", reqFee)
-
+ 	
  	http.ListenAndServe(":2337", mux)
+ 	//http.ListenAndServe(serverPort, mux)
  }
