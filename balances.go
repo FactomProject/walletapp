@@ -22,16 +22,16 @@ import (
  * General Support Functions
  ***********************************************/
 
-var badChar, _ = regexp.Compile("[^A-Za-z0-9_]")
+var badChar, _ = regexp.Compile("[^A-Za-z0-9_-]")
 var badHexChar, _ = regexp.Compile("[^A-Fa-f0-9]")
 
 
 func ValidName(name string) error {
 	if len(name) > 32 {
-		return fmt.Errorf("Name of address is too long")
+		return fmt.Errorf("Name of address is too long.")
 	}
 	if badChar.FindStringIndex(name) != nil {
-		return fmt.Errorf("Invalid name. Names must be alphanumeric or underscores")
+		return fmt.Errorf("Invalid name. Names must be alphanumeric, underscores, or hyphens.")
 	}
 	return nil
 }
