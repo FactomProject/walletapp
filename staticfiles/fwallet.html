@@ -585,6 +585,9 @@
             
             function ensureFeeRefresh() {
                 $( ".qty" ).change(function() {
+                    this.value = parseFloat(this.value).toFixed(8) / 1;
+                    updateInputTotals();
+                    updateOutputTotals();
                     refreshFee();
                 });
                 $( ".addresstype" ).change(function() {
@@ -883,6 +886,7 @@
                 var inputSeed = prompt("What is your wallet seed?");
                 console.log(inputSeed);
           };
+          
 
 //This is all from giuseppe
     $(function() {
