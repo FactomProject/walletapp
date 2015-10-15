@@ -32,7 +32,7 @@ package main
     OutputType string `json:"outputType"`
     }
 
- type pseudoTran struct {
+ type pseudoTransaction struct {
 		Inputs []inputList
 		Outputs []outputList
 	}
@@ -602,7 +602,7 @@ package main
                         }
                     }
                     
-                returnTran := pseudoTran{
+                returnTran := pseudoTransaction{
                     Inputs: myInps,
                     Outputs: myOuts,
                 }
