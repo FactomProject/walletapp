@@ -155,10 +155,10 @@
                      $("#txtBox").text("Cannot load a no-name transaction.");
                  }
                  $.ajax({
-                   url: 'receive',
+                   url: 'loadtx',
                    type: 'post',
                    dataType: 'html',
-                   data : { call_type: "loadTx", ajax_post_data: "", txName: txKey },
+                   data : { ajax_post_data: "", txName: txKey },
                    success : function(data) {
                          if(data === '') {
                              $("#txtBox").text("No such transaction.");
@@ -178,10 +178,10 @@
                         $("#transactionNameInput").val(txKey)
                      }
                      $.ajax({
-                       url: 'receive',
+                       url: 'loadtx',
                        type: 'post',
                        dataType: 'html',
-                       data : { call_type: "loadTx", ajax_post_data: fileName, txName: txKey },
+                       data : { ajax_post_data: fileName, txName: txKey },
                        success : function(data) {
                              if(data === '') {
                                  $("#txtBox").text("No such file.");
@@ -478,7 +478,7 @@
 
                 <br><br><br><br>
 
-              <div id="controlDiv"> <!-- style="min-width: 100px; margin-left: 100px; margin-top: 10px; display:block; padding:1px;">-->
+              <div id="controlDiv"> 
                      <table id="controlButtons" cellspacing="5" cellpadding="2">
                      <tr><td>Transaction Name</td></tr> 
                      <tr>
@@ -508,8 +508,8 @@
                      </table>
                             <!--<input type="button" id="getBalButton" onclick="getBalance()" value="Individual Balance"> <br> --> 
                 </div>
-                <div id="feedbackDiv"> <!-- style="min-width: 100px; width: 30%; margin-right: 10px; margin-bottom:10px; display:inline-block; padding:1px;">-->
-                     <textarea id="txtBox" type="text" value="" rows="22" cols="93" text-align=left readonly=true> <!-- disabled>-->
+                <div id="feedbackDiv"> 
+                     <textarea id="txtBox" type="text" value="" rows="22" cols="103" text-align=left readonly=true> <!-- disabled>-->
                      </textarea>
 
                     <br><br>
