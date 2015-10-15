@@ -186,9 +186,29 @@ package main
                 buffer.WriteString("\tOutput: " + outputElement.OutputAddress + " : " + strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64) + " (" + outputElement.OutputType + 
                                    ") \n")
             }
-      	    currFee := totalInputs - totalOutputs
+            
+
+            tin, err1 := t.(fct.ITransaction).TotalInputs()
+			tout, err2 := t.(fct.ITransaction).TotalOutputs()
+			tec,  err3 := t.(fct.ITransaction).TotalECs()
+			if err1 == nil && err2 == nil && err3 == nil {
+				cfee := int64(tin) - int64(tout) - int64(tec)
+				sign := ""
+				if cfee < 0 {
+					sign = "-"
+					cfee = -cfee
+				}
+                buffer.WriteString("\n\tFee: " + sign + strings.TrimSpace(fct.ConvertDecimal(uint64(cfee))) + "\n")
+            }
+
+            
+            
+            
+            
+      	    //currFee := uint64((totalInputs - totalOutputs) * 100000000)
       	    
-      	    buffer.WriteString("\n\tFee: " + strconv.FormatFloat(currFee, 'f', -1, 64))
+      	    //buffer.WriteString("\n\tFee: " + strings.TrimSpace(fct.ConvertDecimal(currFee)))
+      	    //buffer.WriteString("\n\tFee: " + strconv.FormatFloat(currFee, 'f', -1, 64))
 
                                    
       	    switch actionToDo {
