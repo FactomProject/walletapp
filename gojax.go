@@ -96,7 +96,6 @@ package main
  }
 
  func showFee(txKey string) []byte {
-        
         ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
 		trans, ok := ib.(fct.ITransaction)
 		if ib != nil && ok {
@@ -378,7 +377,6 @@ package main
  }
 
  func SilentAddECOutput(txKey string, outputAddress string, outputSize string) error {
-
 	ib := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
 	trans, ok := ib.(fct.ITransaction)
 	if ib == nil || !ok {

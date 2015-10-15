@@ -88,6 +88,31 @@
                          }); 
                       }
                   };
+
+
+          var updateFee = function () {
+                     var txKey = $("#transactionNameInput").val(); 
+                     if(!txKey || txKey.length < 1) {
+                        txKey = "UITX"
+                        $("#transactionNameInput").val(txKey)
+                     }
+         
+
+                         $.ajax({
+                           url: 'fee',
+                           type: 'get',
+                           dataType: 'html',
+                           data : { key: txKey },
+                           success : function(data) {
+                                     if(data === '' || typeof(data) === 'undefined') {
+                                         $('#reqdFee').val("...");
+                                     } else {
+                                         $('#reqdFee').val(data);
+                                     }
+                           }
+                         });
+          }
+                                 
                   
           var balanceCheck = function() {
                 refreshFee();
@@ -695,7 +720,8 @@
             };
           
             var refreshFee = function() {
-                updateTransaction(buildTxFromPage(), "fee");
+                //updateTransaction(buildTxFromPage(), "fee");
+                updateFee();
                 updateFeeLabel();
                 setTimeout(function(){
                     var reqFee = parseFloat($('#reqdFee').val());
@@ -705,10 +731,14 @@
                         $('#goodFee').css("color", "green");
                         $('#goodFee').text("✔");
                     } else {
-                        $('#goodFee').css("color", "red");
-                        $('#goodFee').text("✗")
+                        if(!isNaN(reqFee)) {
+                            $('#goodFee').css("color", "red");
+                            $('#goodFee').text("✗")
+                        } else {
+                            $('#goodFee').text("")
+                        }
                     }
-                }, 500);
+                }, 750);
             };
             
           var buildTxFromPage = function() {
@@ -787,12 +817,13 @@
                 if(shouldWeSend) {
                     updateTransaction(buildTxFromPage(), "send");
                 }
-                //refreshFee();
+                refreshFee();
           };
           
           var getTx = function() {
                 updateTransaction(buildTxFromPage(), "print");
-                //refreshFee();
+                refreshFee();
+                //updateFee();
           };
           
           var saveTxToFile = function(txInformation, fileToSaveTo) {
