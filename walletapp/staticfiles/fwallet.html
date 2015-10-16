@@ -7,7 +7,11 @@
 <link rel="stylesheet" href="jquery-ui.css">
 
 <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="tooltip.js"></script>
+<script type="text/javascript" src="popover.js"></script>
 <script type="text/javascript" src="jquery-ui.js"></script>
+<link rel="stylesheet" href="bootstrap.min.css">
+
 
         <script type="text/javascript" charset="utf-8">
             var currTabIdx = 5;
@@ -322,7 +326,7 @@
 
               
           var displayHelp = function () {
-                             $.ajax({
+                 /*            $.ajax({
                                url: 'receive',
                                type: 'get',
                                dataType: 'html',
@@ -330,6 +334,10 @@
                                  $('#txtBox').text(data);
                                },
                              });
+                   */          
+
+                    $('[data-toggle="popover"]').popover("toggle"); 
+
                           };
             
           </script>
@@ -392,7 +400,6 @@
 
     #feedbackDiv{
         float:left;
-        /*border: 1px solid white;*/
         min-width: 300px;
         width:65%;
         padding:10px;
@@ -400,7 +407,6 @@
     }
     #controlDiv{
         float:left;
-        /*border: 1px solid white;*/
         min-width: 400px;
         padding:10px;
         width:30%;
@@ -408,8 +414,6 @@
     } 
     .ui-dialog .ui-state-error { padding: .3em; }
             .validateTips { border: 1px solid transparent; padding: 0.1em; }
-        /*body { font-size: 62.5%; }*/
-        /*label, input { display:block; }*/
         input.text { margin-bottom:12px; width:97%; padding: .4em; }
         fieldset { padding:0; border:0; margin-top:25px; }
         h1 { font-size: 1.2em; margin: .6em 0; }
@@ -419,11 +423,24 @@
         .ui-dialog .ui-state-error { padding: .3em; }
         .validateTips .privateKeyName { border: 1px solid transparent; padding: 0.3em; }
     input { text-align:center; }
+
+
+  .popover {
+    background: black;
+    border: 2px solid white;
+    padding: 0px;
+    color: white;
+    text-align:center;
+    font: bold 12px "Helvetica Neue", Sans-Serif;
+    text-transform:uppercase;
+  }
+  .popover-title { display: none; }
+
 </style>
 
 </head>
 <body>
-    <div id="dialog-form" title="Direct coinflow">
+    <div id="dialog-form" title="Please">
 
       <p class="validateTips"></p>
       <form>
@@ -443,7 +460,7 @@
 
       <br><br>
     </div>
-    
+
     <div style="width:100%; height:100%;">
         <div align="center" style="float:right;"><font size="2">Help<br></font>
             <button id="help-button" title="Help" onclick="displayHelp();"><img src="./images/qmark2.png"></button>
@@ -458,7 +475,7 @@
                          <tr>
                             <td>Input Address</td>
                             <td><label id="inputLabel" for="inputQuantity">Amount</label></td>
-                            <td><button type="submit" id="addi-button" class="addi-button" title="New Input"><img src="./images/addbutton.png"></button></td>
+                            <td data-placement="top" data-toggle="popover" data-content="Click to add another input to your transaction" data-trigger="manual"><button type="submit" id="addi-button" class="addi-button" title="New Input"><img src="./images/addbutton.png"></button></td>
                          </tr>
                          <tr>
                             <td><input type="text" id="txInput" size=54 class="keys" tabindex="1"></td>
@@ -466,7 +483,7 @@
                             <td><button title="Delete Input" class="btnDelete">✖</button></td>
                          </tr>
                          <tr id="inTotal">
-                            <td align="right">Input Total: </td>
+                            <td align="right" style="text-align: right;">Input Total: </td>
                             <td><input id="inTotalInput" type="text" value="0.0" disabled></td>
                             <td></td>
                          </tr>
@@ -478,7 +495,7 @@
                          <tr>
                             <td>Output Address</td>
                             <td><label id="outLabel" for="outQuantity">Amount</label></td>
-                            <td><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
+                            <td  data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
                          </tr>
                          <tr>                        
                             <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3"></td>
@@ -486,13 +503,13 @@
                             <td><button title="Delete Output" class="btnDelete">✖</button></td>
                          </tr> 
                          <tr>
-                            <td><form id="outTypeForm"><input type="radio" name="outType" class="addresstype" value="fct" checked>⨎<input type="radio" name="outType" class="addresstype" value="ec">EC</form>
+                            <td data-placement="bottom" data-toggle="popover" data-content="Choose whether to send to a factoid or entry credit address" data-trigger="manual"><form id="outTypeForm"><input type="radio" name="outType" class="addresstype" value="fct" checked>⨎ <input type="radio" name="outType" class="addresstype" value="ec">EC</form>
                             </td>
                             <td></td>
                             <td></td>
                          </tr>
                          <tr id="outTotal">
-                            <td align="right">Output Total: </td>
+                            <td align="right" style="text-align: right;">Output Total: </td>
                             <td><input id="outTotalInput" type="text" value="0.0" disabled></td>
                             <td></td>
                          </tr>
@@ -507,17 +524,17 @@
                      <table id="controlButtons" cellspacing="5" cellpadding="2">
                      <tr><td>Transaction Name</td></tr> 
                      <tr>
-                       <td><input type="text" id="transactionNameInput" size=32 maxlength=32></td>
-                       <td><button type="submit" id="loadName-button" class="loadName-button" title="Load Transaction To Form" onclick="grabTx()"><img src="./images/loadarrow.png"></button></td></tr>
+                       <td data-placement="top" data-toggle="popover" data-content="Specify transaction name (if left blank, name is automatically generated)" data-trigger="manual"><input type="text" id="transactionNameInput" size=32 maxlength=32></td>
+                       <td data-placement="top" data-toggle="popover" data-content="Load the transaction name in the box and populate page with transaction details" data-trigger="manual"><button type="submit" id="loadName-button" class="loadName-button" title="Load Transaction To Form" onclick="grabTx()"><img src="./images/loadarrow.png"></button></td></tr>
                      <tr>
                        <td><div id="conversionRate"></div></td></tr>
                      <tr>
                        <td>Currently Paying Fee: <label id="feeLabel">0.0</label>⨎</td>
-                       <td><label id="goodFee" style="font-size: 40px;"></label></td></tr>
+                       <td data-placement="right" data-toggle="popover" data-content="Shows whether transaction includes a sufficient fee" data-trigger="manual"><label id="goodFee" style="font-size: 40px;"></label></td></tr>
                      <tr>
                        <td>Required Fee: <input type="text" id="reqdFee" size=7 style="border: none; background-color: transparent; color: white;" value="0.0" disabled>⨎</td></tr>
                      <tr>
-                       <td><button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();"><img src="./images/refresh.png"></button></td></tr>
+                       <td data-placement="right" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual"><button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();"><img src="./images/refresh.png"></button></td></tr>
                      <tr>
                        <td>View Transaction</td>
                        <td>Export Transaction</td></tr>
@@ -540,14 +557,14 @@
                     <br><br>
                     <table id="bottomButtonsTable">
                         <tr>
-                         <td>View Transactions</td><td></td><td></td><td></td><td><td>View All Balances</td>
+                         <td></td><td></td><td>View Transactions</td><td></td><td><td>View All Balances</td>
                         </tr>
                         <tr>
+                            <td data-placement="bottom" data-toggle="popover" data-content="+ factoid address" data-trigger="manual"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
+                            <td data-placement="top" data-toggle="popover" data-content="+ entry credit address" data-trigger="manual"><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
                             <td><button type="submit" id="transactions-button" class="transactions-button" title="View In-Progress Transactions" onclick="getTxs()"><img src="./images/ellipsis.png"></button></td>
-                            <td><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
-                            <td><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
-                            <td><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
-                            <td><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
+                            <td data-placement="bottom" data-toggle="popover" data-content="Import private key" data-trigger="manual"><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
+                            <td data-placement="top" data-toggle="popover" data-content="Load transaction from file" data-trigger="manual"><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
                             <td><button type="submit" id="balances-button" class="balances-button" title="View Balances" onclick="getBalances()"><img src="./images/white-list-icon.png"></button></td>
                     </table>
                 </div>
@@ -565,15 +582,18 @@
 </body>
 
 <script>
-        
+            document.body.style.zoom="72%";
+            
             $( document ).ready(function() {
                 showRate();
                 ensureFeeRefresh();
+
                 
                 var inputRows = 1;
                 $("#addi-button").click(function() {
                     $("#inputTable tr").eq(1).clone().find("input").each(function() {
                         $(this).val('').attr('id', function(_, id) { return id + inputRows }).attr('tabindex', currTabIdx.toString());
+                        $(this).attr('data-toggle', function() { return ""; });
                     }).end().insertBefore("#inTotal");
                     inputRows++;
                     currTabIdx++;
@@ -584,21 +604,22 @@
                 $("#addo-button").click(function() {
                     $("#outputTable tr").eq(1).clone().find("input").each(function() {
                         $(this).val('').attr('id', function(_, id) { return id + outputRows }).attr('tabindex', currTabIdx.toString());
+                        $(this).attr('data-toggle', function() { return ""; });
                     }).end().insertBefore("#outTotal");
                     $("#outputTable tr").eq(2).clone().find("input").each(function() {
                         $(this).attr('name', function(_, name) { return name + outputRows });
+                        $(this).attr('data-toggle', function() { return ""; });
                     }).end().insertBefore("#outTotal");
                     outputRows++;
                     currTabIdx++;
                     $('#outputTable input').on('keyup change', updateOutputTotals);
                 });
 
-                
-                
-                //getTxs()
                 getBalances()
             });
+            
 
+            
             function inArray(value, arr) {
                 for(var i = 0; i < arr.length; i++) {
                     if (value === arr[i]) {
@@ -620,9 +641,6 @@
                 });
             }
             
-            $( ".keys" ).change(function() {
-                //refreshFee();
-            });  
             
             $("#outputTable").on('click', '.btnDelete', function () {
                 if($('#outputTable tr').length > 4) {
@@ -679,7 +697,6 @@
                   this).each(function() {
                   total+= $('input', this).val()*1;
                 });
-                //$('input', this).last().val(total);
               });
             };
 
@@ -715,7 +732,6 @@
                   this).each(function() {
                   total+= $('input', this).val()*1;
                 });
-                //$('input', this).last().val(total);
               });
             };
           
@@ -809,7 +825,6 @@
                 console.log("IN: ", inString, " OUT: ", outString);
 
                 return [inString, outString];
-                //refreshFee();
           };
           
           
@@ -856,7 +871,6 @@
                  });
                          
               }      
-                //buildTxFromPage("save");
           };
           
           var loadTx = function() {
@@ -920,13 +934,12 @@
           };
           
 
-//This is all from giuseppe
+//Dialog form controls
     $(function() {
         var dialog, form,
      
           primaryDialogInput = $( "#primaryDialogInput" ),
-          //amountToSend = $( "#sendAmount" ),
-          allFields = $( [] ).add( primaryDialogInput );//.add( amountToSend ),
+          allFields = $( [] ).add( primaryDialogInput );
           tips = $( ".validateTips" );
      
         function updateTips( t ) {
@@ -966,7 +979,7 @@
 
         }
           
-        //Dialog prompt for sending coins from origin to recipient
+        //Dialog prompt
         dialog = $( "#dialog-form" ).dialog({
           autoOpen: false,
           height: 420,
