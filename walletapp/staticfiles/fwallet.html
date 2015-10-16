@@ -479,12 +479,12 @@
                          </tr>
                          <tr>
                             <td><input type="text" id="txInput" size=54 class="keys" tabindex="1"></td>
-                            <td><input type="number" id="inputQuantity" class="qty" tabindex="2" min="0"></td> 
+                            <td><input type="text" id="inputQuantity" size=14 class="qty" tabindex="2"></td> 
                             <td><button title="Delete Input" class="btnDelete">✖</button></td>
                          </tr>
                          <tr id="inTotal">
                             <td align="right" style="text-align: right;">Input Total: </td>
-                            <td><input id="inTotalInput" type="text" value="0.0" disabled></td>
+                            <td><input id="inTotalInput" type="text" value="0.0" size=14 disabled></td>
                             <td></td>
                          </tr>
                         </table>
@@ -495,11 +495,11 @@
                          <tr>
                             <td>Output Address</td>
                             <td><label id="outLabel" for="outQuantity">Amount</label></td>
-                            <td  data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
+                            <td data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
                          </tr>
                          <tr>                        
                             <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3"></td>
-                            <td><input type="number" id="outputQuantity" class="qty" tabindex="4" min="0"></td> 
+                            <td><input type="text" id="outputQuantity" size=14 class="qty" tabindex="4"></td> 
                             <td><button title="Delete Output" class="btnDelete">✖</button></td>
                          </tr> 
                          <tr>
@@ -510,7 +510,7 @@
                          </tr>
                          <tr id="outTotal">
                             <td align="right" style="text-align: right;">Output Total: </td>
-                            <td><input id="outTotalInput" type="text" value="0.0" disabled></td>
+                            <td><input id="outTotalInput" type="text" value="0.0" size=14 disabled></td>
                             <td></td>
                          </tr>
                         </table>
@@ -588,7 +588,13 @@
                 showRate();
                 ensureFeeRefresh();
 
-                
+            
+//The following is a nifty little script which will prevent "-" and "e" characters from a text input field, while still allowing one "." character and copy+paste functionality
+//Author: Joshua De Leon - credit www.transtatic.com
+(function(b){var c={allowFloat:false,allowNegative:false};b.fn.numericInput=function(e){var f=b.extend({},c,e);var d=f.allowFloat;var g=f.allowNegative;this.keypress(function(j){var i=j.which;var h=b(this).val();if(i>0&&(i<48||i>57)){if(d==true&&i==46){if(g==true&&a(this)==0&&h.charAt(0)=="-"){return false}if(h.match(/[.]/)){return false}}else{if(g==true&&i==45){if(h.charAt(0)=="-"){return false}if(a(this)!=0){return false}}else{if(i==8){return true}else{return false}}}}else{if(i>0&&(i>=48&&i<=57)){if(g==true&&h.charAt(0)=="-"&&a(this)==0){return false}}}});return this};function a(d){if(d.selectionStart){return d.selectionStart}else{if(document.selection){d.focus();var f=document.selection.createRange();if(f==null){return 0}var e=d.createTextRange(),g=e.duplicate();e.moveToBookmark(f.getBookmark());g.setEndPoint("EndToStart",e);return g.text.length}}return 0}}(jQuery));
+            
+                $(".qty").numericInput({ allowFloat: true, allowNegative: false });
+    
                 var inputRows = 1;
                 $("#addi-button").click(function() {
                     $("#inputTable tr").eq(1).clone().find("input").each(function() {
@@ -598,6 +604,7 @@
                     inputRows++;
                     currTabIdx++;
                     $('#inputTable input').on('keyup change', updateInputTotals);
+                    $(".qty").numericInput({ allowFloat: true, allowNegative: false });
                 });
                 
                 var outputRows = 1;
@@ -613,12 +620,13 @@
                     outputRows++;
                     currTabIdx++;
                     $('#outputTable input').on('keyup change', updateOutputTotals);
+                    $(".qty").numericInput({ allowFloat: true, allowNegative: false });
                 });
 
                 getBalances()
             });
             
-
+            
             
             function inArray(value, arr) {
                 for(var i = 0; i < arr.length; i++) {
@@ -628,13 +636,14 @@
                 }
                 return -1;
             }
-            
+
+
             function ensureFeeRefresh() {
                 $( ".qty" ).change(function() {
                     this.value = parseFloat(this.value).toFixed(8) / 1;
                     updateInputTotals();
                     updateOutputTotals();
-                    refreshFee();
+                    //refreshFee();
                 });
                 $( ".addresstype" ).change(function() {
                     refreshFee();
