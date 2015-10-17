@@ -23,7 +23,7 @@ func main() {
  	    configDir := os.Getenv("HOME") + "/.factom/"
 	    state := NewState(configDir + "factoid_wallet_bolt.db")
         go startServer(state, configDir)
-        Open("http://localhost:2337")
+        Open("http://localhost:8093")
 	    run(state, os.Stdin,true)
 }
 	

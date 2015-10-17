@@ -655,6 +655,6 @@ package main
  	mux.HandleFunc("/loadtx", loadTx)
  	mux.HandleFunc("/fee", reqFee)
  	
- 	http.ListenAndServe(":2337", mux)
+ 	http.ListenAndServe(":8093", mux)
  	//http.ListenAndServe(serverPort, mux)
  }
