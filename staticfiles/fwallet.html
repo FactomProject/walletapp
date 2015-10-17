@@ -599,7 +599,6 @@
                 $("#addi-button").click(function() {
                     $("#inputTable tr").eq(1).clone().find("input").each(function() {
                         $(this).val('').attr('id', function(_, id) { return id + inputRows }).attr('tabindex', currTabIdx.toString());
-                        $(this).attr('data-toggle', function() { return ""; });
                     }).end().insertBefore("#inTotal");
                     inputRows++;
                     currTabIdx++;
@@ -611,11 +610,10 @@
                 $("#addo-button").click(function() {
                     $("#outputTable tr").eq(1).clone().find("input").each(function() {
                         $(this).val('').attr('id', function(_, id) { return id + outputRows }).attr('tabindex', currTabIdx.toString());
-                        $(this).attr('data-toggle', function() { return ""; });
                     }).end().insertBefore("#outTotal");
                     $("#outputTable tr").eq(2).clone().find("input").each(function() {
                         $(this).attr('name', function(_, name) { return name + outputRows });
-                        $(this).attr('data-toggle', function() { return ""; });
+                        $(this).closest('td').attr('data-toggle', '');
                     }).end().insertBefore("#outTotal");
                     outputRows++;
                     currTabIdx++;
