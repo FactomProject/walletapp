@@ -345,14 +345,14 @@
 
 <style type="text/css">
     html, body {
-        background-image:url('images/bg.png');
-        /*background-color:#1e2884;*/
+        background: radial-gradient(ellipse at center,#303f9f 0%,#1a237e 100%);
         color:white;
         margin: 0;
         padding: 0;
         height: 98%;
         width: 100%;
-        font: 18px Georgia, "Times New Roman", Times, serif;
+        font: 20px bold Georgia, "Times New Roman", Times, serif;
+        text-shadow: 1px 1px #000000;
     }
     #txtBox {
         font-size: large; 
@@ -379,10 +379,31 @@
         box-sizing:border-box;
         -moz-box-sizing:border-box;
         -webkit-box-sizing:border-box;
+        -moz-box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+        -webkit-box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+        box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+        border-radius: 10px;
+        border-color: #0194C1;
+        border-width: 2px;
+
+    scrollbar-face-color: #0194C1;
+    scrollbar-shadow-color: #FFFFFF;
+    scrollbar-highlight-color: #FFFFFF;
+    scrollbar-3dlight-color: #FFFFFF;
+    scrollbar-darkshadow-color: #FFFFFF;
+    scrollbar-track-color: #FFFFFF;
+    scrollbar-arrow-color: #FFFFFF;
+   
+
+
     }
     #inTotalInput, #outTotalInput {
         background-color: Transparent;
         color: white;
+        border-radius: 25px;
+        -moz-box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+        -webkit-box-shadow: 1px 2px 3px rgba(0,0,0,.5);
+        box-shadow: 1px 2px 3px rgba(0,0,0,.5);
     }
     #container { width: 99%; height: 10%; margin-left: 5px; margin:auto; }
     #bottomButtons {
@@ -413,26 +434,37 @@
         display:inline;
     } 
     .ui-dialog .ui-state-error { padding: .3em; }
-            .validateTips { border: 1px solid transparent; padding: 0.1em; }
+        .validateTips { border: 1px solid transparent; padding: 0.1em; }
         input.text { margin-bottom:12px; width:97%; padding: .4em; }
         fieldset { padding:0; border:0; margin-top:25px; }
-        h1 { font-size: 1.2em; margin: .6em 0; }
+        h1 { font-size: 30px; margin: .6em 0;  text-shadow: 1px 1px #000000;}
         div#users-contain { width: 350px; margin: 20px 0; }
         div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
         div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
         .ui-dialog .ui-state-error { padding: .3em; }
         .validateTips .privateKeyName { border: 1px solid transparent; padding: 0.3em; }
-    input { text-align:center; }
+    input { 
+        text-align:center; 
+        border-radius: 10px;
+    }
 
 
   .popover {
-    background: black;
-    border: 2px solid white;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased!important;
+    opacity: 1;
+    background: #303f9f;
     padding: 0px;
     color: white;
     text-align:center;
     font: bold 12px "Helvetica Neue", Sans-Serif;
     text-transform:uppercase;
+    z-index: 999999;
+    min-width: 120px;
+    line-height: 32px;
+    background-color: rgba( 0,0,0,0.75 );
+    box-shadow: 0 0 4px rgba( 0,0,0,0.3 );
+    color: #fff;
   }
   .popover-title { display: none; }
 
@@ -463,9 +495,9 @@
 
     <div style="width:100%; height:100%;">
         <div align="center" style="float:right;"><font size="2">Help<br></font>
-            <button id="help-button" title="Help" onclick="displayHelp();"><img src="./images/qmark2.png"></button>
+            <button id="help-button" title="Help" onclick="displayHelp();"><img src="./images/qmark.png"></button>
         </div>
-        <div align="center" style="float:center;"><h1 class="heading">Factoid Wallet GUI</h1></div>
+        <div align="center" style="float:center;"><h1>Factoid Wallet GUI</h1></div>
         <div id="container">
             <div id="actionBar" align="center">
                 <div id="txDetails"> 
@@ -473,7 +505,7 @@
                         <font size=17 align="center">Inputs</font><br>
                          <table id="inputTable" cellspacing="0" cellpadding="2">
                          <tr>
-                            <td>Input Address</td>
+                            <td><label>Input Address</label></td>
                             <td><label id="inputLabel" for="inputQuantity">Amount</label></td>
                             <td data-placement="top" data-toggle="popover" data-content="Click to add another input to your transaction" data-trigger="manual"><button type="submit" id="addi-button" class="addi-button" title="New Input"><img src="./images/addbutton.png"></button></td>
                          </tr>
@@ -483,7 +515,7 @@
                             <td><button title="Delete Input" class="btnDelete">✖</button></td>
                          </tr>
                          <tr id="inTotal">
-                            <td align="right" style="text-align: right;">Input Total: </td>
+                            <td align="right" style="text-align: right;"><label>Input Total: </label></td>
                             <td><input id="inTotalInput" type="text" value="0.0" size=14 disabled></td>
                             <td></td>
                          </tr>
@@ -493,7 +525,7 @@
                         <font size=17 align="center">Outputs</font><br>
                         <table id="outputTable">
                          <tr>
-                            <td>Output Address</td>
+                            <td><label>Output Address</label></td>
                             <td><label id="outLabel" for="outQuantity">Amount</label></td>
                             <td data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
                          </tr>
@@ -509,7 +541,7 @@
                             <td></td>
                          </tr>
                          <tr id="outTotal">
-                            <td align="right" style="text-align: right;">Output Total: </td>
+                            <td align="right" style="text-align: right;"><label>Output Total: </label></td>
                             <td><input id="outTotalInput" type="text" value="0.0" size=14 disabled></td>
                             <td></td>
                          </tr>
@@ -522,28 +554,28 @@
 
               <div id="controlDiv"> 
                      <table id="controlButtons" cellspacing="5" cellpadding="2">
-                     <tr><td>Transaction Name</td></tr> 
+                     <tr><td><label>Transaction Name</label></td></tr> 
                      <tr>
                        <td data-placement="top" data-toggle="popover" data-content="Specify transaction name (if left blank, name is automatically generated)" data-trigger="manual"><input type="text" id="transactionNameInput" size=32 maxlength=32></td>
                        <td data-placement="top" data-toggle="popover" data-content="Load the transaction name in the box and populate page with transaction details" data-trigger="manual"><button type="submit" id="loadName-button" class="loadName-button" title="Load Transaction To Form" onclick="grabTx()"><img src="./images/loadarrow.png"></button></td></tr>
                      <tr>
                        <td><div id="conversionRate"></div></td></tr>
                      <tr>
-                       <td>Currently Paying Fee: <label id="feeLabel">0.0</label>⨎</td>
+                       <td><label style="padding-right:10px;">Paying Fee: </label>   <label id="feeLabel">0.0</label>⨎</td>
                        <td data-placement="right" data-toggle="popover" data-content="Shows whether transaction includes a sufficient fee" data-trigger="manual"><label id="goodFee" style="font-size: 40px;"></label></td></tr>
                      <tr>
-                       <td>Required Fee: <input type="text" id="reqdFee" size=7 style="border: none; background-color: transparent; color: white;" value="0.0" disabled>⨎</td></tr>
+                       <td><label>Required Fee: </label><input type="text" id="reqdFee" size=7 style="border: none; background-color: transparent; color: white;" value="0.0" disabled>⨎</td></tr>
                      <tr>
-                       <td data-placement="right" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual"><button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();"><img src="./images/refresh.png"></button></td></tr>
+                       <td data-placement="top" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual"><button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();"><img src="./images/refresh.png"></button></td></tr>
                      <tr>
-                       <td>View Transaction</td>
-                       <td>Export Transaction</td></tr>
+                       <td><label>View Transaction</label></td>
+                       <td><label>Export Transaction</label></td></tr>
                      <tr>
-                       <td><button type="submit" id="view-button" class="view-button" title="View Transaction" onclick="getTx()"><img src="./images/eye-white.png"></button></td>
+                       <td><button type="submit" id="view-button" class="view-button" title="View Transaction" onclick="getTx()"><img src="./images/white-view.png"></button></td>
                        <td><button type="submit" id="save-button" class="save-button" title="Save Transaction" onclick="saveTx()"><img src="./images/white-save.png"></button></td></tr>
                      <tr>
-                       <td>Sign Transaction</td>
-                       <td>Send Transaction</td></tr>
+                       <td><label>Sign Transaction</label></td>
+                       <td><label>Send Transaction</label></td></tr>
                      <tr>
                        <td><button type="submit" id="sign-button" class="sign-button" title="Sign Transaction" onclick="signTx()"><img src="./images/white-sign.png"></button></td>
                        <td><button type="submit" id="send-button" class="send-button" title="Sign&Submit Transaction" onclick="prepareTxSend()"><img src="./images/arrow-white.png"></button></td></tr>
@@ -557,7 +589,7 @@
                     <br><br>
                     <table id="bottomButtonsTable">
                         <tr>
-                         <td></td><td></td><td>View Transactions</td><td></td><td><td>View All Balances</td>
+                         <td></td><td></td><td><label>List Transactions</label></td><td></td><td><td><label>View All Balances</label></td>
                         </tr>
                         <tr>
                             <td data-placement="bottom" data-toggle="popover" data-content="+ factoid address" data-trigger="manual"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
