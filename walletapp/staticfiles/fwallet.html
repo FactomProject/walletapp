@@ -231,6 +231,7 @@
                     }
                     //$("#txtBox").text(data);
                     $("#inputTable").find("tr:gt(1)").not(':last').remove();
+                    $("#outputTable").find("tr:gt(2)").not(':last').remove();
                     if(returnedTX) {
                         for(var inIdx=0; inIdx < returnedTX.Inputs.length; inIdx++) {
                             var thisInput = returnedTX.Inputs[inIdx];
@@ -514,7 +515,7 @@
                             <td data-placement="top" data-toggle="popover" data-content="Click to add another input to your transaction" data-trigger="manual"><button type="submit" id="addi-button" class="addi-button" title="New Input"><img src="./images/addbutton.png"></button></td>
                          </tr>
                          <tr>
-                            <td><input type="text" id="txInput" size=54 class="keys" tabindex="1"></td>
+                            <td><input type="text" id="txInput" size=54 class="keys" tabindex="1" maxlength="64"></td>
                             <td><input type="text" id="inputQuantity" size=14 class="qty" tabindex="2"></td> 
                             <td><button title="Delete Input" class="btnDelete">✖</button></td>
                          </tr>
@@ -534,7 +535,7 @@
                             <td data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
                          </tr>
                          <tr>                        
-                            <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3"></td>
+                            <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3" maxlength="64"></td>
                             <td><input type="text" id="outputQuantity" size=14 class="qty" tabindex="4"></td> 
                             <td><button title="Delete Output" class="btnDelete">✖</button></td>
                          </tr> 
