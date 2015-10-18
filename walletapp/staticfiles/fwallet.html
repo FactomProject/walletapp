@@ -641,6 +641,7 @@
                     currTabIdx++;
                     $('#inputTable input').on('keyup change', updateInputTotals);
                     $(".qty").numericInput({ allowFloat: true, allowNegative: false });
+                    $( ".qty" ).change(function() {this.value = parseFloat(this.value).toFixed(8) / 1;});
                 });
                 
                 var outputRows = 1;
@@ -656,6 +657,7 @@
                     currTabIdx++;
                     $('#outputTable input').on('keyup change', updateOutputTotals);
                     $(".qty").numericInput({ allowFloat: true, allowNegative: false });
+                    $( ".qty" ).change(function() {this.value = parseFloat(this.value).toFixed(8) / 1;});
                 });
 
                 getBalances()
@@ -725,7 +727,7 @@
                     total+= $('input', this).val()*1;
                   }
                   else {
-                    $('input', this).val(parseFloat(total));
+                    $('input', this).val(parseFloat(total).toPrecision(8) / 1);
                   }
                 }
               });
@@ -761,7 +763,7 @@
                     total+= $('input', this).val()*1;
                   }
                   else {
-                    $('input', this).val(parseFloat(total));
+                    $('input', this).val(parseFloat(total).toPrecision(8) / 1);
                   }
                 }
               });
