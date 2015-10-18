@@ -783,7 +783,7 @@
                     total+= $('input', this).val()*1;
                   }
                   else {
-                    $('input', this).val(parseFloat(total).toPrecision(8) / 1);
+                    $('input', this).val(parseFloat(total).toFixed(8) / 1);
                   }
                 }
               });
@@ -819,7 +819,7 @@
                     total+= $('input', this).val()*1;
                   }
                   else {
-                    $('input', this).val(parseFloat(total).toPrecision(8) / 1);
+                    $('input', this).val(parseFloat(total).toFixed(8) / 1);
                   }
                 }
               });
