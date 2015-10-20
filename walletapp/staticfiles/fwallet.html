@@ -119,15 +119,10 @@
                                  
                   
           var balanceCheck = function() {
-                refreshFee();
                 var reqFee = parseFloat($('#reqdFee').text());
                 var currFee = parseFloat($('#feeLabel').text());
                 if(!isNaN(reqFee)) {
-                    if(currFee <= (reqFee*10)) {
-                            return true;
-                      } else {
-                            return false;
-                      }
+                    return(currFee <= (reqFee*10));
                 } else {
                     return false;
                 }
@@ -171,7 +166,7 @@
           };
           
           var getBalance = function (address) {
-                 sendPost("balance", address, "#txtBox", "0.0 ⨎");
+                 sendPost("balance", address, "#txtBox", "0.0");
           };
                           
           var getBalances = function () {
@@ -848,9 +843,7 @@
                 setTimeout(function(){
                     var reqFee = parseFloat($('#reqdFee').text());
                     var currFee = parseFloat($('#feeLabel').text());
-                    console.log("REQ : " + reqFee);
-                    console.log("curr! : " + currFee);
-                    if(currFee >= reqFee && !isNaN(reqFee)) {
+                    if(currFee >= reqFee && !isNaN(reqFee) && balanceCheck()) {
                         $('#goodFee').css("color", "green");
                         $('#goodFee').text("✔");
                     } else {
@@ -928,7 +921,7 @@
                         }
                    }
                 }
-                console.log("IN: ", inString, " OUT: ", outString);
+                //console.log("IN: ", inString, " OUT: ", outString);
 
                 return [inString, outString];
           };
