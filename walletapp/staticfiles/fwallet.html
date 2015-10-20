@@ -86,6 +86,17 @@
                                          $('#txtBox').text("Transaction invalid");
                                      } else {
                                          $('#txtBox').text(data);
+                                         if(data.endsWith("has been submitted to Factom.")) { //successfully-submitted transaction
+                                                //clear all fields
+                                                $("#inputTable").find("tr:gt(1)").not(':last').remove();
+                                                $("#outputTable").find("tr:gt(2)").not(':last').remove();
+                                                $( "#inputTable tr:nth-last-child(2)" ).children("td:first").find("input").val("");
+                                                $( "#inputTable tr:nth-last-child(2)" ).children("td:eq(1)").find("input").val("");
+                                                $( "#outputTable tr:nth-last-child(3)" ).children("td:first").find("input").val("");
+                                                $( "#outputTable tr:nth-last-child(3)" ).children("td:eq(1)").find("input").val("");
+                                                updateInputTotals();
+                                                updateOutputTotals();
+                                         }
                                      }
                                  }
                            },
