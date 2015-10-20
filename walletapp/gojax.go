@@ -464,8 +464,14 @@ package main
  		call_type := r.FormValue("call_type")
  		switch call_type {
  		    case "balance":
- 		        printBal, err := FctBalance(myState, ajax_post_data)
- 		        check(err, false)
+ 		        printBal, _ := FctBalance(myState, ajax_post_data)
+ 		        if printBal == 0 {
+ 		            printBal, _ := ECBalance(myState, ajax_post_data)
+ 		            if printBal != 0 {
+ 		                w.Write([]byte("Entry Credit Address " + ajax_post_data + " Balance: " + strconv.Itoa(int(printBal)) + " EC"))
+ 		                return
+ 		            }
+ 		        }
  		        w.Write([]byte("Factoid Address " + ajax_post_data + " Balance: " + strings.Trim(fct.ConvertDecimal(uint64(printBal)), " ") + " ⨎"))
  		    case "balances":
  		        printBal := GetBalances(myState)
