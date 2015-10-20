@@ -77,9 +77,9 @@
                            success : function(data) {
                                  if(performAction === "fee") {
                                      if(data === '' || typeof(data) === 'undefined') {
-                                         $('#reqdFee').val("...");
+                                         $('#reqdFee').text("...");
                                      } else {
-                                         $('#reqdFee').val(data);
+                                         $('#reqdFee').text(data);
                                      }
                                  } else {
                                      if(data === '' || typeof(data) === 'undefined') {
@@ -109,9 +109,9 @@
                            data : { key: txKey },
                            success : function(data) {
                                      if(data === '' || typeof(data) === 'undefined') {
-                                         $('#reqdFee').val("...");
+                                         $('#reqdFee').text("...");
                                      } else {
-                                         $('#reqdFee').val(data);
+                                         $('#reqdFee').text(data);
                                      }
                            }
                          });
@@ -120,7 +120,7 @@
                   
           var balanceCheck = function() {
                 refreshFee();
-                var reqFee = parseFloat($('#reqdFee').val());
+                var reqFee = parseFloat($('#reqdFee').text());
                 var currFee = parseFloat($('#feeLabel').text());
                 if(!isNaN(reqFee)) {
                     if(currFee <= (reqFee*10)) {
@@ -170,8 +170,8 @@
                 $('#feeLabel').text((feeSize.toPrecision(8) / 1).toString());   //divide by 1 to truncate trailing 0's without any regex
           };
           
-          var getBalance = function () {
-                 sendPost("balance", $('#txInput').val(), "#txtBox", "0.0 ⨎");
+          var getBalance = function (address) {
+                 sendPost("balance", address, "#txtBox", "0.0 ⨎");
           };
                           
           var getBalances = function () {
@@ -543,7 +543,7 @@
                                 <td data-placement="top" data-toggle="popover" data-content="Click to add another input to your transaction" data-trigger="manual"><button type="submit" id="addi-button" class="addi-button" title="New Input"><img src="./images/addbutton.png"></button></td>
                              </tr>
                              <tr>
-                                <td><input type="text" id="txInput" size=52 class="keys" tabindex="1" maxlength="64"></td>
+                                <td><input type="text" id="txInput" size=53 class="keys" tabindex="1" maxlength="64"></td>
                                 <td><input type="text" id="inputQuantity" size=14 class="qty" tabindex="2"></td> 
                                 <td><button title="Delete Input" class="btnDelete">✖</button></td>
                              </tr>
@@ -564,7 +564,7 @@
                                     <td data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
                                  </tr>
                                  <tr>                        
-                                    <td><input type="text" id="txOutput" size=52 class="keys" tabindex="3" maxlength="64"></td>
+                                    <td><input type="text" id="txOutput" size=53 class="keys" tabindex="3" maxlength="64"></td>
                                     <td><input type="text" id="outputQuantity" size=14 class="qty" tabindex="4"></td> 
                                     <td><button title="Delete Output" class="btnDelete">✖</button></td>
                                  </tr> 
@@ -602,7 +602,7 @@
                                 <label id="goodFee" style="font-size: 40px;"></label></td></tr>
                              <tr>
                                <td><label>Required Fee: </label>
-                                <input type="text" id="reqdFee" size=7 style="border: none; background-color: transparent; color: white;" value="0.0" disabled>⨎</td></tr>
+                                <label id="reqdFee">0.0</label>⨎</td></tr>
                              <tr>
                                <td data-placement="top" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual"><button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();">
                                 <img src="./images/refresh.png"></button></td></tr>
@@ -619,20 +619,24 @@
                                <td><button type="submit" id="sign-button" class="sign-button" title="Sign Transaction" onclick="signTx()"><img src="./images/white-sign.png"></button></td>
                                <td><button type="submit" id="send-button" class="send-button" title="Sign&Submit Transaction" onclick="prepareTxSend()"><img src="./images/arrow-white.png"></button></td></tr>
                          </table>
-                                <!--<input type="button" id="getBalButton" onclick="getBalance()" value="Individual Balance"> <br> --> 
                     </div> <!-- /controlDiv -->
                     
                     
                     <div id="feedbackDiv"> 
-                         <textarea id="txtBox" type="text" value="" rows="22" cols="103" text-align=left readonly=true> <!-- disabled>-->
+                         <textarea id="txtBox" type="text" value="" rows="22" cols="112" text-align=left readonly=true> <!-- disabled>-->
                          </textarea>
 
                         <br><br>
                         <table id="bottomButtonsTable">
                             <tr>
-                             <td></td><td></td><td><label>List Transactions</label></td><td></td><td><td><label>View All Balances</label></td>
+                             <td>Balance</td>
+                             <td></td><td></td>
+                             <td><label>List Transactions</label></td>
+                             <td></td><td>
+                             <td><label>View All Balances</label></td>
                             </tr>
                             <tr>
+                                <td><button id="getBalButton" onclick="getIndividualBalance()"><img src="./images/magnify.png"></button></td>  
                                 <td data-placement="bottom" data-toggle="popover" data-content="+ factoid address" data-trigger="manual"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
                                 <td data-placement="top" data-toggle="popover" data-content="+ entry credit address" data-trigger="manual"><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
                                 <td><button type="submit" id="transactions-button" class="transactions-button" title="View In-Progress Transactions" onclick="getTxs()"><img src="./images/ellipsis.png"></button></td>
@@ -675,7 +679,7 @@
 </body>
 
 <script>
-            document.body.style.zoom="72%";
+            document.body.style.zoom="70%";
             
             $( document ).ready(function() {
                 showRate();
@@ -842,7 +846,7 @@
                 updateFee();
                 updateFeeLabel();
                 setTimeout(function(){
-                    var reqFee = parseFloat($('#reqdFee').val());
+                    var reqFee = parseFloat($('#reqdFee').text());
                     var currFee = parseFloat($('#feeLabel').text());
                     console.log("REQ : " + reqFee);
                     console.log("curr! : " + currFee);
@@ -1014,6 +1018,16 @@
                     .dialog('open');
 
           };
+          
+          var getIndividualBalance = function() {
+                $(".validateTips").text("What address would you like to view the balance for?");
+                $("#pkPart").hide();
+                $(".dialogInputLabel").text("Address:");
+                $( "#dialog-form" ).dialog('option', 'title', ("Balance"))
+                    .data('formType', "balance")
+                    .dialog('open');
+
+          };
  
           var importFromPK = function() {
                 $(".validateTips").text("");
@@ -1073,6 +1087,9 @@
                 break;
             case "importPrivate":
                 importPrivKey(primaryDialogInput.val(), $("#privateKeyName").val());
+                break;
+            case "balance":
+                getBalance(primaryDialogInput.val());
                 break;
             default:
                 console.log("NOT YET IMPLEMENTED FORMTYPE: " + formType.toString());
