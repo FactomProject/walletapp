@@ -776,6 +776,8 @@
                     currTabIdx--;
                     updateOutputTotals();
                     refreshFee();
+                } else {
+                    $(this).closest('tr').find("input").val("");
                 }
             });
             
@@ -785,6 +787,8 @@
                     currTabIdx--;
                     updateInputTotals();
                     refreshFee();
+                } else {
+                    $(this).closest('tr').find("input").val("");
                 }
             });
             
