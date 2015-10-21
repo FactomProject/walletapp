@@ -249,6 +249,11 @@ func FactoidSubmit(jsonkey string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+    
+	err = isReasonableFee(trans) 
+	if err != nil {
+		return "", err
+	}
 
 	// Okay, transaction is good, so marshal and send to factomd!
 	data, err := trans.MarshalBinary()
@@ -293,6 +298,47 @@ func FactoidSubmit(jsonkey string) (string, error) {
 		return "", fmt.Errorf(r.Response)
 	}
 	return r.Response, nil
+}
+
+func isReasonableFee(state IState, trans fct.ITransaction) (error) {
+                feeRate, getErr := GetFee(state)
+                if getErr != nil {
+                    return getErr
+                }
+                
+			    reqFee, err := trans.CalculateFee(uint64(feeRate))
+			    if err != nil {
+				    return err
+			    }
+			    
+			    sreqFee := int64(reqFee)
+                
+                tin, err := trans.TotalInputs()
+                if err != nil {
+                    return err
+                }
+                
+			    tout, err := trans.TotalOutputs()
+                if err != nil {
+                    return err
+                }
+                
+			    tec,  err := trans.TotalECs()
+                if err != nil {
+                    return err
+                }
+                
+			    cfee := int64(tin) - int64(tout) - int64(tec)
+
+                if cfee >= (sreqFee*10) {
+                    return fmt.Errorf("Unbalanced transaction (fee too high). Fee should be less than 10x the required fee.")
+                }
+                
+                if cfee < sreqFee {
+                    return fmt.Errorf("Insufficient fee")
+                }
+
+                return nil
 }
 
 func GetFee() (int64, error) {
