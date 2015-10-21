@@ -464,14 +464,23 @@ package main
  		call_type := r.FormValue("call_type")
  		switch call_type {
  		    case "balance":
- 		        printBal, _ := FctBalance(myState, ajax_post_data)
- 		        if printBal == 0 {
- 		            printBal, _ := ECBalance(myState, ajax_post_data)
- 		            if printBal != 0 {
+     		    we := myState.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(ajax_post_data))
+     		    printBal, _ := FctBalance(myState, ajax_post_data)
+			    if we != nil {
+				    if we.(wallet.IWalletEntry).GetType() == "ec" {
+			     		printBal, _ := ECBalance(myState, ajax_post_data)
  		                w.Write([]byte("Entry Credit Address " + ajax_post_data + " Balance: " + strconv.Itoa(int(printBal)) + " EC"))
  		                return
- 		            }
- 		        }
+     		        }
+                } else {
+     		        if printBal == 0 {
+     		            printBal, _ = ECBalance(myState, ajax_post_data)
+     		            if printBal != 0 || strings.HasPrefix(ajax_post_data, "EC") {
+     		                w.Write([]byte("Entry Credit Address " + ajax_post_data + " Balance: " + strconv.Itoa(int(printBal)) + " EC"))
+     		                return
+     		            }
+     		        }
+     		    } 
  		        w.Write([]byte("Factoid Address " + ajax_post_data + " Balance: " + strings.Trim(fct.ConvertDecimal(uint64(printBal)), " ") + " ⨎"))
  		    case "balances":
  		        printBal := GetBalances(myState)
