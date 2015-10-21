@@ -196,7 +196,7 @@
                    data : { ajax_post_data: "", txName: txKey },
                    success : function(data) {
                          if(data === '') {
-                             $("#txtBox").text("No such transaction.");
+                             $("#txtBox").text("Transaction empty.");
                          } else {
                              $("#txtBox").text("Transaction loaded into " + txKey + " successfully!");
                              populatePageFields(data);
