@@ -231,13 +231,15 @@ package main
                         signFeedString := []string{"Sign", string(txKey)}    
                         signErr := myState.Execute(signFeedString)
                         if signErr != nil {
-                            w.Write([]byte("SIGNERR: " + signErr.Error()))
+                            w.Write([]byte("Error signing transaction: " + signErr.Error()))
+                            return
                         }
 
                         saveFeedString := []string{"Export", string(txKey), string(fileToSaveTo)}    
                         saveErr := myState.Execute(saveFeedString)
                         if saveErr != nil {
-                            fmt.Println(saveErr)
+                             w.Write([]byte("Error saving transaction: " + saveErr.Error()))
+                             return
                         }
                         buffer.WriteString("\n\nTransaction ")
                         buffer.WriteString(txKey)
