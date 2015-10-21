@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Factoid Wallet GUI</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<link rel="shortcut icon" type="image/png" href="./images/favicon.png">
-<link rel="stylesheet" href="jquery-ui.css">
+    <title>Factoid Wallet GUI</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" type="image/png" href="./images/favicon.png">
+    <link rel="stylesheet" href="jquery-ui.css">
 
-<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
-<script type="text/javascript" src="tooltip.js"></script>
-<script type="text/javascript" src="popover.js"></script>
-<script type="text/javascript" src="jquery-ui.js"></script>
-<link rel="stylesheet" href="bootstrap.min.css">
+    <script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="tooltip.js"></script>
+    <script type="text/javascript" src="popover.js"></script>
+    <script type="text/javascript" src="jquery-ui.js"></script>
+    <link rel="stylesheet" href="bootstrap.min.css">
 
 
         <script type="text/javascript" charset="utf-8">
@@ -707,7 +707,12 @@
                     currTabIdx++;
                     $('#inputTable input').on('keyup change', updateInputTotals);
                     $(".qty").numericInput({ allowFloat: true, allowNegative: false });
-                    $( ".qty" ).change(function() {this.value = parseFloat(this.value).toFixed(8) / 1;});
+                    $( ".qty" ).change(function() {
+                        this.value = parseFloat(this.value).toFixed(8) / 1;
+                        if (isNaN(this.value)) { 
+                            this.value = 0.0 
+                        } 
+                    });
                 });
                 
                 var outputRows = 1;
@@ -723,7 +728,12 @@
                     currTabIdx++;
                     $('#outputTable input').on('keyup change', updateOutputTotals);
                     $(".qty").numericInput({ allowFloat: true, allowNegative: false });
-                    $( ".qty" ).change(function() {this.value = parseFloat(this.value).toFixed(8) / 1;});
+                    $( ".qty" ).change(function() {
+                        this.value = parseFloat(this.value).toFixed(8) / 1;
+                        if (isNaN(this.value)) { 
+                            this.value = 0.0 
+                        } 
+                    });
                 });
 
                 getBalances()
@@ -744,6 +754,9 @@
             function ensureFeeRefresh() {
                 $( ".qty" ).change(function() {
                     this.value = parseFloat(this.value).toFixed(8) / 1;
+                    if (isNaN(this.value)) { 
+                        this.value = 0.0 
+                    } 
                     updateInputTotals();
                     updateOutputTotals();
                     //refreshFee();
