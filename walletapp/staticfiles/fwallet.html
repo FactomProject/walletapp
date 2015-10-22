@@ -579,7 +579,7 @@
             <div id="bodyDiv">
                 <div id="actionBar" align="center">
                     <div id="txDetails"> 
-                        <div id="inputsDiv" style="float: left; margin-right: 50px; margin-bottom: 10px;">
+                        <div id="inputsDiv" style="float: left; margin-right: 50px; margin-bottom: 30px;">
                             <font size=17 align="center">Inputs</font><br>
                              <table id="inputTable" cellspacing="0" cellpadding="2">
                              <tr>
@@ -591,7 +591,7 @@
                                 <td><input type="text" id="txInput" size=54 class="keys" tabindex="1" maxlength="64"></td>
                                 <td><input type="text" id="inputQuantity" size=14 class="qty" tabindex="2"></td> 
                                 <td><button title="Delete Input" class="btnDelete">✖</button></td>
-                                <td><button title="Cover Fee" class="coverFee"><span style="font-size:12px; font-family: Arial; font-weight: bold;">+FEE</span></button></td>
+                                <td data-placement="bottom" data-toggle="popover" data-content="Cover fee with input" data-trigger="manual"><button title="Cover Fee" class="coverFee"><span style="font-size:12px; font-family: Arial; font-weight: bold;">+FEE</span></button></td>
                              </tr>
                              <tr id="inTotal">
                                 <td align="right" style="text-align: right; padding-top: 25px; padding-right: 5px;"><label>Input Total: </label></td>
@@ -602,13 +602,13 @@
                             </table>
                         </div> <!-- /inputsDiv -->
                         
-                        <div id="outputDiv" style="float: left; margin-bottom: 10px; margin-right: 50px;">
+                        <div id="outputDiv" style="float: left; margin-bottom: 30px; margin-right: 50px;">
                             <font size=17 align="center">Outputs</font><br>
                             <table id="outputTable">
                                  <tr>
                                     <td><label>Output Address</label></td>
                                     <td><label id="outLabel" for="outQuantity">Amount</label></td>
-                                    <td data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
+                                    <td data-placement="bottom" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
                                  </tr>
                                  <tr>                        
                                     <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3" maxlength="64"></td>
