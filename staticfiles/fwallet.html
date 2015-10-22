@@ -591,10 +591,12 @@
                                 <td><input type="text" id="txInput" size=54 class="keys" tabindex="1" maxlength="64"></td>
                                 <td><input type="text" id="inputQuantity" size=14 class="qty" tabindex="2"></td> 
                                 <td><button title="Delete Input" class="btnDelete">✖</button></td>
+                                <td><button title="Cover Fee" class="coverFee"><span style="font-size:12px; font-family: Arial; font-weight: bold;">+FEE</span></button></td>
                              </tr>
                              <tr id="inTotal">
                                 <td align="right" style="text-align: right; padding-top: 25px; padding-right: 5px;"><label>Input Total: </label></td>
                                 <td style="padding-top: 25px;"><input id="inTotalInput" type="text" value="0.0" size=14 disabled></td>
+                                <td></td>
                                 <td></td>
                              </tr>
                             </table>
@@ -837,6 +839,24 @@
                     refreshFee();
                 }
             });
+
+            $("#inputTable").on('click', '.coverFee', function () {
+                    var reqFee = parseFloat($('#reqdFee').text());
+                    var currFee = parseFloat($('#feeLabel').text());
+                    if(!isNaN(reqFee) && !isNaN(currFee)) {
+                        var addQty = reqFee - currFee;
+                        var strQty = $(this).closest('tr').find(".qty").val();
+                        var currQty = parseFloat(strQty);
+                        if(isNaN(currQty)) {
+                            currQty = 0.0
+                        }
+                        var newQty = currQty + addQty;
+                        $(this).closest('tr').find(".qty").val(newQty);
+                        updateInputTotals();
+                        refreshFee();
+                    }
+            });
+
             
             $('#inputTable input').on('keyup change', updateInputTotals);            
             $('#outputTable input').on('keyup change', updateOutputTotals);
