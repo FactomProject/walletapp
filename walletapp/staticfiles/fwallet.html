@@ -76,8 +76,11 @@
                            data : { key: txKey, inputs: txInputs, outputs: txOutputs, action: performAction },
                            success : function(data) {
                                  if(performAction === "fee") {
-                                     if(data === '' || typeof(data) === 'undefined') {
+                                     if(isNaN(data) || data === '' || typeof(data) === 'undefined') {
                                          $('#reqdFee').text("...");
+                                         if(typeof(data) != 'undefined' && data != "...") {
+                                            $('#txtBox').text(data);
+                                         }
                                      } else {
                                          $('#reqdFee').text(data);
                                      }
@@ -120,8 +123,11 @@
                            dataType: 'html',
                            data : { key: txKey },
                            success : function(data) {
-                                     if(data === '' || typeof(data) === 'undefined') {
+                                     if(isNaN(data) || data === '' || typeof(data) === 'undefined') {
                                          $('#reqdFee').text("...");
+                                         if(typeof(data) != 'undefined' && data != "...") {
+                                            $('#txtBox').text(data + "hid");
+                                         }
                                      } else {
                                          $('#reqdFee').text(data);
                                      }
@@ -154,6 +160,28 @@
                        success : function(data) {
                              if(data === '' || typeof(data) === 'undefined') {
                                  $('#txtBox').text("Transaction invalid");
+                             } else {
+                                 $('#txtBox').text(data);
+                             }
+                       },
+                     });
+
+          };
+
+          var delTx = function () {
+                 var txKey = $("#transactionNameInput").val(); 
+                 if(!txKey || txKey.length < 1) {
+                    txKey = "UITX"
+                    $("#transactionNameInput").val(txKey)
+                 }
+                     $.ajax({
+                       url: 'deltx',
+                       type: 'get',
+                       dataType: 'html',
+                       data : { key: txKey },
+                       success : function(data) {
+                             if(data === '' || typeof(data) === 'undefined') {
+                                 $('#txtBox').text("Invalid transaction name.");
                              } else {
                                  $('#txtBox').text(data);
                              }
@@ -527,6 +555,15 @@
 
 }
 
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 </style>
 
 </head>
@@ -605,15 +642,20 @@
                              <tr>
                                <td><div id="conversionRate"></div></td></tr>
                              <tr>
-                               <td><label style="padding-right:10px;">Paying Fee: </label>   <label id="feeLabel">0.0</label>⨎</td>
+                               <td><label style="padding-right:10px;">Paying Fee: </label>   <label id="feeLabel">0.0</label><label class="unselectable" style="padding-left:5px;"><img src="./images/factoidsymbol.png" style="height: 25px; width: 25px;"></label></td>
                                <td data-placement="right" data-toggle="popover" data-content="Shows whether transaction includes a sufficient fee" data-trigger="manual">
-                                <label id="goodFee" style="font-size: 40px;"></label></td></tr>
+                                <label id="goodFee" style="font-size: 40px;"></label></td>
+                              </tr>
                              <tr>
                                <td><label>Required Fee: </label>
-                                <label id="reqdFee">0.0</label>⨎</td></tr>
+                                <label id="reqdFee">0.0</label><label class="unselectable" style="padding-left:5px;"><img src="./images/factoidsymbol.png" style="height: 25px; width: 25px;"></label></td>
+                             <td><label>Delete Transaction</label></td>   
+                             </tr>
                              <tr>
-                               <td data-placement="top" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual"><button  id="refresh-button" title="Refresh Fee" onclick="refreshFee();">
-                                <img src="./images/refresh.png"></button></td></tr>
+                               <td data-placement="top" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual"><button id="refresh-button" title="Refresh Fee" onclick="refreshFee();">
+                                <img src="./images/refresh.png"></button></td>
+                               <td><button title="Delete Transaction" onclick="delTx();"><img src="./images/white-trash.png"></button></td>
+                             </tr>
                              <tr>
                                <td><label>View Transaction</label></td>
                                <td><label>Export Transaction</label></td></tr>
