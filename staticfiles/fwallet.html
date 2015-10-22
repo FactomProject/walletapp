@@ -820,6 +820,8 @@
                     refreshFee();
                 } else {
                     $(this).closest('tr').find("input").val("");
+                    updateOutputTotals();
+                    refreshFee();
                 }
             });
             
@@ -831,6 +833,8 @@
                     refreshFee();
                 } else {
                     $(this).closest('tr').find("input").val("");
+                    updateInputTotals();
+                    refreshFee();
                 }
             });
             

@@ -187,6 +187,17 @@ package main
             
             for _, outputElement := range(outRes) {
                 totalOutputs += outputElement.OutputSize
+                thisKey := myState.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(outputElement.OutputAddress))
+
+		        we, ok := thisKey.(wallet.IWalletEntry)
+		        if ok {
+		            if we.GetType() == "ec" {
+                        outputElement.OutputType = "ec"
+                    } else if we.GetType() == "fct" {
+                        outputElement.OutputType = "fct"
+                    } 
+                } 
+
                 if outputElement.OutputType == "fct" {
                     outputFeedErr = SilentAddOutput(string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64))
                 } else {
