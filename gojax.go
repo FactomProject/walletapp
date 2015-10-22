@@ -118,6 +118,22 @@ package main
 			
  }
  
+ func delTx(w http.ResponseWriter, r *http.Request) {
+   		txKey := r.FormValue("key")
+
+	    t := myState.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(txKey))
+	    if t != nil {
+            deleteErr := FactoidDeleteTx(txKey)
+            if deleteErr != nil {
+                w.Write([]byte(deleteErr.Error()))
+                return
+            } else {
+                w.Write([]byte("Transaction " + txKey + " has been deleted successfully."))
+            }
+	    } else {
+            w.Write([]byte("Transaction " + txKey + " does not exist."))
+	    }
+ }
  
  func craftTx(w http.ResponseWriter, r *http.Request) {
    		txKey := r.FormValue("key")
@@ -671,6 +687,7 @@ package main
  	mux.HandleFunc("/tx", craftTx)
  	mux.HandleFunc("/loadtx", loadTx)
  	mux.HandleFunc("/fee", reqFee)
+ 	mux.HandleFunc("/deltx", delTx)
  	
  	http.ListenAndServe(":8093", mux)
  	//http.ListenAndServe(serverPort, mux)
