@@ -645,7 +645,7 @@
                                <td><div id="conversionRate"></div></td></tr>
                              <tr>
                                <td><label style="padding-right:10px;">Paying Fee: </label>   <label id="feeLabel">0.0</label><label class="unselectable" style="padding-left:5px;"><img src="./images/factoidsymbol.png" style="height: 25px; width: 25px;"></label></td>
-                               <td data-placement="right" data-toggle="popover" data-content="Shows whether transaction includes a sufficient fee" data-trigger="manual">
+                               <td data-placement="right" data-toggle="popover" data-content="Shows whether transaction includes a sufficient fee" data-trigger="manual" data-container="body">
                                 <label id="goodFee" style="font-size: 40px;"></label></td>
                               </tr>
                              <tr>
@@ -654,7 +654,7 @@
                              <td><label>Delete Transaction</label></td>   
                              </tr>
                              <tr>
-                               <td data-placement="top" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual"><button id="refresh-button" title="Refresh Fee" onclick="refreshFee();">
+                               <td data-placement="top" data-toggle="popover" data-content="Click to refresh fee information" data-trigger="manual" data-container="body"><button id="refresh-button" title="Refresh Fee" onclick="refreshFee();">
                                 <img src="./images/refresh.png"></button></td>
                                <td><button title="Delete Transaction" onclick="delTx();"><img src="./images/white-trash.png"></button></td>
                              </tr>
@@ -689,8 +689,8 @@
                             </tr>
                             <tr>
                                 <td><button id="getBalButton" onclick="getIndividualBalance()"><img src="./images/magnify.png"></button></td>  
-                                <td data-placement="bottom" data-toggle="popover" data-content="+ factoid address" data-trigger="manual"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
-                                <td data-placement="top" data-toggle="popover" data-content="+ entry credit address" data-trigger="manual"><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
+                                <td data-placement="bottom" data-toggle="popover" data-content="+ factoid address" data-trigger="manual" data-container="body"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
+                                <td data-placement="top" data-toggle="popover" data-content="+ entry credit address" data-trigger="manual" data-container="body"><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
                                 <td><button type="submit" id="transactions-button" class="transactions-button" title="View In-Progress Transactions" onclick="getTxs()"><img src="./images/ellipsis.png"></button></td>
                                 <td data-placement="bottom" data-toggle="popover" data-content="Import private key" data-trigger="manual"><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
                                 <td data-placement="top" data-toggle="popover" data-content="Load transaction from file" data-trigger="manual"><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
@@ -853,6 +853,7 @@
                         var newQty = currQty + addQty;
                         $(this).closest('tr').find(".qty").val(newQty);
                         updateInputTotals();
+                        $( ".qty" ).trigger("change");
                         refreshFee();
                     }
             });
