@@ -200,8 +200,20 @@ package main
 
                 if outputElement.OutputType == "fct" {
                     outputFeedErr = SilentAddOutput(string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64))
+                    if outputFeedErr != nil {
+                        outputFeedErr = SilentAddECOutput(string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64))
+                        if outputFeedErr == nil {
+                            outputElement.OutputType = "ec"
+                        }
+                    }
                 } else {
                     outputFeedErr = SilentAddECOutput(string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64))
+                    if outputFeedErr != nil {
+                        outputFeedErr = SilentAddOutput(string(txKey), string(outputElement.OutputAddress), strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64))
+                        if outputFeedErr == nil {
+                            outputElement.OutputType = "fct"
+                        }
+                    }
                 }
                 
                 if outputFeedErr != nil {
