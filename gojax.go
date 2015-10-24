@@ -697,7 +697,6 @@ package main
  }
 
  func startServer(state IState, configDir string) {
- 	// http.Handler
  	myState = state
  	staticDir = configDir + "static/"
  	//serverPort := strings.Split(myState.GetServer(), ":")[1]
@@ -713,5 +712,4 @@ package main
  	mux.HandleFunc("/deltx", delTx)
  	
  	http.ListenAndServe(":8093", mux)
- 	//http.ListenAndServe(serverPort, mux)
  }
