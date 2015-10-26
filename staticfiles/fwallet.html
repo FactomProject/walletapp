@@ -976,7 +976,7 @@
                             inString = inString.concat(']');
                             break
                         }
-                        inputAddress = table.rows[i].cells[0].childNodes[0].value;
+                        inputAddress = table.rows[i].cells[0].childNodes[0].value.trim();
                         inputQuantity =  table.rows[i].cells[1].childNodes[0].value;
                         
                         if (inputQuantity && inputQuantity > 0 && inputAddress && inputAddress.length > 0) {
@@ -1022,7 +1022,7 @@
                             }
                             
                         } else {
-                            outputAddress = table.rows[j].cells[0].childNodes[0].value;
+                            outputAddress = table.rows[j].cells[0].childNodes[0].value.trim();
                             outputQuantity = table.rows[j].cells[1].childNodes[0].value;
                         }
                    }
