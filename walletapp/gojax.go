@@ -220,9 +220,20 @@ package main
                     w.Write([]byte(outputFeedErr.Error() + " (OUTPUTS)"))
                     return
                 }   
-                
-                buffer.WriteString("\tOutput: " + outputElement.OutputAddress + " : " + strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64) + " (" + outputElement.OutputType + 
-                                   ") \n")
+                if outputElement.OutputType == "ec" {
+
+		            v, err := GetRate(myState)
+		            if err != nil {
+			            fmt.Println(err)
+		            }
+                    numECs := outputElement.OutputSize * float64(100000000) / float64(v)
+		
+                    buffer.WriteString("\tOutput: " + outputElement.OutputAddress + " : " + 
+                        strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64) + " (" + strconv.Itoa(int(numECs)) + " EC) \n")
+                } else {
+                    buffer.WriteString("\tOutput: " + outputElement.OutputAddress + " : " + 
+                        strconv.FormatFloat(outputElement.OutputSize, 'f', -1, 64) + "\n")
+                }
             }
             
 
