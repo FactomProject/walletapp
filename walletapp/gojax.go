@@ -707,9 +707,9 @@ package main
  		   }
  }
 
- func startServer(state IState, configDir string) {
+ func startServer(state IState, staticFilesDir string) {
  	myState = state
- 	staticDir = configDir + "static/"
+ 	staticDir = staticFilesDir
  	//serverPort := strings.Split(myState.GetServer(), ":")[1]
 
  	chttp.Handle("/", http.FileServer(http.Dir(staticDir)))
