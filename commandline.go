@@ -10,9 +10,9 @@ import (
 	"io"
 	fct "github.com/FactomProject/factoid"
 	"os"
+	"runtime"
 	"strings"
 	"time"
-	// "golang.org/x/crypto/ssh/terminal"
 )
 
 var _ = fmt.Println
@@ -21,8 +21,17 @@ var _ = time.Now
 
 func main() {
  	    configDir := os.Getenv("HOME") + "/.factom/"
+        var staticDir string
+        switch runtime.GOOS {
+            case "windows":
+                staticDir = configDir + "walletapp/"
+            case "darwin":
+                staticDir = "./staticfiles/"
+            default:
+                staticDir = "/usr/share/factom/walletapp/"
+        }
 	    state := NewState(configDir + "factoid_wallet_bolt.db")
-        go startServer(state, configDir)
+        go startServer(state, staticDir)
         Open("http://localhost:8093")
 	    run(state, os.Stdin,true)
 }

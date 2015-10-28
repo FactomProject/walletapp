@@ -1,4 +1,4 @@
  #!/bin/bash
  
- mkdir -p $HOME/.factom/static
- cp -R ./staticfiles/* $HOME/.factom/static/
+ mkdir -p /usr/share/factom/walletapp
+ cp -R ./staticfiles/* /usr/share/factom/walletapp/
