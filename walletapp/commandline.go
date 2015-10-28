@@ -20,14 +20,17 @@ var _ fct.Transaction
 var _ = time.Now
 
 func main() {
- 	    configDir := os.Getenv("HOME") + "/.factom/"
+ 	    var configDir string
         var staticDir string
         switch runtime.GOOS {
             case "windows":
+                configDir = os.Getenv("HOME") + "\\.factom\\"
                 staticDir = configDir + "walletapp/"
             case "darwin":
+                configDir = os.Getenv("HOME") + "/.factom/"
                 staticDir = "./staticfiles/"
             default:
+                configDir = os.Getenv("HOME") + "/.factom/"
                 staticDir = "/usr/share/factom/walletapp/"
         }
 	    state := NewState(configDir + "factoid_wallet_bolt.db")
