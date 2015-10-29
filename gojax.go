@@ -556,7 +556,7 @@ package main
  		        }
  		        sliceTxNames := []byte("")
  		        for i:= range txNames {
- 		            sliceTxNames = append(sliceTxNames, txNames[i]...)
+ 		            sliceTxNames = append(sliceTxNames, bytes.Trim(txNames[i], "\x00")...)
  		            if i < len(txNames) - 1 {
  		                sliceTxNames = append(sliceTxNames, byte('\n'))
  		            }
