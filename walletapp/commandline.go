@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	fct "github.com/FactomProject/factoid"
+	"github.com/FactomProject/FactomCode/util"
 	"os"
 	"runtime"
 	"strings"
@@ -18,13 +19,14 @@ import (
 var _ = fmt.Println
 var _ fct.Transaction
 var _ = time.Now
+var cfg = util.ReadConfig().Wallet
 
 func main() {
  	    var configDir string
         var staticDir string
         switch runtime.GOOS {
             case "windows":
-                configDir = os.Getenv("HOME") + "/.factom/"
+                configDir = cfg.BoltDBPath
                 staticDir = configDir + "walletapp/"
             case "darwin":
                 configDir = os.Getenv("HOME") + "/.factom/"
@@ -38,6 +40,7 @@ func main() {
         Open("http://localhost:8093")
 	    run(state, os.Stdin,true)
 }
+
 	
 var fsprompt string = "===============> "	
 	
