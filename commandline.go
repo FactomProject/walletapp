@@ -27,7 +27,7 @@ func main() {
         switch runtime.GOOS {
             case "windows":
                 configDir = cfg.BoltDBPath
-                staticDir = "."
+                staticDir = "./"
             case "darwin":
                 configDir = os.Getenv("HOME") + "/.factom/"
                 staticDir = "./staticfiles/"
@@ -35,6 +35,12 @@ func main() {
                 configDir = os.Getenv("HOME") + "/.factom/"
                 staticDir = "/usr/share/factom/walletapp/"
         }
+        err := os.MkdirAll(configDir, 0750)
+		if err != nil {
+			fmt.Println("mkdir failed %v %v", configDir, err)
+			return
+		}
+
 	    state := NewState(configDir + "factoid_wallet_bolt.db")
         go startServer(state, staticDir)
         Open("http://localhost:8093")
