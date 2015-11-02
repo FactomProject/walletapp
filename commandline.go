@@ -27,7 +27,7 @@ func main() {
         switch runtime.GOOS {
             case "windows":
                 configDir = cfg.BoltDBPath
-                staticDir = configDir + "walletapp/"
+                staticDir = "."
             case "darwin":
                 configDir = os.Getenv("HOME") + "/.factom/"
                 staticDir = "./staticfiles/"
