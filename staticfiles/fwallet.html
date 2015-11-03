@@ -361,6 +361,21 @@
         
           };
 
+          var importTwelveWords = function (twelveWords, addName) {
+                     $.ajax({
+                       url: 'receive',
+                       type: 'post',
+                       dataType: 'html',
+                       data : { call_type: "importTwelveWords", ajax_post_data: twelveWords, addressName: addName },
+                       success : function(data) {
+                             if(data != '') {
+                                 $("#txtBox").text(data);
+                             }
+                       },
+                     });
+        
+          };
+
               
           var displayHelp = function () {
                  /*            $.ajax({
@@ -685,16 +700,17 @@
                              <td>Balance</td>
                              <td></td><td></td>
                              <td><label>List Transactions</label></td>
-                             <td></td><td>
+                             <td></td><td></td><td></td>
                              <td><label>View All Balances</label></td>
                             </tr>
                             <tr>
                                 <td><button id="getBalButton" onclick="getIndividualBalance()"><img src="./images/magnify.png"></button></td>  
-                                <td data-placement="bottom" data-toggle="popover" data-content="+ factoid address" data-trigger="manual" data-container="body"><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()"><img src="./images/addbutton.png"></button>⨎</td>  
-                                <td data-placement="top" data-toggle="popover" data-content="+ entry credit address" data-trigger="manual" data-container="body"><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()"><img src="./images/addbutton.png"></button>EC</td>
+                                <td><button type="submit" id="addFactoidButton" class="afa-button" title="Add Factoid Address" onclick="newFCTAddress()" data-placement="bottom" data-toggle="popover" data-content="Add factoid address" data-trigger="manual" data-container="body"><img src="./images/addbutton.png"></button>⨎</td>  
+                                <td><button type="submit" id="addECButton" class="aeca-button" title="Add EC Address" onclick="newECAddress()" data-placement="top" data-toggle="popover" data-content="Add entry credit address" data-trigger="manual" data-container="body"><img src="./images/addbutton.png"></button>EC</td>
                                 <td><button type="submit" id="transactions-button" class="transactions-button" title="View In-Progress Transactions" onclick="getTxs()"><img src="./images/ellipsis.png"></button></td>
-                                <td data-placement="bottom" data-toggle="popover" data-content="Import private key" data-trigger="manual"><button type="importFromPK" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()"><img src="./images/key.png"></button></td>
-                                <td data-placement="top" data-toggle="popover" data-content="Load transaction from file" data-trigger="manual"><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()"><img src="./images/folder.png"></button></td>                            
+                                <td><button type="submit" id="importTwelveWords-button" class="importTwelveWords-button" title="Import 12 Words" onclick="importFromTwelveWords()"  data-placement="bottom" data-toggle="popover" data-content="Import 12 words" data-trigger="manual"><img src="./images/twelve.png"></button></td>
+                                <td width="140px"><button type="submit" id="importFromPK-button" class="importFromPK-button" title="Import From Private Key" onclick="importFromPK()" data-placement="top" data-toggle="popover" data-content="Import private key" data-trigger="manual"><img src="./images/key.png"></button></td>
+                                <td><button type="submit" id="loadTx-button" class="loadTx-button" title="Load Transaction" onclick="loadTx()" data-placement="bottom" data-toggle="popover" data-content="Load transaction from file" data-trigger="manual"><img src="./images/folder.png"></button></td>                            
                                 <td><button type="submit" id="balances-button" class="balances-button" title="View Balances" onclick="getBalances()"><img src="./images/white-list-icon.png"></button></td>
                         </table>
                     </div> <!-- /feedbackDiv -->
@@ -1137,6 +1153,16 @@
                     .dialog('open');
 
           };         
+
+          var importFromTwelveWords = function() {
+                $(".validateTips").text("");
+                $("#pkPart").show();
+                $(".dialogInputLabel").text("Twelve words:");
+                $( "#dialog-form" ).dialog('option', 'title', ("Import Twelve Words"))
+                    .data('formType', "importTwelve")
+                    .dialog('open');
+
+          };       
           
 
           var signTx = function() {
@@ -1186,6 +1212,9 @@
                 break;
             case "importPrivate":
                 importPrivKey(primaryDialogInput.val(), $("#privateKeyName").val());
+                break;
+            case "importTwelve":
+                importTwelveWords(primaryDialogInput.val(), $("#privateKeyName").val());
                 break;
             case "balance":
                 getBalance(primaryDialogInput.val());

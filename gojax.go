@@ -584,7 +584,8 @@ package main
      		    addressName := r.FormValue("addressName")
  		        if len(ajax_post_data) > 0 && len(addressName) > 0 {
 
-                    importFeedString := []string{"ImportKey", string(addressName), string(ajax_post_data)}    
+                    importFeedString := []string{"ImportKey", string(addressName), string(ajax_post_data)}   
+                    fmt.Println(importFeedString) 
                     importErr := myState.Execute(importFeedString)
                     if importErr != nil {
                         w.Write([]byte(importErr.Error()))
@@ -594,6 +595,27 @@ package main
      		        w.Write([]byte("The contents of the private key have been added to " + addressName + " successfully!"));
      		    } else {
      		        w.Write([]byte("You must include a non-empty private key and name for the address to import it into."));
+     		    }
+     		case "importTwelveWords":
+     		    addressName := r.FormValue("addressName")
+ 		        if len(ajax_post_data) > 0 && len(addressName) > 0 {
+ 		            twelveWords := strings.Split(string(ajax_post_data), " ")
+                    if len(twelveWords) != 12 {
+                        w.Write([]byte("Invalid Parameters"))
+                        return
+                    } else {
+                        twelveFeedString := []string{"AddressFromWords", string(addressName), twelveWords[0], twelveWords[1], twelveWords[2], twelveWords[3], twelveWords[4], twelveWords[5], twelveWords[6], twelveWords[7], twelveWords[8], twelveWords[9], twelveWords[10], twelveWords[11]}    
+                        fmt.Println(twelveFeedString)
+                        twelveErr := myState.Execute(twelveFeedString)
+                        if twelveErr != nil {
+                            w.Write([]byte(twelveErr.Error()))
+                            return
+                        }
+
+         		        w.Write([]byte("The twelve-word key has been imported to " + addressName + " successfully!"));
+                    }
+     		    } else {
+     		        w.Write([]byte("You must provide a valid twelve-word-key and a name for the address to import them into."));
      		    }
         }
  	} else {
