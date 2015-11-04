@@ -28,6 +28,17 @@ func LookupAddress(adrType string, adr string) (string, error) {
 		
 		if we != nil {
 			we2 := we.(wallet.IWalletEntry)
+			
+            if we2.GetType() == "ec" {
+                if strings.ToLower(adrType) == "fct" {
+                    return "", fmt.Errorf("%s is an entry credit address, not a factoid address.",adr)
+                }
+            } else if we2.GetType() == "fct" {
+                if strings.ToLower(adrType) == "ec" {
+                    return "", fmt.Errorf("%s is a factoid address, not an entry credit address.",adr)
+                }
+            }
+			
 			addr, _ := we2.GetAddress()
 			adr = hex.EncodeToString(addr.Bytes())
 		} else {
