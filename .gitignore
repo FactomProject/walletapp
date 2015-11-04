@@ -15,6 +15,7 @@ _obj
 _test
 bin
 pkg
+walletapp
 
 # Architecture specific extensions/prefixes
 *.[568vq]
