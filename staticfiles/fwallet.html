@@ -607,7 +607,7 @@
                                 <td><input type="text" id="txInput" size=54 class="keys" tabindex="1" maxlength="64"></td>
                                 <td><input type="text" id="inputQuantity" size=14 class="qty" tabindex="2"></td> 
                                 <td><button title="Delete Input" class="btnDelete">✖</button></td>
-                                <td data-placement="bottom" data-toggle="popover" data-content="Cover fee with input" data-trigger="manual"><button title="Cover Fee" class="coverFee"><span style="font-size:12px; font-family: Arial; font-weight: bold;">+FEE</span></button></td>
+                                <td data-placement="bottom" data-toggle="popover" data-content="Add fee from input" data-trigger="manual"><button title="Include Fee" class="coverFee"><span style="font-size:12px; font-family: Arial; font-weight: bold;">+FEE</span></button></td>
                              </tr>
                              <tr id="inTotal">
                                 <td align="right" style="text-align: right; padding-top: 25px; padding-right: 5px;"><label>Input Total: </label></td>
@@ -618,18 +618,19 @@
                             </table>
                         </div> <!-- /inputsDiv -->
                         
-                        <div id="outputDiv" style="float: left; margin-bottom: 30px; margin-right: 50px;">
+                        <div id="outputsDiv" style="float: left; margin-bottom: 30px; margin-right: 50px;">
                             <font size=17 align="center">Outputs</font><br>
                             <table id="outputTable">
                                  <tr>
                                     <td><label>Output Address</label></td>
                                     <td><label id="outLabel" for="outQuantity">Amount</label></td>
-                                    <td data-placement="bottom" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
+                                    <td data-placement="top" data-toggle="popover" data-content="Click to add another output to your transaction" data-trigger="manual"><button type="submit" id="addo-button" class="addo-button" title="New Output"><img src="./images/addbutton.png"></button></td>
                                  </tr>
                                  <tr>                        
                                     <td><input type="text" id="txOutput" size=54 class="keys" tabindex="3" maxlength="64"></td>
                                     <td><input type="text" id="outputQuantity" size=14 class="qty" tabindex="4"></td> 
                                     <td><button title="Delete Output" class="btnDelete">✖</button></td>
+                                    <td data-placement="bottom" data-toggle="popover" data-content="Deduct fee from output" data-trigger="manual"><button title="Subtract Fee" class="coverFee"><span style="font-size:12px; font-family: Arial; font-weight: bold;">-FEE</span></button></td>
                                  </tr> 
                                  <tr style="display:none;">
                                     <td data-placement="bottom" data-toggle="popover" data-content="Choose whether to send to a factoid or entry credit address" data-trigger="manual"><form id="outTypeForm"><input type="radio" name="outType" class="addresstype" value="fct" checked>⨎ <input type="radio" name="outType" class="addresstype" value="ec">EC</form>
@@ -871,6 +872,32 @@
                         var newQty = currQty + addQty;
                         $(this).closest('tr').find(".qty").val(newQty);
                         updateInputTotals();
+                        $( ".qty" ).trigger("change");
+                        refreshFee();
+                        setTimeout(function(){
+                            reqFee = parseFloat($('#reqdFee').text());
+                            currFee = parseFloat($('#feeLabel').text());
+                            if(currFee < reqFee) {
+                                thisButton.trigger("click");
+                            }
+                        }, 100);
+                    }
+            });
+
+            $("#outputTable").on('click', '.coverFee', function () {
+                    thisButton = $(this);
+                    var reqFee = parseFloat($('#reqdFee').text());
+                    var currFee = parseFloat($('#feeLabel').text());
+                    if(!isNaN(reqFee) && !isNaN(currFee)) {
+                        var addQty = reqFee - currFee;
+                        var strQty = $(this).closest('tr').find(".qty").val();
+                        var currQty = parseFloat(strQty);
+                        if(isNaN(currQty)) {
+                            currQty = 0.0
+                        }
+                        var newQty = currQty - addQty;
+                        $(this).closest('tr').find(".qty").val(newQty);
+                        updateOutputTotals();
                         $( ".qty" ).trigger("change");
                         refreshFee();
                         setTimeout(function(){
