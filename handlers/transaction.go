@@ -47,7 +47,7 @@ func ValidateKey(key string) (msg string, valid bool) {
 	return "", true
 }
 
-// True is sccuess! False is failure.  The Response is what the CLI
+// True is success! False is failure.  The Response is what the CLI
 // should report.
 func reportResults(ctx *web.Context, response string, success bool) {
 	b := Response{
@@ -59,6 +59,7 @@ func reportResults(ctx *web.Context, response string, success bool) {
 		ctx.WriteHeader(httpBad)
 		return
 	} else {
+        ctx.ContentType("json")
 		ctx.Write(p)
 	}
 }
@@ -657,6 +658,7 @@ func HandleGetAddresses(ctx *web.Context) {
 		reportResults(ctx, err.Error(), false)
 		return
 	}
+    ctx.ContentType("json")
 	ctx.Write(j)
 }
 
@@ -674,6 +676,7 @@ func HandleGetTransactions(ctx *web.Context) {
 		reportResults(ctx, err.Error(), false)
 		return
 	}
+    ctx.ContentType("json")
 	ctx.Write(j)
 }
 
