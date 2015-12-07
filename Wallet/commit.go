@@ -38,10 +38,10 @@ func CommitChain(name string, data []byte) error {
 	if Utility.IsValidAddress(name) && strings.HasPrefix(name,"EC") {
 		addr := fct.ConvertUserStrToAddress(name)
 		we = factoidState.GetDB().GetRaw([]byte(fct.W_ADDRESS_PUB_KEY),addr)
-	}else if Utility.IsValidHexAddress(name) {
+	} else if Utility.IsValidHexAddress(name) {
 		addr, err := hex.DecodeString(name)
 		if err == nil {
-			we = factoidState.GetDB().GetRaw([]byte(fct.W_ADDRESS_PUB_KEY),addr)
+			we = factoidState.GetDB().GetRaw([]byte(fct.W_ADDRESS_PUB_KEY), addr)
 		}
 	}else{
 		we = factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(name))
@@ -51,7 +51,13 @@ func CommitChain(name string, data []byte) error {
 		return fmt.Errorf("Unknown address")
 	}
 	
-	signed := factoidState.GetWallet().SignCommit(we.(wallet.IWalletEntry), msg)
+	signed := make([]byte, 0)
+	switch we.(type) {
+	case wallet.IWalletEntry:
+		signed = factoidState.GetWallet().SignCommit(we.(wallet.IWalletEntry), msg)
+	default:
+		return fmt.Errorf("Cannot use non Entry Credit Address for Chain Commit")
+	}
 
 	com := new(commit)
 	com.CommitChainMsg = hex.EncodeToString(signed)
@@ -89,7 +95,13 @@ func CommitEntry(name string, data []byte) error {
 	}
 
 	we := factoidState.GetDB().GetRaw([]byte(fct.W_NAME), []byte(name))
-	signed := factoidState.GetWallet().SignCommit(we.(wallet.IWalletEntry), msg)
+	signed := make([]byte, 0)
+	switch we.(type) {
+	case wallet.IWalletEntry:
+		signed = factoidState.GetWallet().SignCommit(we.(wallet.IWalletEntry), msg)
+	default:
+		return fmt.Errorf("Cannot use non Entry Credit Address for Entry Commit")
+	}
 
 	com := new(commit)
 	com.CommitEntryMsg = hex.EncodeToString(signed)

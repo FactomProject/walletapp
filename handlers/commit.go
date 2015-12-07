@@ -17,6 +17,7 @@ func HandleCommitChain(ctx *web.Context, name string) {
 	if err != nil {
 		fmt.Println("Could not read from http request:", err)
 		ctx.WriteHeader(httpBad)
+		ctx.Write([]byte(err.Error()))
 		return
 	}
 
@@ -24,6 +25,7 @@ func HandleCommitChain(ctx *web.Context, name string) {
 	if err != nil {
 		fmt.Println(err)
 		ctx.WriteHeader(httpBad)
+		ctx.Write([]byte(err.Error()))
 		return
 	}
 }
@@ -33,6 +35,7 @@ func HandleCommitEntry(ctx *web.Context, name string) {
 	if err != nil {
 		fmt.Println("Could not read from http request:", err)
 		ctx.WriteHeader(httpBad)
+		ctx.Write([]byte(err.Error()))
 		return
 	}
 
@@ -40,6 +43,7 @@ func HandleCommitEntry(ctx *web.Context, name string) {
 	if err != nil {
 		fmt.Println(err)
 		ctx.WriteHeader(httpBad)
+		ctx.Write([]byte(err.Error()))
 		return
 	}
 }
