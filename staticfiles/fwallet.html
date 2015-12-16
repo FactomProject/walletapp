@@ -291,7 +291,8 @@
                             }
                             $("#addo-button").trigger("click");
                         }
-                          $( "#outputTable tr:nth-last-child(3)" ).children("td:last").find("button").trigger("click");
+                          //$( "#outputTable tr:nth-last-child(3)" ).children("td:last").find("button").trigger("click");
+                          $( "#outputTable tr:nth-last-child(3)" ).children("td:nth-last-child(2)").find("button").trigger("click");
                           updateInputTotals();
                           updateOutputTotals();
                           refreshFee();

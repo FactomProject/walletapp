@@ -43,7 +43,7 @@ func main() {
 
 	    state := NewState(configDir + "factoid_wallet_bolt.db")
         go startServer(state, staticDir)
-        Open("http://localhost:8093")
+        Open("http://localhost:8096")
 	    run(state, os.Stdin,true)
 }
 
