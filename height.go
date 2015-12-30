@@ -6,7 +6,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/FactomProject/factom"
+	"github.com/FactomProject/fctwallet/Wallet/Utility"
 )
 
 /************************************************************
@@ -21,7 +21,7 @@ var _ ICommand = (*Height)(nil)
 
 // Height transactions <address list> 
 func (Height) Execute(state IState, args []string) (err error) {
-	h,err := factom.GetDBlockHeight()
+	h,err := Utility.GetDBHeight()
 	if err != nil {
 		return fmt.Errorf("Failed to contact the Factom Network")
 	}else{
