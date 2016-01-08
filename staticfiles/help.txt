@@ -90,13 +90,6 @@ Print <v1> <v2> ...                 Prints the specified values.
 
 Run <filename>                      Executes the script of the given filename
 
-
-Setup <seed>                        Sets up Fountain addresses, and seeds the wallet.
-                                    This only works if no addresses have been created.
-                                    If addresses exist, no Fountain addresses are created.
-                                    But the wallet gets a new seed in any case.
-
-
 Sign <key>                          Signs the transaction specified by the given key.
                                     Each input is found within the wallet, and if 
                                     we have the private key for that input, we 
@@ -109,7 +102,8 @@ Sign <key>                          Signs the transaction specified by the given
                                     inputs.  Exporting the transaction.  Then
                                     sending it to the other party or parties for
                                     their signatures.
-	
+
+
 
 Submit <key>                        Submits the transaction specified by the given key.
                                     Each input in the transaction must have  a valid

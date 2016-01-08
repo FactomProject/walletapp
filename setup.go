@@ -16,7 +16,7 @@
 // license that can be found in the LICENSE file.
 
 package main
-
+/*
 import (
 	"fmt"
 	fct "github.com/FactomProject/factoid"
@@ -27,11 +27,11 @@ import (
 var _ = fmt.Println
 var _ fct.Transaction
 var _ = time.Now
-
+*/
 /*************************************************************
  * run a Script
  *************************************************************/
-
+/*
 type Setup struct {
 }
 
@@ -96,4 +96,4 @@ Setup <seed>                        Sets up Fountain addresses, and seeds the wa
 func NewSeed(state IState, data []byte) {
 	state.GetFS().GetWallet().NewSeed(data)
 }
-
+*/

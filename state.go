@@ -97,7 +97,7 @@ func NewState(filename string) IState {
 	s.AddCommand(new(NewTransaction))
 	s.AddCommand(new(Print))
 	s.AddCommand(new(Run))
-	s.AddCommand(new(Setup))
+	//s.AddCommand(new(Setup))
 	s.AddCommand(new(Sign))
 	s.AddCommand(new(Submit))
 
