@@ -6,9 +6,9 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"os"
-	"io/ioutil"
 	fct "github.com/FactomProject/factoid"
+	"io/ioutil"
+	"os"
 )
 
 /************************************************************
@@ -16,7 +16,6 @@ import (
  ************************************************************/
 
 type Import struct {
-	
 }
 
 var _ ICommand = (*Import)(nil)
@@ -39,38 +38,38 @@ func (Import) Execute(state IState, args []string) error {
 	filename := args[2]
 
 	if _, err := os.Stat(filename); err != nil {
-		return fmt.Errorf("Could not find the input file %s",filename)
+		return fmt.Errorf("Could not find the input file %s", filename)
 	}
-	
-	{	// Doing a bit of variable scope management here, since I want t later.
+
+	{ // Doing a bit of variable scope management here, since I want t later.
 		t := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 		if t != nil {
 			return fmt.Errorf("That transaction already exists.  Specify a new one, or delete this one.")
 		}
 	}
-	
+
 	data, err := ioutil.ReadFile(filename)
 	var hexdata []byte
-	for _,b := range data {
+	for _, b := range data {
 		if b > 32 {
-			hexdata = append(hexdata,b)
+			hexdata = append(hexdata, b)
 		}
 	}
-	
+
 	bdata, err := hex.DecodeString(string(hexdata))
 	if err != nil {
-		return err 
+		return err
 	}
-	
+
 	t := new(fct.Transaction)
 	err = t.UnmarshalBinary(bdata)
 	if err != nil {
-		return err 
+		return err
 	}
-	
+
 	state.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), t)
-	
-	fmt.Println("Transaction",filename,"has been imported")	
+
+	fmt.Println("Transaction", filename, "has been imported")
 	return nil
 }
 
@@ -87,6 +86,3 @@ func (Import) LongHelp() string {
 Import <key> <filename>             Import the given transaction to the given filename.
 `
 }
-
-
-

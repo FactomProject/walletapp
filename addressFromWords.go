@@ -5,9 +5,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/FactomProject/ed25519"
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
-	"github.com/FactomProject/ed25519"
 )
 
 /************************************************************
@@ -15,7 +15,6 @@ import (
  ************************************************************/
 
 type AddressFromWords struct {
-	
 }
 
 var _ ICommand = (*AddressFromWords)(nil)
@@ -35,33 +34,33 @@ func (AddressFromWords) Execute(state IState, args []string) error {
 		return fmt.Errorf("Invalid Parameters")
 	}
 	name := args[1]
-	
+
 	na := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(name))
 	if na != nil {
-		return fmt.Errorf("The name %s is already in use.  Names must be unique.",name)
+		return fmt.Errorf("The name %s is already in use.  Names must be unique.", name)
 	}
-	
+
 	var mnstr string
-	for i:=2;i<14;i++ {
-		if len(args[i])==0 {
-			return fmt.Errorf("Invalid mnemonic; the %d word has issues",i+1)
+	for i := 2; i < 14; i++ {
+		if len(args[i]) == 0 {
+			return fmt.Errorf("Invalid mnemonic; the %d word has issues", i+1)
 		}
-		mnstr = mnstr+args[i]+" "
+		mnstr = mnstr + args[i] + " "
 	}
-	
-	privateKey,err :=  wallet.MnemonicStringToPrivateKey(mnstr) 
+
+	privateKey, err := wallet.MnemonicStringToPrivateKey(mnstr)
 	if err != nil {
 		return err
 	}
-	
+
 	var fixed [64]byte
-	copy(fixed[:],privateKey)
+	copy(fixed[:], privateKey)
 	publicKey := ed25519.GetPublicKey(&fixed)
-	
-	state.GetFS().GetWallet().AddKeyPair("fct",[]byte(name),publicKey[:],fixed[:],false)
+
+	state.GetFS().GetWallet().AddKeyPair("fct", []byte(name), publicKey[:], fixed[:], false)
 
 	return nil
-	
+
 }
 
 func (AddressFromWords) Name() string {
@@ -77,6 +76,3 @@ func (AddressFromWords) LongHelp() string {
 AddressFromWords <name> <12 words>  Compute an address from 12 words, and assign to <name>.
 `
 }
-
-
-

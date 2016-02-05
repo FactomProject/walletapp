@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	fct "github.com/FactomProject/factoid"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 )
 
 /************************************************************
@@ -45,10 +45,10 @@ func (Submit) Execute(state IState, args []string) error {
 	if err != nil {
 		return err
 	}
-	
-	err = isReasonableFee(state, trans) 
+
+	err = isReasonableFee(state, trans)
 	if err != nil {
-		return  err
+		return err
 	}
 
 	// Okay, transaction is good, so marshal and send to factomd!
@@ -100,46 +100,45 @@ Submit <key>                        Submits the transaction specified by the giv
 `
 }
 
+func isReasonableFee(state IState, trans fct.ITransaction) error {
+	feeRate, getErr := GetFee(state)
+	if getErr != nil {
+		return getErr
+	}
 
-func isReasonableFee(state IState, trans fct.ITransaction) (error) {
-                feeRate, getErr := GetFee(state)
-                if getErr != nil {
-                    return getErr
-                }
-                
-			    reqFee, err := trans.CalculateFee(uint64(feeRate))
-			    if err != nil {
-				    return err
-			    }
-			    
-			    sreqFee := int64(reqFee)
-                
-                tin, err := trans.TotalInputs()
-                if err != nil {
-                    return err
-                }
-                
-			    tout, err := trans.TotalOutputs()
-                if err != nil {
-                    return err
-                }
-                
-			    tec,  err := trans.TotalECs()
-                if err != nil {
-                    return err
-                }
-                
-			    cfee := int64(tin) - int64(tout) - int64(tec)
+	reqFee, err := trans.CalculateFee(uint64(feeRate))
+	if err != nil {
+		return err
+	}
 
-                if cfee >= (sreqFee*10) {
-                    return fmt.Errorf("Unbalanced transaction (fee too high). Fee should be less than 10x the required fee.")
-                }
-                
-                if cfee < sreqFee {
-                    return fmt.Errorf("Insufficient fee")
-                }
+	sreqFee := int64(reqFee)
 
-                return nil
+	tin, err := trans.TotalInputs()
+	if err != nil {
+		return err
+	}
+
+	tout, err := trans.TotalOutputs()
+	if err != nil {
+		return err
+	}
+
+	tec, err := trans.TotalECs()
+	if err != nil {
+		return err
+	}
+
+	cfee := int64(tin) - int64(tout) - int64(tec)
+
+	if cfee >= (sreqFee * 10) {
+		return fmt.Errorf("Unbalanced transaction (fee too high). Fee should be less than 10x the required fee.")
+	}
+
+	if cfee < sreqFee {
+		return fmt.Errorf("Insufficient fee")
+	}
+
+	return nil
 }
 
 func GetFee(state IState) (int64, error) {
@@ -163,5 +162,3 @@ func GetFee(state IState) (int64, error) {
 
 	return b.Fee, nil
 }
-
-

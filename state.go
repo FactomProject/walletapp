@@ -11,12 +11,12 @@ import (
 )
 
 type IState interface {
-	GetCommand([]string) 	(ICommand, error)
+	GetCommand([]string) (ICommand, error)
 	AddCommand(ICommand)
-	Execute(args []string) 	error
-	GetServer() 			string
-	GetFS() 				state.IFactoidState
-	GetCommands()			map[string]ICommand
+	Execute(args []string) error
+	GetServer() string
+	GetFS() state.IFactoidState
+	GetCommands() map[string]ICommand
 }
 
 type State struct {

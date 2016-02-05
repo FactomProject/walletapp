@@ -30,14 +30,14 @@ func (r Run) Execute(state IState, args []string) error {
 	if len(args) != 2 {
 		return fmt.Errorf("Wrong number of arguments")
 	}
-	
+
 	f, err := os.Open(args[1])
 	if err != nil {
-		return err 
+		return err
 	}
-	
-	run (state, bufio.NewReader(f),false)
-	
+
+	run(state, bufio.NewReader(f), false)
+
 	return nil
 }
 
@@ -46,7 +46,7 @@ func (r Run) Name() string {
 }
 
 func (Run) ShortHelp() string {
-	return "Run <filename>              -- Executes the script of the given filename" 
+	return "Run <filename>              -- Executes the script of the given filename"
 }
 
 func (Run) LongHelp() string {
@@ -54,4 +54,3 @@ func (Run) LongHelp() string {
 Run <filename>                      Executes the script of the given filename
 `
 }
-

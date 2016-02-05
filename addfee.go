@@ -4,16 +4,15 @@
 package main
 
 import (
-	"encoding/hex"
-	"strings"
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	fct "github.com/FactomProject/factoid"
 	"github.com/FactomProject/factoid/wallet"
 	"github.com/FactomProject/fctwallet/Wallet/Utility"
 	"strconv"
+	"strings"
 )
-
 
 /************************************************************
  * AddFee
@@ -38,15 +37,15 @@ func (AddFee) Execute(state IState, args []string) (err error) {
 	if len(args) == 4 {
 		srate, err := fct.ConvertFixedPoint(args[3])
 		if err != nil {
-			return fmt.Errorf("Could not parse exchange rate: %v",err)
+			return fmt.Errorf("Could not parse exchange rate: %v", err)
 		}
-		rate, err = strconv.ParseInt(srate,10,64)
-	}else{
+		rate, err = strconv.ParseInt(srate, 10, 64)
+	} else {
 		if rate, err = GetRate(state); err != nil {
 			return fmt.Errorf("Could not reach the server to get the exchange rate")
 		}
 	}
-			
+
 	ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	trans, ok := ib.(fct.ITransaction)
 	if ib == nil || !ok {
@@ -54,13 +53,13 @@ func (AddFee) Execute(state IState, args []string) (err error) {
 	}
 
 	var addr fct.IAddress
-	
+
 	if fct.ValidateFUserStr(adr) {
 		addr = fct.NewAddress(fct.ConvertUserStrToAddress(adr))
-	}else if Utility.IsValidHexAddress(adr) {
-		badr,_ := hex.DecodeString(adr)
+	} else if Utility.IsValidHexAddress(adr) {
+		badr, _ := hex.DecodeString(adr)
 		addr = fct.NewAddress(badr)
-	}else if Utility.IsValidNickname(adr) {
+	} else if Utility.IsValidNickname(adr) {
 		we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
 		if we != nil {
 			we2 := we.(wallet.IWalletEntry)
@@ -70,35 +69,34 @@ func (AddFee) Execute(state IState, args []string) (err error) {
 			return fmt.Errorf("Name is undefined.")
 		}
 	}
-	
+
 	fee, err := trans.CalculateFee(uint64(rate))
 	var tin, tout, tec uint64
-	if tin,err = trans.TotalInputs(); err != nil {
+	if tin, err = trans.TotalInputs(); err != nil {
 		return err
 	}
-	if tout,err = trans.TotalOutputs(); err != nil {
+	if tout, err = trans.TotalOutputs(); err != nil {
 		return err
 	}
-	if tec,err = trans.TotalECs(); err != nil {
+	if tec, err = trans.TotalECs(); err != nil {
 		return err
 	}
-	
+
 	if tin != tout+tec {
-		msg := fmt.Sprintf("%s Total Inputs\n",fct.ConvertDecimal(tin))
-		msg += fmt.Sprintf("%s Total Outputs and Entry Credits\n",fct.ConvertDecimal(tout+tec))
+		msg := fmt.Sprintf("%s Total Inputs\n", fct.ConvertDecimal(tin))
+		msg += fmt.Sprintf("%s Total Outputs and Entry Credits\n", fct.ConvertDecimal(tout+tec))
 		msg += fmt.Sprintf("\nThe Inputs must match the outputs to use AddFee to add the fee to an input")
 		return fmt.Errorf(msg)
 	}
-	
-	
-	for _,input := range trans.GetInputs() {
+
+	for _, input := range trans.GetInputs() {
 		if bytes.Equal(input.GetAddress().Bytes(), addr.Bytes()) {
-		    input.SetAmount(input.GetAmount()+fee)
-			fmt.Printf("Added fee of %v\n",strings.TrimSpace(fct.ConvertDecimal(fee)))
+			input.SetAmount(input.GetAmount() + fee)
+			fmt.Printf("Added fee of %v\n", strings.TrimSpace(fct.ConvertDecimal(fee)))
 			break
 		}
 	}
-	
+
 	return nil
 }
 
@@ -109,7 +107,7 @@ func (AddFee) Name() string {
 func (AddFee) ShortHelp() string {
 	return "AddFee <key> <name/address> -- Adds a fee to the given input.\n" +
 		"                              Inputs must match Outputs, and the input address\n" +
-		"                              must be one of the inputs to the transaction\n" 
+		"                              must be one of the inputs to the transaction\n"
 }
 
 func (AddFee) LongHelp() string {
@@ -119,4 +117,3 @@ AddFee <key> <name>                 Adds a fee to the given transaction. The nam
                                     must equal the outputs.
 `
 }
-

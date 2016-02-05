@@ -16,6 +16,7 @@
 // license that can be found in the LICENSE file.
 
 package main
+
 /*
 import (
 	"fmt"
@@ -45,7 +46,7 @@ func (r Setup) Execute(state IState, args []string) error {
 		"would make a nice seed.  The more random the better.\n\n" +
 		"Note that if you create an address before you call Setup, you must\n" +
 		"use those address(s) as you access the fountians."
-		
+
 		return fmt.Errorf(msg)
 	}
 	setFountian := false
@@ -61,10 +62,10 @@ func (r Setup) Execute(state IState, args []string) error {
 			}
 		}
 	}
-	
+
 	seedprime := fct.Sha([]byte(fmt.Sprintf("%s%v", args[1], time.Now().UnixNano()))).Bytes()
 	NewSeed(state, seedprime)
-	
+
 	if setFountian {
 		fmt.Println("New seed set, fountain addresses defined")
 	} else {

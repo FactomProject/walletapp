@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-
 /************************************************************
  * Print <v>
  ************************************************************/
@@ -32,9 +31,9 @@ func (Print) Execute(state IState, args []string) error {
 		ib := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(v))
 		trans, ok := ib.(fct.ITransaction)
 		if ib != nil && ok {
-			
-			fmt.Println("Transaction: ",v,"\n\n", ib)
-			
+
+			fmt.Println("Transaction: ", v, "\n\n", ib)
+
 			v, err := GetRate(state)
 			if err != nil {
 				fmt.Println(err)
@@ -48,7 +47,7 @@ func (Print) Execute(state IState, args []string) error {
 			fmt.Println("Required Fee:       ", strings.TrimSpace(fct.ConvertDecimal(fee)))
 			tin, err1 := trans.TotalInputs()
 			tout, err2 := trans.TotalOutputs()
-			tec,  err3 := trans.TotalECs()
+			tec, err3 := trans.TotalECs()
 			if err1 == nil && err2 == nil && err3 == nil {
 				cfee := int64(tin) - int64(tout) - int64(tec)
 				sign := ""
@@ -57,7 +56,7 @@ func (Print) Execute(state IState, args []string) error {
 					cfee = -cfee
 				}
 				fmt.Print("Fee You are paying: ",
-						  sign, strings.TrimSpace(fct.ConvertDecimal(uint64(cfee))), "\n")
+					sign, strings.TrimSpace(fct.ConvertDecimal(uint64(cfee))), "\n")
 			} else {
 				if err1 != nil {
 					fmt.Println("Inputs have an error: ", err1)

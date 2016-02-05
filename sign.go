@@ -29,12 +29,12 @@ func (Sign) Execute(state IState, args []string) error {
 	if !ok {
 		return fmt.Errorf("Invalid Parameters")
 	}
-	
+
 	err := state.GetFS().GetWallet().Validate(1, trans)
 	if err != nil {
 		return err
 	}
-	
+
 	ok, err = state.GetFS().GetWallet().SignInputs(trans)
 	if err != nil {
 		return err
@@ -42,13 +42,13 @@ func (Sign) Execute(state IState, args []string) error {
 	if !ok {
 		return fmt.Errorf("Error signing the transaction")
 	}
-	
+
 	// Update our map with our new transaction to the same key.  Otherwise, all
 	// of our work will go away!
 	state.GetFS().GetDB().PutRaw([]byte(fct.DB_BUILD_TRANS), []byte(key), trans)
-	
+
 	return nil
-	
+
 }
 
 func (Sign) Name() string {
@@ -75,4 +75,3 @@ Sign <key>                          Signs the transaction specified by the given
                                     their signatures.
 	`
 }
-

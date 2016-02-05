@@ -4,12 +4,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/hex"
 	"fmt"
-	"os"
-	"bufio"
-	"io/ioutil"
 	fct "github.com/FactomProject/factoid"
+	"io/ioutil"
+	"os"
 )
 
 /************************************************************
@@ -17,7 +17,6 @@ import (
  ************************************************************/
 
 type Export struct {
-	
 }
 
 var _ ICommand = (*Export)(nil)
@@ -44,35 +43,35 @@ func (Export) Execute(state IState, args []string) error {
 		reader := bufio.NewReader(os.Stdin)
 		input, _ := reader.ReadString('\n')
 		if input != "y\n" && input != "Y\n" {
-			fmt.Println("answer: ",hex.EncodeToString([]byte(input)))
+			fmt.Println("answer: ", hex.EncodeToString([]byte(input)))
 			return fmt.Errorf("Transaction not exported")
 		}
 	}
-	
+
 	t := state.GetFS().GetDB().GetRaw([]byte(fct.DB_BUILD_TRANS), []byte(key))
 	if t == nil {
 		return fmt.Errorf("Could not find the transaction")
 	}
-	
+
 	data, err := t.MarshalBinary()
 	if err != nil {
 		return err
 	}
-	
+
 	bytelen := 40
-	var outdata []byte 
+	var outdata []byte
 	for len(data) > bytelen {
 		outdata = append(outdata, []byte(hex.EncodeToString(data[:bytelen]))...)
 		outdata = append(outdata, 10)
 		data = data[bytelen:]
 	}
-	if len(data)>0 {
+	if len(data) > 0 {
 		outdata = append(outdata, []byte(hex.EncodeToString(data))...)
 		outdata = append(outdata, 10)
 	}
-		
-	ioutil.WriteFile(filename,outdata,0644)
-	
+
+	ioutil.WriteFile(filename, outdata, 0644)
+
 	return nil
 }
 
@@ -89,6 +88,3 @@ func (Export) LongHelp() string {
 Export <key> <filename>             Export the given transaction to the given filename.
 `
 }
-
-
-

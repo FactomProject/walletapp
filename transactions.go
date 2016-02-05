@@ -95,7 +95,7 @@ func (AddInput) Execute(state IState, args []string) error {
 	if ib == nil || !ok {
 		return fmt.Errorf("Unknown Transaction: " + key)
 	}
-		
+
 	var addr fct.IAddress
 	if !fct.ValidateFUserStr(adr) {
 		if len(adr) != 64 {
@@ -113,14 +113,14 @@ func (AddInput) Execute(state IState, args []string) error {
 				return fmt.Errorf("Name is undefined.")
 			}
 		} else {
-			badr,err := hex.DecodeString(adr)
+			badr, err := hex.DecodeString(adr)
 			if err != nil {
 				return fmt.Errorf("Looks like an Invalid hex address.  Check that you entered it correctly")
 			}
 			addr = fct.NewAddress(badr)
 		}
 	} else {
-		fmt.Printf("adr: %x\n",adr)
+		fmt.Printf("adr: %x\n", adr)
 		addr = fct.NewAddress(fct.ConvertUserStrToAddress(adr))
 	}
 	amount, _ := fct.ConvertFixedPoint(amt)
@@ -325,7 +325,3 @@ AddECOutput <key> <n|a> <amt>       <key>  created by a previous NewTransaction 
                                            Credits varies.
 `
 }
-
-
-
-

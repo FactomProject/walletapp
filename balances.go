@@ -25,7 +25,6 @@ import (
 var badChar, _ = regexp.Compile("[^A-Za-z0-9_-]")
 var badHexChar, _ = regexp.Compile("[^A-Fa-f0-9]")
 
-
 func ValidName(name string) error {
 	if len(name) > 32 {
 		return fmt.Errorf("Name of address is too long.")
@@ -37,25 +36,25 @@ func ValidName(name string) error {
 }
 
 func GenAddress(state IState, adrType string, key string) error {
-    validErr := ValidName(key)
-    if validErr != nil {
+	validErr := ValidName(key)
+	if validErr != nil {
 		return validErr
-    }
+	}
 	switch strings.ToLower(adrType) {
-		case "ec":
-			adr, err := state.GetFS().GetWallet().GenerateECAddress([]byte(key))
-			if err != nil {
-				return err
-			}
-			fmt.Println(key, "=", fct.ConvertECAddressToUserStr(adr))
-		case "fct":
-			adr, err := state.GetFS().GetWallet().GenerateFctAddress([]byte(key), 1, 1)
-			if err != nil {
-				return err
-			}
-			fmt.Println(key, "=", fct.ConvertFctAddressToUserStr(adr))
-		default:
-			return fmt.Errorf("Invalid Parameters")
+	case "ec":
+		adr, err := state.GetFS().GetWallet().GenerateECAddress([]byte(key))
+		if err != nil {
+			return err
+		}
+		fmt.Println(key, "=", fct.ConvertECAddressToUserStr(adr))
+	case "fct":
+		adr, err := state.GetFS().GetWallet().GenerateFctAddress([]byte(key), 1, 1)
+		if err != nil {
+			return err
+		}
+		fmt.Println(key, "=", fct.ConvertFctAddressToUserStr(adr))
+	default:
+		return fmt.Errorf("Invalid Parameters")
 	}
 	return nil
 }
@@ -84,35 +83,35 @@ func GetRate(state IState) (int64, error) {
 }
 
 func LookupAddress(state IState, adrType string, adr string) (string, error) {
-	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr,adrType) {
+	if Utility.IsValidAddress(adr) && strings.HasPrefix(adr, adrType) {
 		baddr := fct.ConvertUserStrToAddress(adr)
 		adr = hex.EncodeToString(baddr)
 	} else if Utility.IsValidHexAddress(adr) {
 		// the address is good enough.
 	} else if Utility.IsValidNickname(adr) {
 		we := state.GetFS().GetDB().GetRaw([]byte(fct.W_NAME), []byte(adr))
-		
+
 		if we != nil {
 			we2 := we.(wallet.IWalletEntry)
 			addr, _ := we2.GetAddress()
 			adr = hex.EncodeToString(addr.Bytes())
 		} else {
-			return "", fmt.Errorf("Name %s is undefined.",adr)
+			return "", fmt.Errorf("Name %s is undefined.", adr)
 		}
 	} else {
 		return "", fmt.Errorf("Invalid Name.  Check that you have entered the name correctly.")
 	}
-	
+
 	return adr, nil
 }
 
 func FctBalance(state IState, adr string) (int64, error) {
-		
-	adr, err := LookupAddress(state, "FA",adr)
+
+	adr, err := LookupAddress(state, "FA", adr)
 	if err != nil {
 		return 0, err
 	}
-	
+
 	str := fmt.Sprintf("http://%s/v1/factoid-balance/%s", state.GetServer(), adr)
 	resp, err := http.Get(str)
 	if err != nil {
@@ -124,9 +123,9 @@ func FctBalance(state IState, adr string) (int64, error) {
 	}
 	resp.Body.Close()
 
-	type Balance struct{ 
+	type Balance struct {
 		Response string
-		Success bool
+		Success  bool
 	}
 	b := new(Balance)
 
@@ -136,7 +135,7 @@ func FctBalance(state IState, adr string) (int64, error) {
 	if !b.Success {
 		return 0, fmt.Errorf(err.Error())
 	}
-	v, err := strconv.ParseInt(b.Response,10,64)	
+	v, err := strconv.ParseInt(b.Response, 10, 64)
 	if err != nil {
 		return 0, fmt.Errorf("Invalid balance returned by factomd")
 	}
@@ -146,7 +145,7 @@ func FctBalance(state IState, adr string) (int64, error) {
 
 func ECBalance(state IState, adr string) (int64, error) {
 
-	adr, err := LookupAddress(state, "EC",adr)
+	adr, err := LookupAddress(state, "EC", adr)
 	if err != nil {
 		return 0, err
 	}
@@ -162,19 +161,19 @@ func ECBalance(state IState, adr string) (int64, error) {
 	}
 	resp.Body.Close()
 
-	type Balance struct{ 
+	type Balance struct {
 		Response string
-		Success bool
+		Success  bool
 	}
 	b := new(Balance)
-	
+
 	if err := json.Unmarshal(body, b); err != nil {
 		return 0, fmt.Errorf("Parsing Error on data returned by Factom Client")
 	}
 	if !b.Success {
 		return 0, fmt.Errorf(err.Error())
 	}
-	v, err := strconv.ParseInt(b.Response,10,64)	
+	v, err := strconv.ParseInt(b.Response, 10, 64)
 	if err != nil {
 		return 0, fmt.Errorf("Invalid balance returned by factomd")
 	}
@@ -216,7 +215,7 @@ func GetBalances(state IState) []byte {
 			}
 			if connect {
 				ecBalances = append(ecBalances, strconv.FormatInt(bal, 10))
-			}else{
+			} else {
 				ecBalances = append(ecBalances, "-")
 			}
 		} else {
@@ -234,7 +233,7 @@ func GetBalances(state IState) []byte {
 			sbal := fct.ConvertDecimal(uint64(bal))
 			if connect {
 				fctBalances = append(fctBalances, sbal)
-			}else{
+			} else {
 				fctBalances = append(fctBalances, "-")
 			}
 		}
@@ -288,7 +287,7 @@ func (Balance) Execute(state IState, args []string) (err error) {
 	}
 	if args[1] == "fct" {
 		fmt.Println(args[2], "=", fct.ConvertDecimal(uint64(bal)))
-	}else{
+	} else {
 		fmt.Println(args[2], "=", bal)
 	}
 	return nil
@@ -328,8 +327,8 @@ func (NewAddress) Execute(state IState, args []string) (err error) {
 	if err := ValidName(args[2]); err != nil {
 		return err
 	}
-	
-	return GenAddress(state, args[1],args[2])
+
+	return GenAddress(state, args[1], args[2])
 }
 
 func (NewAddress) Name() string {
