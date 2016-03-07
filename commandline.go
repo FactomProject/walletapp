@@ -7,13 +7,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/FactomProject/FactomCode/util"
-	fct "github.com/FactomProject/factoid"
 	"io"
 	"os"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/FactomProject/FactomCode/util"
+	fct "github.com/FactomProject/factoid"
 )
 
 var _ = fmt.Println
@@ -30,7 +31,7 @@ func main() {
 		staticDir = "./staticfiles/"
 	case "darwin":
 		configDir = os.Getenv("HOME") + "/.factom/"
-		staticDir = "./staticfiles/"
+		staticDir = "/Applications/FactomApps/staticfiles/"
 	default:
 		configDir = os.Getenv("HOME") + "/.factom/"
 		staticDir = "/usr/share/factom/walletapp/"
