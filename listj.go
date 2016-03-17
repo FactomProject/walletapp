@@ -27,7 +27,7 @@ func (Listj) Execute(state IState, args []string) (err error) {
 	case "all":
 		fmt.Println("Listing all transactions: ")
 		var list []byte
-		if list, err = Utility.DumpTransactionsJSON(nil); err != nil {
+		if list, err = Utility.DumpTransactionsJSON(nil,0,0); err != nil {
 			return err
 		}
 		fmt.Print(string(list))
@@ -50,7 +50,7 @@ func (Listj) Execute(state IState, args []string) (err error) {
 			addresses = append(addresses, badr)
 		}
 		var list []byte
-		if list, err = Utility.DumpTransactionsJSON(addresses); err != nil {
+		if list, err = Utility.DumpTransactionsJSON(addresses,0,0); err != nil {
 			return err
 		}
 		fmt.Print(string(list))
