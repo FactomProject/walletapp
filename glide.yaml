@@ -1,0 +1,15 @@
+package: github.com/FactomProject/walletapp
+import:
+- package: github.com/FactomProject/FactomCode
+  subpackages:
+  - util
+- package: github.com/FactomProject/ed25519
+- package: github.com/FactomProject/factoid
+  subpackages:
+  - state
+  - state/stateinit
+  - wallet
+- package: github.com/FactomProject/factom
+- package: github.com/FactomProject/fctwallet
+  subpackages:
+  - Wallet/Utility
